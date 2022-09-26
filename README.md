@@ -11,6 +11,7 @@ Dockerized [Battlefield 2 Server](https://www.ea.com/games/battlefield/battlefie
 | Tag | Dockerfile Build Context |
 |:-------:|:---------:|
 | `:v1.5.3153.0`, `:latest` | [View](variants/v1.5.3153.0 ) |
+| `:v1.5.3153.0-bf2hub`, `:latest` | [View](variants/v1.5.3153.0-bf2hub ) |
 
 ## Usage
 
