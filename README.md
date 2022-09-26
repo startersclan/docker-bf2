@@ -8,7 +8,7 @@ Dockerized [Battlefield 2 Server](https://www.ea.com/games/battlefield/battlefie
 
 ## Tags
 
-All images include [Enhanced Strategic AI](https://www.moddb.com/mods/esai-enhanced-strategic-ai), which may be activated if needed.
+All images include [Enhanced Strategic AI (ESAI)](https://www.moddb.com/mods/esai-enhanced-strategic-ai), which may be activated if needed.
 
 - `bf2stats` - Battlefield 2 with support for private statistics using [bf2statistics](https://code.google.com/archive/p/bf2stats/) python files to send stats snapshots to a webserver at the end of each map. Must be paired [ASP](https://github.com/BF2Statistics/ASP) webserver that receives stats snapshots.
 - `bf2hub` -  Battlefield 2 with support for [BF2Hub.com](https://www.bf2hub.com/home/serversetup.php) statistics.
@@ -19,7 +19,6 @@ All images include [Enhanced Strategic AI](https://www.moddb.com/mods/esai-enhan
 | `:v1.5.3153.0`, `:latest` | [View](variants/v1.5.3153.0 ) |
 | `:v1.5.3153.0-bf2hub` | [View](variants/v1.5.3153.0-bf2hub ) |
 | `:v1.5.3153.0-bf2stats` | [View](variants/v1.5.3153.0-bf2stats ) |
-| `:v1.5.3153.0-esai-v4.2` | [View](variants/v1.5.3153.0-esai-v4.2 ) |
 | `:v1.5.3153.0-fh2-4.6.304` | [View](variants/v1.5.3153.0-fh2-4.6.304 ) |
 
 ## Usage
