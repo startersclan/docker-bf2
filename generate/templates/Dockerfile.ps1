@@ -47,6 +47,17 @@ RUN mv "extract/bf2statisitcs 2.2.0/Server Files/Linux/python" /server/bf2/pytho
 
 "@
 }
+if ('esai' -in $VARIANT['_metadata']['components']) {
+    @"
+WORKDIR /root
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
+COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip
+RUN sha256sum ESAI-Standard-v4.2.zip | grep ef4e5d0f1446b9a2ddb0b350f1334273681c0f64d9c38c506320db769b24499c
+RUN unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/bf2
+
+
+"@
+}
 if ('fh2' -in $VARIANT['_metadata']['components']) {
     @"
 WORKDIR /root
@@ -70,6 +81,16 @@ COPY --from=install /server /server
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
 "@
+if ('esai' -in $VARIANT['_metadata']['components']) {
+    @"
+# Install unzip and zip for the sake of applying ESAI in mods/*/levels/server.zip at GameModes/[gpm_coop|gpm_cq|sp1|sp2|sp3]/[16|32|64]/AI/Strategies.ai
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip zip
+COPY esai-helper /usr/local/bin/esai-helper
+COPY esai-optimized-strategies-bf2.txt /esai-optimized-strategies-bf2.txt
+COPY esai-optimized-strategies-xpack.txt /esai-optimized-strategies-xpack.txt
+
+"@
+}
 if ('fh2' -in $VARIANT['_metadata']['components']) {
     @"
 # Install fh2 dependencies
