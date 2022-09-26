@@ -5,6 +5,7 @@ RUN echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM"
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y curl
 
+# Install Battlefield 2 server
 WORKDIR /root
 RUN curl -sSLO ftp://ftp.bf-games.net/server-files/bf2/bf2-linuxded-1.5.3153.0-installer.tgz
 RUN tar -zxvf bf2-linuxded-1.5.3153.0-installer.tgz
@@ -17,6 +18,14 @@ RUN mkdir -p /server
 RUN cat /install/license.sh | sed 's/^more/cat/' > /install/license-fixed.sh # Show the licenses without a pager
 RUN cd /install && printf '\naccept\n\nyes\n/server\ny\n' | sh /install/license-fixed.sh # Agree to licenses
 
+# Install ESAI
+WORKDIR /root
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
+COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip
+RUN sha256sum ESAI-Standard-v4.2.zip | grep ef4e5d0f1446b9a2ddb0b350f1334273681c0f64d9c38c506320db769b24499c
+RUN unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/bf2
+
+# Install Forgotten Hope 2 mod
 WORKDIR /root
 RUN curl -ssLO http://fhbeta.warumdarum.de/~spitfire/fh2pub/2.63/fh2-server-4.6.304.tar
 RUN sha256sum fh2-server-4.6.304.tar | grep "bb933052ad20928b5a4bc6c1eeff647d62b0f3b38de46d063101719a9f0cf488"
@@ -27,9 +36,21 @@ RUN chmod -R +x /server/bf2/bin
 RUN mv /server/bf2/start-fh2.sh /server/bf2/start.sh
 RUN for i in $( ls /server/bf2/mods/fh2/levels/*/info/*cq_64_menumap.png | cut -d '/' -f7 ); do echo "maplist.append \"$i\" \"gpm_cq\" 64" >> /server/bf2/mods/fh2/settings/maplist.con; done # Create a default maplist.con, since it is not included by the installer
 
+# Install ESAI for fh2
+WORKDIR /root
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
+COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip
+RUN sha256sum ESAI-Standard-v4.2.zip | grep ef4e5d0f1446b9a2ddb0b350f1334273681c0f64d9c38c506320db769b24499c
+RUN unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/fh2
+
 FROM ubuntu:16.04 AS final
 COPY --from=install /server /server
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+# Install unzip and zip for the sake of applying ESAI in mods/*/levels/server.zip at GameModes/[gpm_coop|gpm_cq|sp1|sp2|sp3]/[16|32|64]/AI/Strategies.ai
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip zip
+COPY esai-helper /usr/local/bin/esai-helper
+COPY esai-optimized-strategies-bf2.txt /esai-optimized-strategies-bf2.txt
+COPY esai-optimized-strategies-xpack.txt /esai-optimized-strategies-xpack.txt
 # Install fh2 dependencies
 # Fix error: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version GLIBCXX_3.4.22' not found (required by /server/bf2/bin/amd-64/fh2utils.so)
 # See: https://stackoverflow.com/questions/43070900/version-glibcxx-3-4-22-not-found

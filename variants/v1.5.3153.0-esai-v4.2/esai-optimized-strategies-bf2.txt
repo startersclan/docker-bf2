@@ -1,13 +1,15 @@
 # This is a list of optimized ESAI strategies, based on 'Strategies-&-Navmesh-Credits.pdf' for BF2SP64
+# Format: <level> <gamemode> <strategy>
 # Usage:
-# 1. The following level-gamemode-strategy entries may be generated (with an empty <strategy> field) using:
+# 1. The following level-gamemode-strategy entries may be generated (with an empty <strategy> field):
 #       esai-helper --mod bf2 get gamemodes
-# 2. Edit <strategy> field to your liking. Then apply these ESAI strategies as part of container entrypoint:
+# 2. Edit <strategy> field to your liking. To get all available strategies:
+#       esai-helper --mod bf2 get strategies
+# 3. Apply these ESAI strategies:
 #       esai-helper --mod bf2 apply -f esai-optimized-strategies-bf2.txt
-# 3. To remove these ESAI strategies, simply:
+# 4. Remove these ESAI strategies:
 #       esai-helper --mod bf2 delete -f esai-optimized-strategies-bf2.txt
 # NOTE: Commented out maps do not have an optimized ESAI strategy
-# Format: <level> <gamemode> <strategy>
 
 dalian_plant gpm_coop/16 smallMap
 dalian_plant gpm_cq/16 smallMap
