@@ -44,12 +44,25 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf
 
 # Run server
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0 /server/bf2/start.sh
+67/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0 /server/bf2/start.sh
 
 # Run server with custom configs
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
-    -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con
-    -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con
+    -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro \
+    -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro \
     startersclan/docker-bf2:v1.5.3153.0
+
+# Run server with bf2stats
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
+    -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
+    -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
+    startersclan/docker-bf2:v1.5.3153.0-bf2stats
 ```
 
+## Links
+
+- https://www.bf-games.net/downloads/category/153/serverfiles.html
+- https://bf2hub.com
+- https://code.google.com/archive/p/bf2stats/
 '@

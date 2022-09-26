@@ -34,6 +34,19 @@ RUN chmod +x /server/bf2/bin/ia-32/libbf2hub.so /server/bf2/bin/amd-64/libbf2hub
 
 "@
 }
+if ('bf2stats' -in $VARIANT['_metadata']['components']) {
+    @"
+WORKDIR /root
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
+RUN curl -ssLO https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/bf2stats/bf2statisitcs_2.2.0.zip # I know, it is mispelled
+RUN sha256sum bf2statisitcs_2.2.0.zip | grep '^334b662727d64fb2d244b8958b4f3059dcd213488d2bc22f9bd0870995f74b1c '
+RUN unzip bf2statisitcs_2.2.0.zip -d extract
+RUN rm -rf /server/bf2/python
+RUN mv "extract/bf2statisitcs 2.2.0/Server Files/Linux/python" /server/bf2/python
+
+
+"@
+}
 
 @"
 FROM ubuntu:16.04 AS final
