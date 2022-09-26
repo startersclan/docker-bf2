@@ -6,6 +6,7 @@ RUN echo "I am running on `$BUILDPLATFORM, building for `$TARGETPLATFORM"
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y curl
 
+# Install Battlefield 2 server
 WORKDIR /root
 RUN curl -sSLO ftp://ftp.bf-games.net/server-files/bf2/bf2-linuxded-$( $VARIANT['_metadata']['installer_version'] )-installer.tgz
 RUN tar -zxvf bf2-linuxded-$( $VARIANT['_metadata']['installer_version'] )-installer.tgz
@@ -18,11 +19,19 @@ RUN mkdir -p /server
 RUN cat /install/license.sh | sed 's/^more/cat/' > /install/license-fixed.sh # Show the licenses without a pager
 RUN cd /install && printf '\naccept\n\nyes\n/server\ny\n' | sh /install/license-fixed.sh # Agree to licenses
 
+# Install ESAI
+WORKDIR /root
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
+COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip
+RUN sha256sum ESAI-Standard-v4.2.zip | grep ef4e5d0f1446b9a2ddb0b350f1334273681c0f64d9c38c506320db769b24499c
+RUN unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/bf2
+
 
 "@
 
 if ('bf2hub' -in $VARIANT['_metadata']['components']) {
     @"
+# Install bf2hub
 WORKDIR /root
 RUN curl -ssLO https://www.bf2hub.com/downloads/BF2Hub-Unranked-Linux-R3.tar.gz
 RUN sha256sum BF2Hub-Unranked-Linux-R3.tar.gz | grep '^c4b3d583741c500e930502e96c6a43a40f223868c9ca1111c70d80c7e6d2cd2b '
@@ -36,6 +45,7 @@ RUN chmod +x /server/bf2/bin/ia-32/libbf2hub.so /server/bf2/bin/amd-64/libbf2hub
 }
 if ('bf2stats' -in $VARIANT['_metadata']['components']) {
     @"
+# Install bf2stats
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 RUN curl -ssLO https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/bf2stats/bf2statisitcs_2.2.0.zip # I know, it is mispelled
@@ -47,19 +57,9 @@ RUN mv "extract/bf2statisitcs 2.2.0/Server Files/Linux/python" /server/bf2/pytho
 
 "@
 }
-if ('esai' -in $VARIANT['_metadata']['components']) {
-    @"
-WORKDIR /root
-RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
-COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip
-RUN sha256sum ESAI-Standard-v4.2.zip | grep ef4e5d0f1446b9a2ddb0b350f1334273681c0f64d9c38c506320db769b24499c
-RUN unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/bf2
-
-
-"@
-}
 if ('fh2' -in $VARIANT['_metadata']['components']) {
     @"
+# Install Forgotten Hope 2 mod
 WORKDIR /root
 RUN curl -ssLO http://fhbeta.warumdarum.de/~spitfire/fh2pub/2.63/fh2-server-$( $VARIANT['_metadata']['mod_installer_version'] ).tar
 RUN sha256sum fh2-server-$( $VARIANT['_metadata']['mod_installer_version'] ).tar | grep "$( $VARIANT['_metadata']['mod_installer_sha256sum'] )"
@@ -70,6 +70,13 @@ RUN chmod -R +x /server/bf2/bin
 RUN mv /server/bf2/start-fh2.sh /server/bf2/start.sh
 RUN for i in `$( ls /server/bf2/mods/fh2/levels/*/info/*cq_64_menumap.png | cut -d '/' -f7 ); do echo "maplist.append \"`$i\" \"gpm_cq\" 64" >> /server/bf2/mods/fh2/settings/maplist.con; done # Create a default maplist.con, since it is not included by the installer
 
+# Install ESAI for fh2
+WORKDIR /root
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
+COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip
+RUN sha256sum ESAI-Standard-v4.2.zip | grep ef4e5d0f1446b9a2ddb0b350f1334273681c0f64d9c38c506320db769b24499c
+RUN unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/fh2
+
 
 "@
 }
@@ -79,10 +86,6 @@ RUN for i in `$( ls /server/bf2/mods/fh2/levels/*/info/*cq_64_menumap.png | cut 
 FROM ubuntu:16.04 AS final
 COPY --from=install /server /server
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
-
-"@
-if ('esai' -in $VARIANT['_metadata']['components']) {
-    @"
 # Install unzip and zip for the sake of applying ESAI in mods/*/levels/server.zip at GameModes/[gpm_coop|gpm_cq|sp1|sp2|sp3]/[16|32|64]/AI/Strategies.ai
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip zip
 COPY esai-helper /usr/local/bin/esai-helper
@@ -90,7 +93,6 @@ COPY esai-optimized-strategies-bf2.txt /esai-optimized-strategies-bf2.txt
 COPY esai-optimized-strategies-xpack.txt /esai-optimized-strategies-xpack.txt
 
 "@
-}
 if ('fh2' -in $VARIANT['_metadata']['components']) {
     @"
 # Install fh2 dependencies

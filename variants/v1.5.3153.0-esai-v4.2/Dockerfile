@@ -5,6 +5,7 @@ RUN echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM"
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y curl
 
+# Install Battlefield 2 server
 WORKDIR /root
 RUN curl -sSLO ftp://ftp.bf-games.net/server-files/bf2/bf2-linuxded-1.5.3153.0-installer.tgz
 RUN tar -zxvf bf2-linuxded-1.5.3153.0-installer.tgz
@@ -17,6 +18,7 @@ RUN mkdir -p /server
 RUN cat /install/license.sh | sed 's/^more/cat/' > /install/license-fixed.sh # Show the licenses without a pager
 RUN cd /install && printf '\naccept\n\nyes\n/server\ny\n' | sh /install/license-fixed.sh # Agree to licenses
 
+# Install ESAI
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip

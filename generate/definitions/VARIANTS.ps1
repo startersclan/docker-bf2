@@ -47,26 +47,6 @@ $VARIANTS = @(
         # Docker image tag
         tag = 'v1.5.3153.0-esai-v4.2'
         tag_as_latest = $false
-        buildContextFiles = @{
-            templates = @{
-                'Dockerfile' = @{
-                    common = $true
-                    includeHeader = $false
-                    includeFooter = $false
-                    passes = @(
-                        @{
-                            variables = @{}
-                        }
-                    )
-                }
-            }
-            copies = @(
-                '/vendor/ESAI-Standard-v4.2.zip'
-                '/vendor/esai-helper'
-                '/vendor/esai-optimized-strategies-bf2.txt'
-                '/vendor/esai-optimized-strategies-xpack.txt'
-            )
-        }
     }
     @{
         # Metadata object
@@ -99,5 +79,11 @@ $VARIANTS_SHARED = @{
                 )
             }
         }
+        copies = @(
+            '/vendor/ESAI-Standard-v4.2.zip'
+            '/vendor/esai-helper'
+            '/vendor/esai-optimized-strategies-bf2.txt'
+            '/vendor/esai-optimized-strategies-xpack.txt'
+        )
     }
 }
