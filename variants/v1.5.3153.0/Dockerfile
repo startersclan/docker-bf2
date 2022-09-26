@@ -5,10 +5,11 @@ RUN echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM"
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y curl
 
+WORKDIR /root
 RUN curl -sSLO ftp://ftp.bf-games.net/server-files/bf2/bf2-linuxded-1.5.3153.0-installer.tgz
 RUN tar -zxvf bf2-linuxded-1.5.3153.0-installer.tgz
 ENV INSTALLER=bf2-linuxded-1.5.3153.0-installer.sh
-RUN sha1sum "$INSTALLER" | grep "^f9f55b7c1cf9c8dcbffaa46ea1b0067146e047af "
+RUN sha256sum "$INSTALLER" | grep "^b5afe6602280b99797b46389f3cd582bbfe212e7402c8b009b72e6ae41e8d435 "
 RUN sh "$INSTALLER" --target /install --noexec --info
 RUN sh "$INSTALLER" --target /install --noexec
 RUN cd /install
