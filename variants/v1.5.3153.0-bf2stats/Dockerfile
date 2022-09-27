@@ -42,5 +42,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -
 COPY esai-helper /usr/local/bin/esai-helper
 COPY esai-optimized-strategies-bf2.txt /esai-optimized-strategies-bf2.txt
 COPY esai-optimized-strategies-xpack.txt /esai-optimized-strategies-xpack.txt
+EXPOSE 16567/udp
+EXPOSE 29900/udp
 WORKDIR /server/bf2
 CMD [ "./start.sh" ]

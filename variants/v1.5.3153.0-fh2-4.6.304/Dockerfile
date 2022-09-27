@@ -71,5 +71,7 @@ RUN apt-get update && apt-get install -y apt-transport-https software-properties
 #   GameLogic created
 #   Serversettings created
 ENV PYTHONHOME=
+EXPOSE 16567/udp
+EXPOSE 29900/udp
 WORKDIR /server/bf2
 CMD [ "./start.sh" ]
