@@ -8,19 +8,21 @@ Dockerized [Battlefield 2 Server](https://www.ea.com/games/battlefield/battlefie
 
 ## Tags
 
-All images include [Enhanced Strategic AI (ESAI)](https://www.moddb.com/mods/esai-enhanced-strategic-ai), which may be activated if needed.
-
-- `bf2stats` - Battlefield 2 with support for private statistics using [bf2statistics](https://code.google.com/archive/p/bf2stats/) python files to send stats snapshots to a webserver at the end of each map. Must be paired [ASP](https://github.com/BF2Statistics/ASP) webserver that receives stats snapshots.
-- `bf2hub` -  Battlefield 2 with support for [BF2Hub.com](https://www.bf2hub.com/home/serversetup.php) statistics.
-- `fh2` - Battlefield 2 with [Forgotten Hope 2](http://www.forgottenhope.warumdarum.de) mod
+All images contain [`Battlefield 2 Server 1.50`](https://www.bf-games.net/downloads/category/153/serverfiles.html), and include [Enhanced Strategic AI (ESAI)](https://www.moddb.com/mods/esai-enhanced-strategic-ai), which may be activated if needed.
 
 | Tag | Dockerfile Build Context |
 |:-------:|:---------:|
 | `:v1.5.3153.0`, `:latest` | [View](variants/v1.5.3153.0 ) |
 | `:v1.5.3153.0-bf2hub` | [View](variants/v1.5.3153.0-bf2hub ) |
 | `:v1.5.3153.0-bf2stats-2.2.0` | [View](variants/v1.5.3153.0-bf2stats-2.2.0 ) |
+| `:v1.5.3153.0-bf2stats-3.1.0` | [View](variants/v1.5.3153.0-bf2stats-3.1.0 ) |
 | `:v1.5.3153.0-fh2-4.6.304` | [View](variants/v1.5.3153.0-fh2-4.6.304 ) |
 
+
+- `bf2stats-2.2.0` - Support for private statistics using [bf2statistics](https://code.google.com/archive/p/bf2stats/) v2 python files to send stats snapshots to a webserver at the end of each map. Must be paired [ASP](https://github.com/BF2Statistics/ASP) v2 webserver that receives stats snapshots.
+- `bf2stats-3.1.0` - Support for private statistics using [bf2statistics](https://github.com/BF2Statistics/StatsPython) v3 python files to send stats snapshots to a webserver at the end of each map. Must be paired [ASP](https://github.com/BF2Statistics/ASP) v3 webserver that receives stats snapshots.
+- `bf2hub` - Support for [bf2hub.com](https://www.bf2hub.com/home/serversetup.php) statistics.
+- `fh2` - [Forgotten Hope 2](http://www.forgottenhope.warumdarum.de) mod
 ## Usage
 
 ```sh
