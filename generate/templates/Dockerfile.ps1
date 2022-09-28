@@ -43,9 +43,9 @@ RUN chmod +x /server/bf2/bin/ia-32/libbf2hub.so /server/bf2/bin/amd-64/libbf2hub
 
 "@
 }
-if ('bf2stats' -in $VARIANT['_metadata']['components']) {
+if ('bf2stats-2.2.0' -in $VARIANT['_metadata']['components']) {
     @"
-# Install bf2stats
+# Install bf2stats 2
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 RUN curl -ssLO https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/bf2stats/bf2statisitcs_2.2.0.zip # I know, it is mispelled
