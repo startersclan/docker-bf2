@@ -57,6 +57,21 @@ RUN mv "extract/bf2statisitcs 2.2.0/Server Files/Linux/python" /server/bf2/pytho
 
 "@
 }
+if ('bf2stats-3.1.0' -in $VARIANT['_metadata']['components']) {
+    @"
+# Install bf2stats 3
+WORKDIR /root
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
+RUN curl -ssLO https://github.com/BF2Statistics/StatsPython/archive/2197486.zip
+RUN sha256sum 2197486.zip | grep '^881ddc8f77a573be661f68a146883bc5e23b3d1b1a4d4323496d66d405744232 '
+RUN unzip 2197486.zip -d 2197486
+RUN rm -rf /server/bf2/python/
+RUN mkdir -p /server/bf2/python
+RUN cp -rf 2197486/*/. /server/bf2/python
+
+
+"@
+}
 if ('fh2' -in $VARIANT['_metadata']['components']) {
     @"
 # Install Forgotten Hope 2 mod
