@@ -18,7 +18,7 @@ All images include [Enhanced Strategic AI (ESAI)](https://www.moddb.com/mods/esa
 |:-------:|:---------:|
 | `:v1.5.3153.0`, `:latest` | [View](variants/v1.5.3153.0 ) |
 | `:v1.5.3153.0-bf2hub` | [View](variants/v1.5.3153.0-bf2hub ) |
-| `:v1.5.3153.0-bf2stats` | [View](variants/v1.5.3153.0-bf2stats ) |
+| `:v1.5.3153.0-bf2stats-2.2.0` | [View](variants/v1.5.3153.0-bf2stats-2.2.0 ) |
 | `:v1.5.3153.0-fh2-4.6.304` | [View](variants/v1.5.3153.0-fh2-4.6.304 ) |
 
 ## Usage
