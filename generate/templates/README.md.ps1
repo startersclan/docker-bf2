@@ -28,10 +28,9 @@ $(
     }
 }) -join ''
 )
-
+- ``bf2hub`` - Support for [bf2hub.com](https://www.bf2hub.com/home/serversetup.php) statistics.
 - ``bf2stats-2.2.0`` - Support for private statistics using [bf2statistics](https://code.google.com/archive/p/bf2stats/) v2 python files to send stats snapshots to a webserver at the end of each map. Must be paired [ASP](https://github.com/BF2Statistics/ASP) v2 webserver that receives stats snapshots.
 - ``bf2stats-3.1.0`` - Support for private statistics using [bf2statistics](https://github.com/BF2Statistics/StatsPython) v3 python files to send stats snapshots to a webserver at the end of each map. Must be paired [ASP](https://github.com/BF2Statistics/ASP) v3 webserver that receives stats snapshots.
-- ``bf2hub`` - Support for [bf2hub.com](https://www.bf2hub.com/home/serversetup.php) statistics.
 - ``fh2`` - [Forgotten Hope 2](http://www.forgottenhope.warumdarum.de) mod
 
 "@
@@ -41,8 +40,7 @@ $(
 
 ```sh
 # bf2 server
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0 /server/bf2/start.sh
-67/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0 /server/bf2/start.sh
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0
 
 # bf2 server with custom configs
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
@@ -50,12 +48,26 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro \
     startersclan/docker-bf2:v1.5.3153.0
 
-# bf2 server with bf2stats
+# bf2 server with bf2stats 2.2.0
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
     -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
     -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
-    startersclan/docker-bf2:v1.5.3153.0-bf2stats
+    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.2.0
+
+# bf2 server with bf2stats 3.1.0
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
+    -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
+    -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
+    startersclan/docker-bf2:v1.5.3153.0-bf2stats-3.1.0
+
+# bf2 server with bf2hub support
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
+    -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
+    -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
+    startersclan/docker-bf2:v1.5.3153.0-bf2hub
 
 # fh2 server
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
@@ -96,7 +108,7 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
 To apply custom ESAI strategies, mount the custom config:
 
 ```sh
-# bf2
+# bf2 server
 docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 get gamemodes > strategies.txt
 docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod xpack get gamemodes >> strategies.txt
 docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 get strategies # Get all available strategies
@@ -109,7 +121,7 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     startersclan/docker-bf2:v1.5.3153.0 \
     -c "esai-helper apply -f /strategies.txt && cd /server/bf2 && exec ./start.sh"
 
-# fh2
+# fh2 server
 docker run --rm startersclan/docker-bf2:v1.5.3153.0-fh2-4.6.304 esai-helper --mod fh2 get gamemodes > strategies.txt
 docker run --rm startersclan/docker-bf2:v1.5.3153.0-fh2-4.6.304 esai-helper --mod fh2 get strategies # Get all available strategies
 vi strategies.txt # Add <strategy> field to each entry
