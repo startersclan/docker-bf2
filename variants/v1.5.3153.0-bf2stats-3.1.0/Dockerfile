@@ -31,9 +31,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -
 RUN curl -ssLO https://github.com/BF2Statistics/StatsPython/archive/2197486.zip
 RUN sha256sum 2197486.zip | grep '^881ddc8f77a573be661f68a146883bc5e23b3d1b1a4d4323496d66d405744232 '
 RUN unzip 2197486.zip -d 2197486
-RUN rm -rf /server/bf2/python/
-RUN mkdir -p /server/bf2/python
-RUN cp -rf 2197486/*/. /server/bf2/python
+RUN cp -r 2197486/*/. /server/bf2/python/bf2/
 
 FROM ubuntu:16.04 AS final
 COPY --from=install /server /server
