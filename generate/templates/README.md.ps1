@@ -29,8 +29,9 @@ $(
 }) -join ''
 )
 - ``bf2hub`` - Support for [bf2hub.com](https://www.bf2hub.com/home/serversetup.php) statistics.
-- ``bf2stats-2.2.0`` - Includes [bf2statistics](https://code.google.com/archive/p/bf2stats/) v2 python files to send stats snapshots to a webserver at the end of each map. Must be paired [ASP](https://github.com/BF2Statistics/ASP) v2 webserver. See [here](https://github.com/startersclan/bf2stats) for a fully dockerized stack example.
-- ``bf2stats-3.1.0`` - Includes [bf2statistics](https://github.com/BF2Statistics/StatsPython) v3 python files to send stats snapshots to a webserver at the end of each map. Must be paired [ASP](https://github.com/BF2Statistics/ASP) v3 webserver. See [here](https://github.com/startersclan/ASP) for a dockerized `ASP`.
+- ``bf2stats-2.2.0`` - Includes [bf2statistics](https://code.google.com/archive/p/bf2stats/) 2.2.0 python files to send stats snapshots to a webserver to the [ASP](https://github.com/BF2Statistics/ASP) v2 webserver. See [here](https://github.com/startersclan/bf2stats) for a fully dockerized stack example.
+- ``bf2stats-2.3.0`` - Includes [bf2statistics](https://github.com/startersclan/bf2stats) 2.3.0 python files to send stats snapshots to the [ASP](https://github.com/startersclan/bf2stats) v2 webserver. See [here](https://github.com/startersclan/bf2stats) for a fully dockerized stack example.
+- ``bf2stats-3.1.0`` - Includes [bf2statistics](https://github.com/BF2Statistics/StatsPython) 3.1.0 python files to send stats snapshots to the [ASP](https://github.com/BF2Statistics/ASP) v3 webserver. See [here](https://github.com/startersclan/ASP) for a fully dockerized example.
 - ``fh2`` - [Forgotten Hope 2](http://www.forgottenhope.warumdarum.de) mod
 
 
@@ -49,12 +50,12 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro \
     startersclan/docker-bf2:v1.5.3153.0
 
-# bf2 server with bf2stats 2.2.0 python files.
+# bf2 server with bf2stats 2.3.0 python files
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
     -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
     -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
-    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.2.0
+    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.3.0
 
 # bf2 server with bf2stats 3.1.0
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
