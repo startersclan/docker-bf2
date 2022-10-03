@@ -33,7 +33,7 @@ if ('bf2hub' -in $VARIANT['_metadata']['components']) {
     @"
 # Install bf2hub
 WORKDIR /root
-RUN curl -ssLO https://www.bf2hub.com/downloads/BF2Hub-Unranked-Linux-R3.tar.gz
+RUN curl -sSLO https://www.bf2hub.com/downloads/BF2Hub-Unranked-Linux-R3.tar.gz
 RUN sha256sum BF2Hub-Unranked-Linux-R3.tar.gz | grep '^c4b3d583741c500e930502e96c6a43a40f223868c9ca1111c70d80c7e6d2cd2b '
 RUN tar -C /server/bf2 -zxvf BF2Hub-Unranked-Linux-R3.tar.gz -- bin start_bf2hub.sh
 RUN ls -al /server/bf2
@@ -48,7 +48,7 @@ if ('bf2stats-2.2.0' -in $VARIANT['_metadata']['components']) {
 # Install bf2stats 2
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
-RUN curl -ssLO https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/bf2stats/bf2statisitcs_2.2.0.zip # I know, it is mispelled
+RUN curl -sSLO https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/bf2stats/bf2statisitcs_2.2.0.zip # I know, it is mispelled
 RUN sha256sum bf2statisitcs_2.2.0.zip | grep '^334b662727d64fb2d244b8958b4f3059dcd213488d2bc22f9bd0870995f74b1c '
 RUN unzip bf2statisitcs_2.2.0.zip -d extract
 RUN rm -rf /server/bf2/python
@@ -76,7 +76,7 @@ if ('bf2stats-3.1.0' -in $VARIANT['_metadata']['components']) {
 # Install bf2stats 3
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
-RUN curl -ssLO https://github.com/BF2Statistics/StatsPython/archive/2197486.zip
+RUN curl -sSLO https://github.com/BF2Statistics/StatsPython/archive/2197486.zip
 RUN sha256sum 2197486.zip | grep '^881ddc8f77a573be661f68a146883bc5e23b3d1b1a4d4323496d66d405744232 '
 RUN unzip 2197486.zip -d 2197486
 RUN cp -r 2197486/*/. /server/bf2/python/bf2/
@@ -88,7 +88,7 @@ if ('fh2' -in $VARIANT['_metadata']['components']) {
     @"
 # Install Forgotten Hope 2 mod
 WORKDIR /root
-RUN curl -ssLO http://fhbeta.warumdarum.de/~spitfire/fh2pub/2.63/fh2-server-$( $VARIANT['_metadata']['mod_installer_version'] ).tar
+RUN curl -sSLO http://fhbeta.warumdarum.de/~spitfire/fh2pub/2.63/fh2-server-$( $VARIANT['_metadata']['mod_installer_version'] ).tar
 RUN sha256sum fh2-server-$( $VARIANT['_metadata']['mod_installer_version'] ).tar | grep "$( $VARIANT['_metadata']['mod_installer_sha256sum'] )"
 RUN tar -C /server/bf2 -xvf fh2-server-$( $VARIANT['_metadata']['mod_installer_version'] ).tar
 RUN chown -R root:root /server/bf2

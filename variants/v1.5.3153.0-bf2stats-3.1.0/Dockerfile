@@ -28,7 +28,7 @@ RUN unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/bf2
 # Install bf2stats 3
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
-RUN curl -ssLO https://github.com/BF2Statistics/StatsPython/archive/2197486.zip
+RUN curl -sSLO https://github.com/BF2Statistics/StatsPython/archive/2197486.zip
 RUN sha256sum 2197486.zip | grep '^881ddc8f77a573be661f68a146883bc5e23b3d1b1a4d4323496d66d405744232 '
 RUN unzip 2197486.zip -d 2197486
 RUN cp -r 2197486/*/. /server/bf2/python/bf2/

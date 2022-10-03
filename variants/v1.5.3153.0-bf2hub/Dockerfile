@@ -27,7 +27,7 @@ RUN unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/bf2
 
 # Install bf2hub
 WORKDIR /root
-RUN curl -ssLO https://www.bf2hub.com/downloads/BF2Hub-Unranked-Linux-R3.tar.gz
+RUN curl -sSLO https://www.bf2hub.com/downloads/BF2Hub-Unranked-Linux-R3.tar.gz
 RUN sha256sum BF2Hub-Unranked-Linux-R3.tar.gz | grep '^c4b3d583741c500e930502e96c6a43a40f223868c9ca1111c70d80c7e6d2cd2b '
 RUN tar -C /server/bf2 -zxvf BF2Hub-Unranked-Linux-R3.tar.gz -- bin start_bf2hub.sh
 RUN ls -al /server/bf2
