@@ -27,7 +27,7 @@ RUN unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/bf2
 
 # Install Forgotten Hope 2 mod
 WORKDIR /root
-RUN curl -ssLO http://fhbeta.warumdarum.de/~spitfire/fh2pub/2.63/fh2-server-4.6.304.tar
+RUN curl -sSLO http://fhbeta.warumdarum.de/~spitfire/fh2pub/2.63/fh2-server-4.6.304.tar
 RUN sha256sum fh2-server-4.6.304.tar | grep "bb933052ad20928b5a4bc6c1eeff647d62b0f3b38de46d063101719a9f0cf488"
 RUN tar -C /server/bf2 -xvf fh2-server-4.6.304.tar
 RUN chown -R root:root /server/bf2
