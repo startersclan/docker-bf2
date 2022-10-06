@@ -24,6 +24,8 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -
 COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip
 RUN sha256sum ESAI-Standard-v4.2.zip | grep ef4e5d0f1446b9a2ddb0b350f1334273681c0f64d9c38c506320db769b24499c
 RUN unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/bf2
+COPY lowercase-helper /usr/local/bin/lowercase-helper
+RUN lowercase-helper --dir /server/bf2/mods/bf2/ESAI # Lowercase ESAI folder and its descendent folders
 
 # Install bf2hub
 WORKDIR /root
@@ -42,6 +44,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -
 COPY esai-helper /usr/local/bin/esai-helper
 COPY esai-optimized-strategies-bf2.txt /esai-optimized-strategies-bf2.txt
 COPY esai-optimized-strategies-xpack.txt /esai-optimized-strategies-xpack.txt
+COPY lowercase-helper /usr/local/bin/lowercase-helper
 EXPOSE 16567/udp
 EXPOSE 29900/udp
 WORKDIR /server/bf2
