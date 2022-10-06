@@ -40,6 +40,8 @@ $(
 @'
 ## Usage
 
+See [here](docs/examples) for some good examples.
+
 ```sh
 # bf2 server
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0
@@ -50,6 +52,13 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro \
     startersclan/docker-bf2:v1.5.3153.0
 
+# bf2 server with bf2hub support
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
+    -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
+    -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
+    startersclan/docker-bf2:v1.5.3153.0-bf2hub
+
 # bf2 server with bf2stats 2.3.0 python files
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
@@ -57,19 +66,12 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
     startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.3.0
 
-# bf2 server with bf2stats 3.1.0
+# bf2 server with bf2stats 3.1.0 python filespython files
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
     -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
     -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
     startersclan/docker-bf2:v1.5.3153.0-bf2stats-3.1.0
-
-# bf2 server with bf2hub support
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
-    -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
-    -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
-    -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
-    startersclan/docker-bf2:v1.5.3153.0-bf2hub
 
 # fh2 server
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
@@ -91,49 +93,14 @@ docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/pb_e
 
 ESAI greatly enhances bot performance, and is compatible with any BF2 mod. It is included but not enabled by default.
 
-[`esai-helper`](vendor/esai-helper) is included to manage ESAI strategies for levels.
+A handy tool called [`esai-helper`](vendor/esai-helper) is included in all images. It can be used to generate maplists for a mod, list gamemodes, list a levels' `strategies.ai`, apply custom `strategies.ai` to levels, and more. See `esai-helper --help` for usage.
 
-Optimized strategies config files [``/esai-optimized-strategies-bf2.txt``](vendor/esai-optimized-strategies-bf2.txt) and [``/esai-optimized-strategies-xpack.txt``](vendor/esai-optimized-strategies-xpack.txt) are included. These strategies have been optimized by the BF2SP64 community.
+To use a default strategy for all levels, see [this example](docs/examples/v1.5-esai-default-strategy/).
 
-To apply the included optimized ESAI strategies:
+To override the default strategy with a level-specific strategy, optimized strategies config files [``/esai-optimized-strategies-bf2.txt``](vendor/esai-optimized-strategies-bf2.txt) and [``/esai-optimized-strategies-xpack.txt``](vendor/esai-optimized-strategies-xpack.txt) are included in each image. These strategies have been optimized by the BF2SP64 community.
 
-```sh
-# Run server with custom configs, and optimized ESAI strategies
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
-    -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro \
-    -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro \
-    --entrypoint /bin/bash \
-    startersclan/docker-bf2:v1.5.3153.0 \
-    -c "esai-helper apply -f /esai-optimized-strategies-bf2.txt && cd /server/bf2 && exec ./start.sh"
-```
+To use optimized strategies for levels, see [this example](docs/examples/v1.5-esai-optimized-strategies/).
 
-To apply custom ESAI strategies, mount the custom config:
-
-```sh
-# bf2 server
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 get gamemodes > strategies.txt
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod xpack get gamemodes >> strategies.txt
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 get strategies # Get all available strategies
-vi strategies.txt # Add <strategy> to each entry
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
-    -v serversettings.con:/server/bf2/mods/fh2/settings/serversettings.con:ro \
-    -v maplist.con:/server/bf2/mods/fh2/settings/maplist.con:ro \
-    -v strategies.txt:/strategies.txt:ro \
-    --entrypoint /bin/bash \
-    startersclan/docker-bf2:v1.5.3153.0 \
-    -c "esai-helper apply -f /strategies.txt && cd /server/bf2 && exec ./start.sh"
-
-# fh2 server
-docker run --rm startersclan/docker-bf2:v1.5.3153.0-fh2-4.6.304 esai-helper --mod fh2 get gamemodes > strategies.txt
-docker run --rm startersclan/docker-bf2:v1.5.3153.0-fh2-4.6.304 esai-helper --mod fh2 get strategies # Get all available strategies
-vi strategies.txt # Add <strategy> field to each entry
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
-    -v serversettings.con:/server/bf2/mods/fh2/settings/serversettings.con:ro \
-    -v maplist.con:/server/bf2/mods/fh2/settings/maplist.con:ro \
-    -v strategies.txt:/strategies.txt:ro \
-    --entrypoint /bin/bash \
-    startersclan/docker-bf2:v1.5.3153.0-fh2-4.6.304 \
-    -c "esai-helper apply -f /strategies.txt && cd /server/bf2 && exec ./start.sh"
-```
+To use custom strategies for levels, see [example](docs/examples/v1.5-esai-custom-strategies/).
 '@
 

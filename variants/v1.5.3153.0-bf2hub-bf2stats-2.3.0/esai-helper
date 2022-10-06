@@ -7,7 +7,8 @@ usage() {
     echo "    -m|--mod                              Mod. E.g. 'bf2' or 'xpack'. Defaults to 'bf2'"
     echo "Commands:"
     echo "  get [subcommand]"
-    echo "    gamemodes                             Get all available levels' gamemodes"
+    echo "    gamemodes <level>                     Get all available levels' gamemodes"
+    echo "    maplist <level>                       Generate a maplist"
     echo "    level-strategies <level>              Get a level's server.zip's ESAI strategies"
     echo "                                          If <level> if omitted, all levels' strategies are shown"
     echo "    level-strategiescontent <level>       Get file content of level's server.zip's ESAI strategies"
@@ -22,8 +23,9 @@ usage() {
     echo "                                          Format per line: <level> <gamemode> <strategy>"
     echo "                                          Use '#' for comments"
     echo "Examples:"
-    echo "  $0 -m bf2 get gamemodes "
-    echo "  $0 -m xpack get gamemodes "
+    echo "  $0 -m bf2 get gamemodes"
+    echo "  $0 -m xpack get gamemodes"
+    echo "  $0 -m bf2 get maplist"
     echo "  $0 -m bf2 get level-strategies"
     echo "  $0 -m bf2 get level-strategiescontent"
     echo "  $0 -m bf2 get levels"
@@ -61,6 +63,14 @@ while test $# -gt 0; do
             case "$1" in
                 gamemodes)
                     GET_GAMEMODES=1
+                    shift
+                    if [ "$#" -gt 0 ]; then
+                        LEVEL="${1:-}"
+                        shift
+                    fi
+                    ;;
+                maplist)
+                    GET_MAPLIST=1
                     shift
                     if [ "$#" -gt 0 ]; then
                         LEVEL="${1:-}"
@@ -150,6 +160,7 @@ done
 SERVER_DIR=${SERVER_DIR:-/server/bf2}
 MOD=${MOD:-bf2} # Default mod is mods/bf2
 GET_GAMEMODES=${GET_GAMEMODES:-}
+GET_MAPLIST=${GET_MAPLIST:-}
 GET_LEVEL_STRATEGIES=${GET_LEVEL_STRATEGIES:-}
 GET_LEVEL_STRATEGIESCONTENT=${GET_LEVEL_STRATEGIESCONTENT:-}
 GET_LEVELS=${GET_LEVELS:-}
@@ -174,6 +185,18 @@ if [ -n "$GET_GAMEMODES" ]; then
         LEVEL=$( echo "$i" | xargs dirname | xargs basename )
         for j in $( unzip -l "$i" | awk '{print $4}' | grep -E "GameModes/[^/]+/[0-9]+/.+" | cut -d '/' -f2-3 | sort -n | uniq || true ); do
             echo "$LEVEL $j"
+        done
+    done
+fi
+
+if [ -n "$GET_MAPLIST" ]; then
+    SERVER_ZIPS=$( find "$SERVER_DIR" -path "*/mods/$MOD/levels/${LEVEL:-*}/server.zip" )
+    for i in $( echo "$SERVER_ZIPS" | sort -n ); do
+        LEVEL=$( echo "$i" | xargs dirname | xargs basename )
+        for j in $( unzip -l "$i" | awk '{print $4}' | grep -E "GameModes/[^/]+/[0-9]+/.+" | cut -d '/' -f2-3 | sort -n | uniq || true ); do
+            GAMEMODE=$( echo "$j" | cut -d '/' -f1 )
+            MAXPLAYERS=$( echo "$j" | cut -d '/' -f2 )
+            echo "maplist.append $LEVEL $GAMEMODE $MAXPLAYERS"
         done
     done
 fi

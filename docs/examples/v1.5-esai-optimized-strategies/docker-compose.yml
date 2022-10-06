@@ -1,0 +1,29 @@
+version: '2.2'
+services:
+  bf2:
+    image: startersclan/docker-bf2:v1.5.3153.0
+    volumes:
+      - ./config/bf2/mods/bf2/ai/aidefault-custom.ai:/server/bf2/mods/bf2/ai/aidefault.ai:ro # Customize bots
+      - ./config/bf2/mods/bf2/ai/aibehaviours-fixlookatwrapper.ai:/server/bf2/mods/bf2/ai/aibehaviours.ai:ro # LoopAtWrapper fix
+      - ./config/bf2/mods/bf2/ai/aidefaultstrategies-custom-esai.ai:/server/bf2/mods/bf2/ai/aidefaultstrategies.ai:ro # Enable ESAI with a default strategy for all maps
+      - ./config/bf2/mods/bf2/ai/aidefaultstrategiesadd-custom-esai.ai:/server/bf2/mods/bf2/ai/aidefaultstrategiesadd.ai:ro # Enable ESAI with a default strategy for all maps
+      - ./config/bf2/mods/bf2/settings/serversettings-custom.con:/server/bf2/mods/bf2/settings/serversettings.con:ro # Server config
+      - ./config/bf2/mods/bf2/settings/maplist-custom-coop.con:/server/bf2/mods/bf2/settings/maplist.con:ro # Maplist
+    ports:
+      - 16567:16567/udp
+      - 29900:29900/udp
+    networks:
+      - default
+    tty: true
+    stdin_open: true
+    entrypoint:
+      - /bin/bash
+    command:
+      - -c
+      - |
+          set -eu
+          esai-helper apply -f /esai-optimized-strategies-bf2.txt
+          exec ./start.sh"
+
+networks:
+  default:
