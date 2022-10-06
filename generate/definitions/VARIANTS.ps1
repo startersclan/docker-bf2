@@ -96,6 +96,7 @@ $VARIANTS_SHARED = @{
             '/vendor/esai-helper'
             '/vendor/esai-optimized-strategies-bf2.txt'
             '/vendor/esai-optimized-strategies-xpack.txt'
+            '/vendor/lowercase-helper'
         )
     }
 }
