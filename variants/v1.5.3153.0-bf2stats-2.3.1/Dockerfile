@@ -18,20 +18,11 @@ RUN mkdir -p /server
 RUN cat /install/license.sh | sed 's/^more/cat/' > /install/license-fixed.sh # Show the licenses without a pager
 RUN cd /install && printf '\naccept\n\nyes\n/server\ny\n' | sh /install/license-fixed.sh # Agree to licenses
 
-# Install bf2hub
-WORKDIR /root
-RUN curl -sSLO https://www.bf2hub.com/downloads/BF2Hub-Unranked-Linux-R3.tar.gz
-RUN sha256sum BF2Hub-Unranked-Linux-R3.tar.gz | grep '^c4b3d583741c500e930502e96c6a43a40f223868c9ca1111c70d80c7e6d2cd2b '
-RUN tar -C /server/bf2 -zxvf BF2Hub-Unranked-Linux-R3.tar.gz -- bin start_bf2hub.sh
-RUN ls -al /server/bf2
-RUN mv /server/bf2/start_bf2hub.sh /server/bf2/start.sh
-RUN chmod +x /server/bf2/bin/ia-32/libbf2hub.so /server/bf2/bin/amd-64/libbf2hub.so
-
 # Install bf2stats 2.3.1
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 RUN curl -sSLO https://github.com/startersclan/bf2stats/archive/refs/tags/2.3.1.zip
-RUN sha256sum 2.3.1.zip | grep '^4e91c5cdda63aaff1e2ccc20f40befcb603000eac25221be4cefbdebfdee6aec '
+RUN sha256sum 2.3.1.zip | grep '^b9569819f7c58b70ff3e66d9219aed78ad6433d5cbba58f46b7bc0bf9eeb6d89 '
 RUN unzip 2.3.1.zip -d extract
 RUN rm -rf /server/bf2/python
 RUN mv extract/bf2stats-2.3.1/src/python /server/bf2/python

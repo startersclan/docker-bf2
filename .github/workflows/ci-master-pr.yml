@@ -266,11 +266,11 @@ jobs:
       run: docker logout
       if: always()
 
-  build-v1-5-3153-0-bf2hub-bf2stats-2-3-0:
+  build-v1-5-3153-0-bf2hub-bf2stats-2-3-1:
     runs-on: ubuntu-latest
     env:
-      VARIANT_TAG: v1.5.3153.0-bf2hub-bf2stats-2.3.0
-      VARIANT_BUILD_DIR: variants/v1.5.3153.0-bf2hub-bf2stats-2.3.0
+      VARIANT_TAG: v1.5.3153.0-bf2hub-bf2stats-2.3.1
+      VARIANT_BUILD_DIR: variants/v1.5.3153.0-bf2hub-bf2stats-2.3.1
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -520,11 +520,11 @@ jobs:
       run: docker logout
       if: always()
 
-  build-v1-5-3153-0-bf2stats-2-3-0:
+  build-v1-5-3153-0-bf2stats-2-3-1:
     runs-on: ubuntu-latest
     env:
-      VARIANT_TAG: v1.5.3153.0-bf2stats-2.3.0
-      VARIANT_BUILD_DIR: variants/v1.5.3153.0-bf2stats-2.3.0
+      VARIANT_TAG: v1.5.3153.0-bf2stats-2.3.1
+      VARIANT_BUILD_DIR: variants/v1.5.3153.0-bf2stats-2.3.1
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -1029,7 +1029,7 @@ jobs:
       if: always()
 
   update-draft-release:
-    needs: [build-v1-5-3153-0, build-v1-5-3153-0-bf2hub, build-v1-5-3153-0-bf2hub-bf2stats-2-3-0, build-v1-5-3153-0-bf2stats-2-2-0, build-v1-5-3153-0-bf2stats-2-3-0, build-v1-5-3153-0-bf2stats-3-1-0, build-v1-5-3153-0-bf2stats-3-1-1, build-v1-5-3153-0-fh2-4-6-304]
+    needs: [build-v1-5-3153-0, build-v1-5-3153-0-bf2hub, build-v1-5-3153-0-bf2hub-bf2stats-2-3-1, build-v1-5-3153-0-bf2stats-2-2-0, build-v1-5-3153-0-bf2stats-2-3-1, build-v1-5-3153-0-bf2stats-3-1-0, build-v1-5-3153-0-bf2stats-3-1-1, build-v1-5-3153-0-fh2-4-6-304]
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
@@ -1043,7 +1043,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-draft-release:
-    needs: [build-v1-5-3153-0, build-v1-5-3153-0-bf2hub, build-v1-5-3153-0-bf2hub-bf2stats-2-3-0, build-v1-5-3153-0-bf2stats-2-2-0, build-v1-5-3153-0-bf2stats-2-3-0, build-v1-5-3153-0-bf2stats-3-1-0, build-v1-5-3153-0-bf2stats-3-1-1, build-v1-5-3153-0-fh2-4-6-304]
+    needs: [build-v1-5-3153-0, build-v1-5-3153-0-bf2hub, build-v1-5-3153-0-bf2hub-bf2stats-2-3-1, build-v1-5-3153-0-bf2stats-2-2-0, build-v1-5-3153-0-bf2stats-2-3-1, build-v1-5-3153-0-bf2stats-3-1-0, build-v1-5-3153-0-bf2stats-3-1-1, build-v1-5-3153-0-fh2-4-6-304]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
