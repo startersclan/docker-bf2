@@ -18,15 +18,6 @@ RUN mkdir -p /server
 RUN cat /install/license.sh | sed 's/^more/cat/' > /install/license-fixed.sh # Show the licenses without a pager
 RUN cd /install && printf '\naccept\n\nyes\n/server\ny\n' | sh /install/license-fixed.sh # Agree to licenses
 
-# Install ESAI
-WORKDIR /root
-RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
-COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip
-RUN sha256sum ESAI-Standard-v4.2.zip | grep ef4e5d0f1446b9a2ddb0b350f1334273681c0f64d9c38c506320db769b24499c
-RUN unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/bf2
-COPY lowercase-helper /usr/local/bin/lowercase-helper
-RUN lowercase-helper --dir /server/bf2/mods/bf2/ESAI # Lowercase ESAI folder and its descendent folders
-
 # Install Forgotten Hope 2 mod
 WORKDIR /root
 RUN curl -sSLO http://fhbeta.warumdarum.de/~spitfire/fh2pub/2.63/fh2-server-4.6.304.tar
@@ -38,12 +29,16 @@ RUN chmod -R +x /server/bf2/bin
 RUN mv /server/bf2/start-fh2.sh /server/bf2/start.sh
 RUN for i in $( ls /server/bf2/mods/fh2/levels/*/info/*cq_64_menumap.png | cut -d '/' -f7 ); do echo "maplist.append \"$i\" \"gpm_cq\" 64" >> /server/bf2/mods/fh2/settings/maplist.con; done # Create a default maplist.con, since it is not included by the installer
 
-# Install ESAI for fh2
+# Install ESAI in all mods and lowercase ESAI folder in all mods
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip
 RUN sha256sum ESAI-Standard-v4.2.zip | grep ef4e5d0f1446b9a2ddb0b350f1334273681c0f64d9c38c506320db769b24499c
-RUN unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/fh2
+COPY lowercase-helper /usr/local/bin/lowercase-helper
+RUN for i in $( ls /server/bf2/mods ); do \
+        unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/$i; \
+        lowercase-helper --dir "/server/bf2/mods/$i/ESAI"; \
+    done
 
 FROM ubuntu:16.04 AS final
 COPY --from=install /server /server
