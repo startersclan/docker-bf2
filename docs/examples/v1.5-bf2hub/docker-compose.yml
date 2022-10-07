@@ -16,6 +16,8 @@ services:
       - default
     tty: true
     stdin_open: true
+    # healthcheck:
+    #   test: nc -w 1 -vzu 127.0.0.1 16567 && nc -vzu 127.0.0.1 29900
 
 networks:
   default:

@@ -38,14 +38,17 @@ RUN mv extract/bf2stats-2.3.0/src/python /server/bf2/python
 
 FROM ubuntu:16.04 AS final
 COPY --from=install /server /server
-RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
-# Install unzip and zip for the sake of applying ESAI in mods/*/levels/server.zip at GameModes/[gpm_coop|gpm_cq|sp1|sp2|sp3]/[16|32|64]/AI/Strategies.ai
-RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip zip
 COPY esai-helper /usr/local/bin/esai-helper
 COPY esai-optimized-strategies-bf2.txt /esai-optimized-strategies-bf2.txt
 COPY esai-optimized-strategies-xpack.txt /esai-optimized-strategies-xpack.txt
 COPY lowercase-helper /usr/local/bin/lowercase-helper
+# Install deployment tools
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install --no-install-recommends -y ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install --no-install-recommends -y dnsutils netcat && rm -rf /var/lib/apt/lists/*
+# Install unzip and zip for the sake of applying ESAI strategies in ./mods/*/levels/*/server.zip at './GameModes/[gpm_coop|gpm_cq|sp1|sp2|sp3]/[16|32|64]/AI/Strategies.ai'
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install --no-install-recommends -y unzip zip && rm -rf /var/lib/apt/lists/*
 EXPOSE 16567/udp
 EXPOSE 29900/udp
+# HEALTHCHECK CMD nc -w 1 -vzu 127.0.0.1 16567 && nc -vzu 127.0.0.1 29900
 WORKDIR /server/bf2
 CMD [ "./start.sh" ]
