@@ -1,40 +1,42 @@
+# Format: <level> <gamemode> <size> <strategy>
 # 1. The following level-gamemode-strategy entries may be generated (with an empty <strategy> field) using:
 #       esai-helper --mod xpack get gamemodes
-# 2. Edit <strategy> field to your liking. Then apply these ESAI strategies as part of container entrypoint:
+# 2. Edit <strategy> field to your liking. To get all available strategies:
+#       esai-helper --mod bf2 get strategies
+# 3. Then apply these ESAI strategies as part of container entrypoint:
 #       esai-helper --mod xpack apply -f esai-optimized-strategies-xpack.txt
-# 3. To remove these ESAI strategies, simply:
+# 4. To remove these ESAI strategies, simply:
 #       esai-helper --mod xpack delete -f esai-optimized-strategies-xpack.txt
 # NOTE: Commented out maps do not have an optimized ESAI strategy
-# Format: <level> <gamemode> <strategy>
 
-# ghost_town gpm_coop/16 -
-# ghost_town gpm_cq/16 -
-# ghost_town gpm_cq/32 -
-# ghost_town gpm_cq/64 -
-# ghost_town sp1/16 -
-# iron_gator gpm_cq/16 -
-# iron_gator gpm_cq/32 -
-# iron_gator gpm_cq/64 -
-# leviathan gpm_cq/16 -
-# leviathan gpm_cq/32 -
-# leviathan gpm_cq/64 -
-# mass_destruction gpm_coop/16 -
-# mass_destruction gpm_cq/16 -
-# mass_destruction gpm_cq/32 -
-# mass_destruction gpm_cq/64 -
-# mass_destruction sp1/16 -
-# night_flight gpm_coop/16 -
-# night_flight gpm_cq/16 -
-# night_flight gpm_cq/32 -
-# night_flight gpm_cq/64 -
-# night_flight sp1/16 -
-# surge gpm_coop/16 -
-# surge gpm_cq/16 -
-# surge gpm_cq/32 -
-# surge gpm_cq/64 -
-# surge sp1/16 -
-# warlord gpm_coop/16 -
-# warlord gpm_cq/16 -
-# warlord gpm_cq/32 -
-# warlord gpm_cq/64 -
-# warlord sp1/16 -
+# ghost_town gpm_coop 16 -
+# ghost_town gpm_cq 16 -
+# ghost_town gpm_cq 32 -
+# ghost_town gpm_cq 64 -
+# ghost_town sp1 16 -
+# iron_gator gpm_cq 16 -
+# iron_gator gpm_cq 32 -
+# iron_gator gpm_cq 64 -
+# leviathan gpm_cq 16 -
+# leviathan gpm_cq 32 -
+# leviathan gpm_cq 64 -
+# mass_destruction gpm_coop 16 -
+# mass_destruction gpm_cq 16 -
+# mass_destruction gpm_cq 32 -
+# mass_destruction gpm_cq 64 -
+# mass_destruction sp1 16 -
+# night_flight gpm_coop 16 -
+# night_flight gpm_cq 16 -
+# night_flight gpm_cq 32 -
+# night_flight gpm_cq 64 -
+# night_flight sp1 16 -
+# surge gpm_coop 16 -
+# surge gpm_cq 16 -
+# surge gpm_cq 32 -
+# surge gpm_cq 64 -
+# surge sp1 16 -
+# warlord gpm_coop 16 -
+# warlord gpm_cq 16 -
+# warlord gpm_cq 32 -
+# warlord gpm_cq 64 -
+# warlord sp1 16 -
