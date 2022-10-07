@@ -18,15 +18,6 @@ RUN mkdir -p /server
 RUN cat /install/license.sh | sed 's/^more/cat/' > /install/license-fixed.sh # Show the licenses without a pager
 RUN cd /install && printf '\naccept\n\nyes\n/server\ny\n' | sh /install/license-fixed.sh # Agree to licenses
 
-# Install ESAI
-WORKDIR /root
-RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
-COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip
-RUN sha256sum ESAI-Standard-v4.2.zip | grep ef4e5d0f1446b9a2ddb0b350f1334273681c0f64d9c38c506320db769b24499c
-RUN unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/bf2
-COPY lowercase-helper /usr/local/bin/lowercase-helper
-RUN lowercase-helper --dir /server/bf2/mods/bf2/ESAI # Lowercase ESAI folder and its descendent folders
-
 # Install bf2stats 3
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
@@ -34,6 +25,17 @@ RUN curl -sSLO https://github.com/BF2Statistics/StatsPython/archive/2197486.zip
 RUN sha256sum 2197486.zip | grep '^881ddc8f77a573be661f68a146883bc5e23b3d1b1a4d4323496d66d405744232 '
 RUN unzip 2197486.zip -d 2197486
 RUN cp -r 2197486/*/. /server/bf2/python/bf2/
+
+# Install ESAI in all mods and lowercase ESAI folder in all mods
+WORKDIR /root
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
+COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip
+RUN sha256sum ESAI-Standard-v4.2.zip | grep ef4e5d0f1446b9a2ddb0b350f1334273681c0f64d9c38c506320db769b24499c
+COPY lowercase-helper /usr/local/bin/lowercase-helper
+RUN for i in $( ls /server/bf2/mods ); do \
+        unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/$i; \
+        lowercase-helper --dir "/server/bf2/mods/$i/ESAI"; \
+    done
 
 FROM ubuntu:16.04 AS final
 COPY --from=install /server /server

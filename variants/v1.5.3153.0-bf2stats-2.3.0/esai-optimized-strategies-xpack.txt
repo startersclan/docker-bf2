@@ -2,7 +2,7 @@
 # 1. The following level-gamemode-strategy entries may be generated (with an empty <strategy> field) using:
 #       esai-helper --mod xpack get gamemodes
 # 2. Edit <strategy> field to your liking. To get all available strategies:
-#       esai-helper --mod bf2 get strategies
+#       esai-helper --mod xpack get strategies
 # 3. Then apply these ESAI strategies as part of container entrypoint:
 #       esai-helper --mod xpack apply -f esai-optimized-strategies-xpack.txt
 # 4. To remove these ESAI strategies, simply:
