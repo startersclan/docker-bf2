@@ -31,7 +31,7 @@ RUN chmod +x /server/bf2/bin/ia-32/libbf2hub.so /server/bf2/bin/amd-64/libbf2hub
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 RUN curl -sSLO https://github.com/startersclan/bf2stats/archive/refs/tags/2.3.1.zip
-RUN sha256sum 2.3.1.zip | grep '^4e91c5cdda63aaff1e2ccc20f40befcb603000eac25221be4cefbdebfdee6aec '
+RUN sha256sum 2.3.1.zip | grep '^b9569819f7c58b70ff3e66d9219aed78ad6433d5cbba58f46b7bc0bf9eeb6d89 '
 RUN unzip 2.3.1.zip -d extract
 RUN rm -rf /server/bf2/python
 RUN mv extract/bf2stats-2.3.1/src/python /server/bf2/python
