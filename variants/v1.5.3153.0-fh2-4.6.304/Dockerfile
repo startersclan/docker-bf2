@@ -29,15 +29,21 @@ RUN chmod -R +x /server/bf2/bin
 RUN mv /server/bf2/start-fh2.sh /server/bf2/start.sh
 RUN for i in $( ls /server/bf2/mods/fh2/levels/*/info/*cq_64_menumap.png | cut -d '/' -f7 ); do echo "maplist.append \"$i\" \"gpm_cq\" 64" >> /server/bf2/mods/fh2/settings/maplist.con; done # Create a default maplist.con, since it is not included by the installer
 
-# Install ESAI in all mods and lowercase ESAI folder in all mods
+# Install ESAI in all mods
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip
 RUN sha256sum ESAI-Standard-v4.2.zip | grep ef4e5d0f1446b9a2ddb0b350f1334273681c0f64d9c38c506320db769b24499c
+# Lowercase all files in ESAI folder
 COPY lowercase-helper /usr/local/bin/lowercase-helper
 RUN for i in $( ls /server/bf2/mods ); do \
         unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/$i; \
         lowercase-helper --dir "/server/bf2/mods/$i/ESAI"; \
+    done
+# Lowercase ESAI mapfiles' content
+RUN for i in $( find /server/bf2/mods/*/esai/mapfiles -type f ); do \
+        CONTENT=$( cat "$i" ); \
+        echo "$CONTENT" | tr '[:upper:]' '[:lower:]' > "$i"; \
     done
 
 FROM ubuntu:16.04 AS final
