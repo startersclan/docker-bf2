@@ -27,15 +27,21 @@ RUN ls -al /server/bf2
 RUN mv /server/bf2/start_bf2hub.sh /server/bf2/start.sh
 RUN chmod +x /server/bf2/bin/ia-32/libbf2hub.so /server/bf2/bin/amd-64/libbf2hub.so
 
-# Install ESAI in all mods and lowercase ESAI folder in all mods
+# Install ESAI in all mods
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip
 RUN sha256sum ESAI-Standard-v4.2.zip | grep ef4e5d0f1446b9a2ddb0b350f1334273681c0f64d9c38c506320db769b24499c
+# Lowercase all files in ESAI folder
 COPY lowercase-helper /usr/local/bin/lowercase-helper
 RUN for i in $( ls /server/bf2/mods ); do \
         unzip ESAI-Standard-v4.2.zip -d /server/bf2/mods/$i; \
         lowercase-helper --dir "/server/bf2/mods/$i/ESAI"; \
+    done
+# Lowercase ESAI mapfiles' content
+RUN for i in $( find /server/bf2/mods/*/esai/mapfiles -type f ); do \
+        CONTENT=$( cat "$i" ); \
+        echo "$CONTENT" | tr '[:upper:]' '[:lower:]' > "$i"; \
     done
 
 FROM ubuntu:16.04 AS final
