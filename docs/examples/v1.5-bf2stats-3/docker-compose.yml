@@ -1,5 +1,7 @@
 version: '2.2'
 services:
+  # This uses your private master server and private ASP web server as the stats system.
+  # It works by spoofing Gamespy DNS to use your private master server, and spoofing Gamespy DNS to use your ASP web server as the stats system.
   # For a full bf2stats 3 stack example, see https://github.com/startersclan/ASP
   bf2:
     image: startersclan/docker-bf2:v1.5.3153.0-bf2stats-3.1.0
@@ -18,8 +20,6 @@ services:
       - default
     tty: true
     stdin_open: true
-    # healthcheck:
-    #   test: nc -w 1 -vzu 127.0.0.1 16567 && nc -vzu 127.0.0.1 29900
 
 networks:
   default:

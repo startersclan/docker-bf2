@@ -1,7 +1,7 @@
 version: '2.2'
 services:
-  # This uses your private master server and private ASP web server as the stats system.
-  # It works by spoofing Gamespy DNS to use your private master server, and spoofing Gamespy DNS to use your ASP web server as the stats system.
+  # This uses BF2Hub as the master server, but your private ASP web server as the stats system.
+  # It works by spoofing Gamespy DNS to use BF2Hub as the master server, and spoofing Gamespy DNS to use your ASP web server as the stats system.
   # For a full bf2stats 2 stack example, see https://github.com/startersclan/bf2stats
   bf2:
     image: startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.3.1
@@ -16,20 +16,20 @@ services:
     ports:
       - 16567:16567/udp
       - 29900:29900/udp
-    extra_hosts:
-      - battlefield2.available.gamespy.com:192.168.1.100 # Your master server IP
-      - battlefield2.master.gamespy.com:92.51.181.102 # Your master server IP
-      - battlefield2.ms14.gamespy.com:92.51.181.102 # Your master server IP
-      - master.gamespy.com:92.51.181.102 # Your master server IP
-      - motd.gamespy.com:92.51.181.102 # Your master server IP
-      - gpsp.gamespy.com:92.51.181.102 # Your master server IP
-      - gpcm.gamespy.com:92.51.181.102 # Your master server IP
-      - gamespy.com:92.51.181.102 # Your master server IP
-      - bf2web.gamespy.com:92.51.180.45 # Your ASP web server IP
-      - gamestats.gamespy.com:92.51.180.45 # Your ASP web server IP
-      - eapusher.dice.se:92.51.180.45 # Your ASP web server IP
     networks:
       - default
+    extra_hosts:
+      - battlefield2.available.gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - battlefield2.master.gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - battlefield2.ms14.gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - master.gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - motd.gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - gpsp.gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - gpcm.gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - bf2web.gamespy.com:192.168.1.100 # Your ASP web server IP
+      - gamestats.gamespy.com:192.168.1.100 # Your ASP web server IP
+      - eapusher.dice.se:192.168.1.100 # Your ASP web server IP
     tty: true
     stdin_open: true
 

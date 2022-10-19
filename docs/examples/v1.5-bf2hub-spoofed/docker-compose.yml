@@ -1,9 +1,10 @@
 version: '2.2'
 services:
-  # This runs on the official BF2Hub server binaries. It uses BF2Hub as the master server and the ASP web server
+  # This is identical to the `v1.5-bf2hub` example
+  # It runs the official BF2 1.5 dedicated server binaries, and spoofs Gamespy DNS to use BF2Hub as the master server and the ASP web server
   # Server will be unranked since there is no custom ASP web server stats system
   bf2:
-    image: startersclan/docker-bf2:v1.5.3153.0-bf2hub
+    image: startersclan/docker-bf2:v1.5.3153.0
     volumes:
       - ./config/bf2/mods/bf2/ai/aidefault-custom.ai:/server/bf2/mods/bf2/ai/aidefault.ai:ro # Customize bots
       - ./config/bf2/mods/bf2/ai/aibehaviours-fixlookatwrapper.ai:/server/bf2/mods/bf2/ai/aibehaviours.ai:ro # LoopAtWrapper fix
@@ -16,6 +17,18 @@ services:
       - 29900:29900/udp
     networks:
       - default
+    extra_hosts:
+      - battlefield2.available.gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - battlefield2.master.gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - battlefield2.ms14.gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - master.gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - motd.gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - gpsp.gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - gpcm.gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - gamespy.com:92.51.181.102 # bf2hub.com master server IP
+      - bf2web.gamespy.com:92.51.180.45 # bf2hub.com ASP web server IP
+      - gamestats.gamespy.com:92.51.180.45 # bf2hub.com ASP web server IP
+      - eapusher.dice.se:92.51.180.45 # bf2hub.com ASP web server IP
     tty: true
     stdin_open: true
 

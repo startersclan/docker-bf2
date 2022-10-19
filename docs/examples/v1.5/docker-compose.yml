@@ -1,5 +1,6 @@
 version: '2.2'
 services:
+  # This is the official BF2 1.5 dedicated server. It does not work unless DNS spoofing is added.
   bf2:
     image: startersclan/docker-bf2:v1.5.3153.0
     volumes:
@@ -16,8 +17,6 @@ services:
       - default
     tty: true
     stdin_open: true
-    healthcheck:
-      test: nc -w 1 -vzu 127.0.0.1 16567 && nc -vzu 127.0.0.1 29900
 
 networks:
   default:
