@@ -46,11 +46,15 @@ COPY esai-helper /usr/local/bin/esai-helper
 COPY esai-optimized-strategies-bf2.txt /esai-optimized-strategies-bf2.txt
 COPY esai-optimized-strategies-xpack.txt /esai-optimized-strategies-xpack.txt
 COPY lowercase-helper /usr/local/bin/lowercase-helper
-# Install deployment tools
-RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install --no-install-recommends -y ca-certificates && rm -rf /var/lib/apt/lists/*
-RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install --no-install-recommends -y dnsutils netcat && rm -rf /var/lib/apt/lists/*
+# Install network utilities which can be useful for debugging issues
 # Install unzip and zip for the sake of applying ESAI strategies in ./mods/*/levels/*/server.zip at './GameModes/[gpm_coop|gpm_cq|sp1|sp2|sp3]/[16|32|64]/AI/Strategies.ai'
-RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install --no-install-recommends -y unzip zip && rm -rf /var/lib/apt/lists/*
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update  \
+    && apt-get install --no-install-recommends -y \
+        ca-certificates \
+        conntrack dnsutils iproute2 netcat tcpdump \
+        unzip zip \
+    && rm -rf /var/lib/apt/lists/*
 # Install fh2 dependencies
 # Fix error: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version GLIBCXX_3.4.22' not found (required by /server/bf2/bin/amd-64/fh2utils.so)
 # See: https://stackoverflow.com/questions/43070900/version-glibcxx-3-4-22-not-found
@@ -73,6 +77,6 @@ RUN apt-get update && apt-get install -y apt-transport-https software-properties
 ENV PYTHONHOME=
 EXPOSE 16567/udp
 EXPOSE 29900/udp
-# HEALTHCHECK CMD nc -w 1 -vzu 127.0.0.1 16567 && nc -vzu 127.0.0.1 29900
+# HEALTHCHECK CMD nc -w 1 -vzu 127.0.0.1 16567 && nc -w 1 -vzu 127.0.0.1 29900
 WORKDIR /server/bf2
 CMD [ "./start.sh" ]
