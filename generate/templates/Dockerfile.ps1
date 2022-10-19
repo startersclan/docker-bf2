@@ -50,16 +50,16 @@ RUN mv "extract/bf2statisitcs 2.2.0/Server Files/Linux/python" /server/bf2/pytho
 
 "@
 }
-if ('bf2stats-2.3.1' -in $VARIANT['_metadata']['components']) {
+if ('bf2stats-2.3.2' -in $VARIANT['_metadata']['components']) {
     @"
-# Install bf2stats 2.3.1
+# Install bf2stats 2.3.2
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
-RUN curl -sSLO https://github.com/startersclan/bf2stats/archive/refs/tags/2.3.1.zip
-RUN sha256sum 2.3.1.zip | grep '^b9569819f7c58b70ff3e66d9219aed78ad6433d5cbba58f46b7bc0bf9eeb6d89 '
-RUN unzip 2.3.1.zip -d extract
+RUN curl -sSLO https://github.com/startersclan/bf2stats/archive/refs/tags/2.3.2.zip
+RUN sha256sum 2.3.2.zip | grep '^448bc8a9d5adbad509f6d79e53ae030d4a5e0948bb301aaafe42c5442c1ffeef '
+RUN unzip 2.3.2.zip -d extract
 RUN rm -rf /server/bf2/python
-RUN mv extract/bf2stats-2.3.1/src/python /server/bf2/python
+RUN mv extract/bf2stats-2.3.2/src/python /server/bf2/python
 
 
 "@

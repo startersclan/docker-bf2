@@ -28,10 +28,8 @@ $(
     }
 }) -join ''
 )
-- ``bf2hub`` - Support for [bf2hub.com](https://www.bf2hub.com/home/serversetup.php) statistics.
-- ``bf2stats-2.2.0`` - Includes [bf2statistics](https://code.google.com/archive/p/bf2stats/) 2.2.0 python files to send stats snapshots to a webserver to the [ASP](https://github.com/BF2Statistics/ASP) v2 webserver. See [here](https://github.com/startersclan/bf2stats) for a fully dockerized stack example.
+- ``bf2hub`` - Includes [BF2Hub](https://www.bf2hub.com/home/serversetup.php) server binaries.
 - ``bf2stats-2.3.1`` - Includes [bf2statistics](https://github.com/startersclan/bf2stats) 2.3.1 python files to send stats snapshots to the [ASP](https://github.com/startersclan/bf2stats) v2 webserver. See [here](https://github.com/startersclan/bf2stats) for a fully dockerized stack example.
-- ``bf2stats-3.1.0`` - Includes [bf2statistics](https://github.com/BF2Statistics/StatsPython) 3.1.0 python files to send stats snapshots to the [ASP](https://github.com/BF2Statistics/ASP) v3 webserver. See [here](https://github.com/startersclan/ASP) for a fully dockerized example.
 - ``bf2stats-3.1.1`` - Includes [bf2statistics](https://github.com/startersclan/StatsPython) 3.1.1 python files to send stats snapshots to the [ASP](https://github.com/startersclan/ASP) v3 webserver. See [here](https://github.com/startersclan/ASP) for a fully dockerized example.
 - ``fh2`` - [Forgotten Hope 2](http://www.forgottenhope.warumdarum.de) mod
 
