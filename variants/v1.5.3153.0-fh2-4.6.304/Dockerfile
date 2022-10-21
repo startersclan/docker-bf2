@@ -58,7 +58,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get update  \
     && apt-get install --no-install-recommends -y \
         ca-certificates \
-        conntrack dnsutils iproute2 netcat tcpdump \
+        conntrack dnsutils iproute2 netcat net-tools tcpdump \
         unzip zip \
     && rm -rf /var/lib/apt/lists/*
 # Install fh2 dependencies
