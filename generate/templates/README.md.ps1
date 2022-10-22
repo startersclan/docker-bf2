@@ -88,7 +88,7 @@ docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/pb_e
 
 ESAI greatly enhances bot performance, and is compatible with any BF2 mod. It is included but not enabled by default.
 
-A handy tool called [`esai-helper`](vendor/esai-helper) is included in all images. It can be used to generate maplists for a mod, list gamemodes, list a levels' `strategies.ai`, apply custom `strategies.ai` to levels, and more. See `esai-helper --help` for usage.
+A handy tool called [`esai-helper`](vendor/esai-helper) is included in all images. It can be used to list gamemodes, generate maplists for a mod, list a levels' `strategies.ai`, apply default or custom `strategies.ai` to levels, and more. See `esai-helper --help` for usage.
 
 To use a default strategy for all levels, see [this example](docs/examples/v1.5-esai-default-strategy/).
 
@@ -97,6 +97,31 @@ To override the default strategy with a level-specific strategy, optimized strat
 To use optimized strategies for levels, see [this example](docs/examples/v1.5-esai-optimized-strategies/).
 
 To use custom strategies for levels, see [example](docs/examples/v1.5-esai-custom-strategies/).
+
+```sh
+# Read ESAI readmes
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/mods/bf2/esai/readme.txt
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/mods/bf2/esai/directory.txt
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/mods/bf2/esai/docs/credits.txt
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat "/server/bf2/mods/bf2/esai/docs/quick start.txt"
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat "/server/bf2/mods/bf2/esai/docs/users guide.txt"
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/mods/bf2/esai/docs/version.txt
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/mods/bf2/esai/mapfiles/dir.txt
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/mods/bf2/esai/plugin/dir.txt
+
+# esai-helper useful one-liners
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --help # See usage
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 get gamemodes # Get gamemodes
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 get levels # Get levels
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 get maplist # Generate a maplist for maplist.con
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 get mods # Get mods
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 get strategies # Get strategies
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 apply default-strategy <strategy> # Apply a default strategy
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 apply <level> <gamemode> <size> <strategy> # Apply a strategy for a level
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 delete <level> <gamemode> <size> <strategy> # Delete a strategy for a level
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 apply -f strategies.txt # Apply strategies for levels
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 delete -f strategies.txt # Delete strategies for levels
+```
 
 '@
 
