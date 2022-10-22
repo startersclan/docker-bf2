@@ -4,25 +4,25 @@ set -eu
 usage() {
     echo "$0: Get and apply ESAI Strategies.ai in levels/<level>/server.zip"
     echo "Options:"
-    echo "    -d|--dir                              BF2 server installation directory. Defaults to '/server/bf2'"
-    echo "    -m|--mod                              Mod. E.g. 'bf2' or 'xpack'. Defaults to 'bf2'"
+    echo "    -d|--dir                                      BF2 server installation directory. Defaults to '/server/bf2'"
+    echo "    -m|--mod                                      Mod. E.g. 'bf2' or 'xpack'. Defaults to 'bf2'"
     echo "Commands:"
     echo "  get [subcommand]"
-    echo "    gamemodes <level>                     Get all available levels' gamemodes"
-    echo "    maplist <level>                       Generate a maplist"
-    echo "    level-strategies <level>              Get a level's server.zip's ESAI strategies"
-    echo "                                          If <level> if omitted, all levels' strategies are shown"
-    echo "    level-strategiescontent <level>       Get file content of level's server.zip's ESAI strategies"
-    echo "                                          If <level> if omitted, all levels' strategies are shown"
-    echo "    levels                                Get all available levels"
-    echo "    mods                                  Get all available mods"
-    echo "    strategies                            Get all available ESAI strategies"
+    echo "    gamemodes <level>                             Get all available levels' gamemodes"
+    echo "    maplist <level>                               Generate a maplist"
+    echo "    level-strategies <level>                      Get a level's server.zip's ESAI strategies"
+    echo "                                                  If <level> if omitted, all levels' strategies are shown"
+    echo "    level-strategiescontent <level>               Get file content of level's server.zip's ESAI strategies"
+    echo "                                                  If <level> if omitted, all levels' strategies are shown"
+    echo "    levels                                        Get all available levels"
+    echo "    mods                                          Get all available mods"
+    echo "    strategies                                    Get all available ESAI strategies"
     echo "  apply|delete [options] [arg...]"
-    echo "      <level> <gamemode> <strategy>       Apply the specified ESAI strategy to a specified gamemode"
-    echo "                                          of a specified level's server.zip"
-    echo "      -f|--file <space_delimited_file>    Apply ESAI strategies based on a space-delimited file"
-    echo "                                          Format per line: <level> <gamemode> <strategy>"
-    echo "                                          Use '#' for comments"
+    echo "    <level> <gamemode> <strategy>  Apply the specified ESAI strategy to a specified gamemode"
+    echo "                                                  of a specified level's server.zip"
+    echo "    -f|--file <space_delimited_file>              Apply ESAI strategies based on a space-delimited file"
+    echo "                                                  Format per line: <level> <gamemode> <strategy>"
+    echo "                                                  Use '#' for comments"
     echo "Examples:"
     echo "  $0 -m bf2 get gamemodes"
     echo "  $0 -m xpack get gamemodes"
@@ -32,9 +32,9 @@ usage() {
     echo "  $0 -m bf2 get levels"
     echo "  $0 -m bf2 get mods"
     echo "  $0 -m bf2 get strategies"
-    echo "  $0 -m bf2 apply highway_tampa gpm_cq/32 mediumFCA"
+    echo "  $0 -m bf2 apply highway_tampa gpm_cq 32 mediumfca"
     echo "  $0 -m bf2 apply -f esai-optimized-strategies.txt"
-    echo "  $0 -m bf2 delete highway_tampa gpm_cq/32 mediumFCA"
+    echo "  $0 -m bf2 delete highway_tampa gpm_cq 32 mediumfca"
     echo "  $0 -m bf2 delete -f esai-optimized-strategies.txt"
 }
 # Exit if we got no options
@@ -145,13 +145,19 @@ while test $# -gt 0; do
                     shift
                     GAMEMODE="${1:-}"
                     if [ -z "$GAMEMODE" ]; then
-                        echo "Please specify a gamemode as the second argument. E.g. gpm_coop/16"
+                        echo "Please specify a gamemode as the second argument. E.g. gpm_coop"
+                        exit 1
+                    fi
+                    shift
+                    SIZE="${1:-}"
+                    if [ -z "$SIZE" ]; then
+                        echo "Please specify a map size as the third argument. E.g. 16"
                         exit 1
                     fi
                     shift
                     STRATEGY="${1:-}"
                     if [ -z "$STRATEGY" ]; then
-                        echo "Please specify an ESAI strategy as the third argument. E.g. mediumFCAPB"
+                        echo "Please specify an ESAI strategy as the fourth argument. E.g. mediumfcapb"
                         exit 1
                     fi
                     shift
@@ -180,6 +186,7 @@ DELETE=${DELETE:-}
 FILE=${FILE:-}
 LEVEL=${LEVEL:-}
 GAMEMODE=${GAMEMODE:-}
+SIZE=${SIZE:-}
 STRATEGY=${STRATEGY:-}
 
 # Validation
@@ -292,11 +299,11 @@ if [ -n "$APPLY" ] || [ -n "$DELETE" ]; then
             exit 1
         fi
     else
-        CONTENT="$LEVEL $GAMEMODE $STRATEGY"
+        CONTENT="$LEVEL $GAMEMODE $SIZE $STRATEGY"
     fi
-    echo "$CONTENT" | while read -r LEVEL GAMEMODE STRATEGY; do
+    echo "$CONTENT" | while read -r LEVEL GAMEMODE SIZE STRATEGY; do
         SERVER_ZIP="$DIR/mods/$MOD/levels/$LEVEL/server.zip"
-        if ! unzip -l "$SERVER_ZIP" | grep "GameModes/$GAMEMODE" > /dev/null; then
+        if ! unzip -l "$SERVER_ZIP" | grep "GameModes/$GAMEMODE/$SIZE" > /dev/null; then
             echo "The gamemode '$GAMEMODE' does not exist in $SERVER_ZIP"
             echo "To get a list of available gamemodes, run:"
             echo "   $0 get gamemodes"
@@ -312,12 +319,12 @@ if [ -n "$APPLY" ] || [ -n "$DELETE" ]; then
     done
 fi
 if [ -n "$APPLY" ]; then
-    echo "$CONTENT" | while read -r LEVEL GAMEMODE STRATEGY; do
+    echo "$CONTENT" | while read -r LEVEL GAMEMODE SIZE STRATEGY; do
         cd "$DIR/mods/$MOD/levels/$LEVEL"
         SERVER_ZIP="$PWD/server.zip"
         STRATEGIES_AI=$( find $DIR | grep -E "mods/$MOD/esai/mapfiles/[^/]+/$STRATEGY/strategies.ai" | head -n1 || true )
-        STRATEGIES_AI_DESTINATION_IN_ZIP="GameModes/$GAMEMODE/ai/Strategies.ai"
-        echo "Applying strategy $STRATEGIES_AI to $SERVER_ZIP at GameModes/$GAMEMODE/ai/Strategies.ai"
+        STRATEGIES_AI_DESTINATION_IN_ZIP="GameModes/$GAMEMODE/$SIZE/ai/Strategies.ai"
+        echo "Applying strategy $STRATEGIES_AI to $SERVER_ZIP at $STRATEGIES_AI_DESTINATION_IN_ZIP"
         mkdir -p "$( dirname "$STRATEGIES_AI_DESTINATION_IN_ZIP" )" # Same layout as content of server.zip
         cp -f "$STRATEGIES_AI" "$STRATEGIES_AI_DESTINATION_IN_ZIP"
         zip -qru server.zip GameModes
@@ -325,10 +332,10 @@ if [ -n "$APPLY" ]; then
     done
 fi
 if [ -n "$DELETE" ]; then
-    echo "$CONTENT" | while read -r LEVEL GAMEMODE STRATEGY; do
+    echo "$CONTENT" | while read -r LEVEL GAMEMODE SIZE STRATEGY; do
         cd "$DIR/mods/$MOD/levels/$LEVEL"
         SERVER_ZIP="$PWD/server.zip"
-        EXISTING_STRATEGIES_AI=$( unzip -l "$SERVER_ZIP" | grep -iE "GameModes/$GAMEMODE/(ai|AI)/Strategies.ai" | awk '{print $4}' || true )
+        EXISTING_STRATEGIES_AI=$( unzip -l "$SERVER_ZIP" | grep -iE "GameModes/$GAMEMODE/$SIZE/(ai|AI)/Strategies.ai" | awk '{print $4}' || true )
         if [ -n "$EXISTING_STRATEGIES_AI" ]; then
             for i in $EXISTING_STRATEGIES_AI; do
                 echo "Removing existing strategy $i from $SERVER_ZIP at $i"
