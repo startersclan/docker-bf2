@@ -108,3 +108,77 @@ docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 delete
 docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 apply -f strategies.txt # Apply strategies for levels
 docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 delete -f strategies.txt # Delete strategies for levels
 ```
+
+## FAQ
+
+### Q: Server not listed on master server after `docker-compose down && docker-compose up`
+
+A: This is caused by stale UDP conntrack entries which are not deleted up by `docker` on container teardown. See [this issue](https://github.com/moby/moby/issues/8795).
+
+The solution is to run a sidecar container that deletes the stale UDP conntrack entries on BF2 container startup, see [this example](docs/examples/delete-udp-conntrack). Alternatively, a sidecar `init-container` can achieve the same result, see [this example](docs/examples/v1.5-with-delete-udp-conntrack). Alternatively, run on host networking (i.e. `network_mode: host` in docker-compose.yml) to avoid SNAT completely, but that is not advised because it defeats the purpose of containerization.
+
+To illustate the details:
+
+```sh
+# Start BF2 server
+$ docker-compose up
+$ sleep 10
+
+# Get UDP conntrack entries
+# 91.51.181.102:27900 is BF2Hub master server
+# 91.51.181.102:29910 is BF2Hub cdkey server
+# 91.51.149.13 is the BF2Hub master listing server
+# 192.168.1.100 is our host machine's IP address
+# 172.17.48.2 is the bf2 container's IP address
+# 1st line: On init, the BF2 server talks to the BF2Hub master server and registers itself to be listed. After which, both send heartbeats to each other at regular intervals. Hence [ASSURED]
+# 2st line: The BF2 server sends heartbeats to the cd key server at regular intervals without a response. Hence [UNREPLIED]
+# 3rd line: A few seconds after the BF2 server registers itself to be listed, the BF2 master listing server talks with the BF2 server, and the BF2 server sends its details, at regular intervals. Hence [ASSURED]
+$ sudo conntrack -L -p udp | grep 92.51
+udp      17 115 src=172.17.48.2 dst=92.51.181.102 sport=60002 dport=27900 src=92.51.181.102 dst=192.168.1.100 sport=27900 dport=60002 [ASSURED] mark=0 use=1
+udp      17 25 src=172.17.48.2 dst=92.51.181.102 sport=60002 dport=29910 [UNREPLIED] src=92.51.181.102 dst=192.168.1.100 sport=29910 dport=60002 mark=0 use=1
+udp      17 118 src=92.51.149.13 dst=192.168.1.100 sport=58665 dport=60002 src=172.17.48.2 dst=92.51.149.13 sport=60002 dport=58665 [ASSURED] mark=0 use=1
+
+# Stop and tearfown BF2 server
+$ docker-compose down
+
+# Get UDP conntrack entries
+# Line 1: Notice that this UDP conntrack entry to the BF2 master server remains and is not removed
+# Line 2: Notice that this UDP conntrack entry to the BF2 master server remains and is not removed
+# If we started a new BF2 server container now, it will not receive any UDP packets from the BF2Hub master server and listing server, since the packets will end up being sent to the old container's IP (172.17.64.2), and instead of the new container's IP
+$ sudo conntrack -L -p udp | grep 92.51
+udp      17 23 src=172.17.48.2 dst=92.51.181.102 sport=60002 dport=29910 [UNREPLIED] src=92.51.181.102 dst=192.168.1.100 sport=29910 dport=60002 mark=0 use=1
+udp      17 113 src=172.17.48.2 dst=92.51.181.102 sport=60002 dport=27900 src=92.51.181.102 dst=192.168.1.100 sport=27900 dport=60002 [ASSURED] mark=0 use=1
+
+# Start BF2 server with a new container IP address
+$ docker-compose up
+$ sleep 10
+
+# Get UDP conntrack entries
+# 172.17.64.2 is the new BF2 container's IP address
+# Line 1: BF2 server talking with the BF2Hub master server. However, instead of [ASSURED], it is [UNREPLIED]
+# Line 2: This is the culprit. This stale UDP conntrack entry is directing BF2Hub master server replies to the old container IP (172.17.48.2), and the entry remains [ASSURED]
+# Line 3: BF2 server talking with the BF2Hub cd key server. [UNREPLIED] is expected
+# Line 4: The master listing server talks with the BF2 server. [ASSURED] is expected
+# Hence, to solve this we need to remove the 3rd line from the conntrack table
+$ sudo conntrack -L -p udp | grep 92.51
+udp      17 26 src=172.17.64.2 dst=92.51.181.102 sport=60002 dport=27900 [UNREPLIED] src=92.51.181.102 dst=192.168.1.100 sport=27900 dport=40589 mark=0 use=1
+udp      17 77 src=172.17.48.2 dst=92.51.181.102 sport=60002 dport=27900 src=92.51.181.102 dst=192.168.1.100 sport=27900 dport=60002 [ASSURED] mark=0 use=1
+udp      17 26 src=172.17.64.2 dst=92.51.181.102 sport=60002 dport=29910 [UNREPLIED] src=92.51.181.102 dst=192.168.1.100 sport=29910 dport=40589 mark=0 use=1
+udp      17 106 src=92.51.149.13 dst=192.168.1.100 sport=58665 dport=60002 src=172.17.64.2 dst=92.51.149.13 sport=60002 dport=58665 [ASSURED] mark=0 use=1
+
+# Delete the stale UDP conntrack entries destined for the BF2Hub master server
+$ sudo conntrack -D -p udp --dst 92.51.181.102
+udp      17 24 src=172.17.64.2 dst=92.51.181.102 sport=60002 dport=27900 [UNREPLIED] src=92.51.181.102 dst=192.168.1.100 sport=27900 dport=40589 mark=0 use=1
+udp      17 25 src=172.17.64.2 dst=92.51.181.102 sport=60002 dport=29910 [UNREPLIED] src=92.51.181.102 dst=192.168.1.100 sport=29910 dport=40589 mark=0 use=1
+conntrack v1.4.5 (conntrack-tools): 2 flow entries have been deleted
+
+# Get UDP conntrack entries
+# Line 1: BF2 server talking with the BF2Hub master server. It is now [ASSURED] which is expected
+# Line 2: BF2 server talking with the BF2Hub cd key server. [UNREPLIED] is expected
+# Line 3: The master listing server talks with the BF2 server. [ASSURED] is expected
+# Now we see that the new BF2 container IP (172.17.64.2) correctly talks with the BF2Hub master server, and our server is now listed
+$ sudo conntrack -L -p udp | grep 92.51
+udp      17 114 src=172.17.64.2 dst=92.51.181.102 sport=60002 dport=27900 src=92.51.181.102 dst=192.168.1.100 sport=27900 dport=60002 [ASSURED] mark=0 use=1
+udp      17 25 src=172.17.64.2 dst=92.51.181.102 sport=60002 dport=29910 [UNREPLIED] src=92.51.181.102 dst=192.168.1.100 sport=29910 dport=60002 mark=0 use=1
+udp      17 119 src=92.51.149.13 dst=192.168.1.100 sport=58665 dport=60002 src=172.17.64.2 dst=92.51.149.13 sport=60002 dport=58665 [ASSURED] mark=0 use=1
+```
