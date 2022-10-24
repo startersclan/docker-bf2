@@ -119,6 +119,7 @@ $VARIANTS_SHARED = @{
             '/vendor/ESAI-Standard-v4.2.zip'
             '/vendor/esai-helper'
             '/vendor/esai-optimized-strategies-bf2.txt'
+            '/vendor/esai-optimized-strategies-bf2all64.txt'
             '/vendor/esai-optimized-strategies-xpack.txt'
             '/vendor/lowercase-helper'
         )

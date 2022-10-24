@@ -96,9 +96,12 @@ A handy tool called [`esai-helper`](vendor/esai-helper) is included in all image
 
 To use a default strategy for all levels, see [this example](docs/examples/v1.5-esai-default-strategy/).
 
-To override the default strategy with a level-specific strategy, optimized strategies config files [``/esai-optimized-strategies-bf2.txt``](vendor/esai-optimized-strategies-bf2.txt) and [``/esai-optimized-strategies-xpack.txt``](vendor/esai-optimized-strategies-xpack.txt) are included in each image. These strategies have been optimized by the BF2SP64 community.
+To override the default strategy with a level-specific strategy, optimized strategies config files are included in each image. These strategies have been optimized by the BF2SP64 community:
+- [`/esai-optimized-strategies-bf2.txt`](vendor/esai-optimized-strategies-bf2.txt)
+- [`/esai-optimized-strategies-bf2all64.txt`](vendor/esai-optimized-strategies-bf2all64.txt)
+- [`/esai-optimized-strategies-xpack.txt`](vendor/esai-optimized-strategies-xpack.txt)
 
-To use optimized strategies for levels, see [this example](docs/examples/v1.5-esai-optimized-strategies/).
+To use optimized strategies for levels, see [this example](docs/examples/v1.5-esai-optimized-strategies/). For `bf2all64` mod, see [this example](docs/examples/v1.5-bf2all64-esai-optimized-strategies/).
 
 To use custom strategies for levels, see [example](docs/examples/v1.5-esai-custom-strategies/).
 

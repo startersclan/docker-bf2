@@ -39,6 +39,7 @@ FROM ubuntu:16.04 AS final
 COPY --from=install /server /server
 COPY esai-helper /usr/local/bin/esai-helper
 COPY esai-optimized-strategies-bf2.txt /esai-optimized-strategies-bf2.txt
+COPY esai-optimized-strategies-bf2all64.txt /esai-optimized-strategies-bf2all64.txt
 COPY esai-optimized-strategies-xpack.txt /esai-optimized-strategies-xpack.txt
 COPY lowercase-helper /usr/local/bin/lowercase-helper
 # Install network utilities which can be useful for debugging issues
