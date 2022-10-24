@@ -8,10 +8,10 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -
 
 # Install Battlefield 2 server
 WORKDIR /root
-RUN curl -sSLO ftp://ftp.bf-games.net/server-files/bf2/bf2-linuxded-$( $VARIANT['_metadata']['installer_version'] )-installer.tgz
+RUN curl -sSLO https://files.startersclan.com/ea/bf2/bf2-linuxded-$( $VARIANT['_metadata']['installer_version'] )-installer.tgz
+RUN sha256sum bf2-linuxded-$( $VARIANT['_metadata']['installer_version'] )-installer.tgz | grep "^$( $VARIANT['_metadata']['installer_sha256sum'] ) "
 RUN tar -zxvf bf2-linuxded-$( $VARIANT['_metadata']['installer_version'] )-installer.tgz
 ENV INSTALLER=bf2-linuxded-$( $VARIANT['_metadata']['installer_version'] )-installer.sh
-RUN sha256sum "`$INSTALLER" | grep "^$( $VARIANT['_metadata']['installer_sha256sum'] ) "
 RUN sh "`$INSTALLER" --target /install --noexec --info
 RUN sh "`$INSTALLER" --target /install --noexec
 RUN cd /install
@@ -94,7 +94,7 @@ if ('fh2' -in $VARIANT['_metadata']['components']) {
     @"
 # Install Forgotten Hope 2 mod
 WORKDIR /root
-RUN curl -sSLO http://fhbeta.warumdarum.de/~spitfire/fh2pub/2.63/fh2-server-$( $VARIANT['_metadata']['mod_installer_version'] ).tar
+RUN curl -sSLO https://files.startersclan.com/ea/bf2/fh2-server-$( $VARIANT['_metadata']['mod_installer_version'] ).tar
 RUN sha256sum fh2-server-$( $VARIANT['_metadata']['mod_installer_version'] ).tar | grep "$( $VARIANT['_metadata']['mod_installer_sha256sum'] )"
 RUN tar -C /server/bf2 -xvf fh2-server-$( $VARIANT['_metadata']['mod_installer_version'] ).tar
 RUN chown -R root:root /server/bf2

@@ -7,10 +7,10 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -
 
 # Install Battlefield 2 server
 WORKDIR /root
-RUN curl -sSLO ftp://ftp.bf-games.net/server-files/bf2/bf2-linuxded-1.5.3153.0-installer.tgz
+RUN curl -sSLO https://files.startersclan.com/ea/bf2/bf2-linuxded-1.5.3153.0-installer.tgz
+RUN sha256sum bf2-linuxded-1.5.3153.0-installer.tgz | grep "^4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6 "
 RUN tar -zxvf bf2-linuxded-1.5.3153.0-installer.tgz
 ENV INSTALLER=bf2-linuxded-1.5.3153.0-installer.sh
-RUN sha256sum "$INSTALLER" | grep "^b5afe6602280b99797b46389f3cd582bbfe212e7402c8b009b72e6ae41e8d435 "
 RUN sh "$INSTALLER" --target /install --noexec --info
 RUN sh "$INSTALLER" --target /install --noexec
 RUN cd /install
