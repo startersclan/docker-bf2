@@ -25,7 +25,7 @@ services:
       - |
           set -eu
           esai-helper --mod bf2 apply default-strategy mediumfca
-          exec ./start.sh"
+          exec ./start.sh
 
 networks:
   default:
