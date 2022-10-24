@@ -79,6 +79,10 @@ highway_tampa sp3 16 smallmap
 highway_tampa sp3 32 mediummap
 highway_tampa sp3 64 largemap
 highway_tampa sp3 128 largemap
+kubra_dam gpm_cq 16 smallmap
+kubra_dam gpm_cq 32 mediumpf
+kubra_dam gpm_cq 64 largepf
+kubra_dam sp1 16 smallmap
 mashtuur_city gpm_cq 16 smallmap
 mashtuur_city gpm_cq 32 smallmap
 mashtuur_city gpm_cq 64 mediummap
