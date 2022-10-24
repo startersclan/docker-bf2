@@ -10,7 +10,6 @@ services:
       # - ./config/bf2/mods/bf2all64/ai/aidefaultstrategiesadd-custom-esai.ai:/server/bf2/mods/bf2all64/ai/aidefaultstrategiesadd.ai:ro # Enable ESAI with a default strategy for all maps. The same can be achieved using: esai-helper apply default-strategy mediumfca
       - ./config/bf2/mods/bf2all64/settings/serversettings-custom.con:/server/bf2/mods/bf2all64/settings/serversettings.con:ro # Server config
       - ./config/bf2/mods/bf2all64/settings/maplist-custom-coop.con:/server/bf2/mods/bf2all64/settings/maplist.con:ro # Maplist
-      - ./config/bf2/python/bf2/BF2StatisticsConfig-custom.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro # bf2stats python config
     ports:
       - 16567:16567/udp
       - 29900:29900/udp
