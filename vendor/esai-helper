@@ -2,7 +2,7 @@
 set -eu
 
 usage() {
-    echo "esai-helper: Get and apply ESAI Strategies.ai in levels/<level>/server.zip"
+    echo "esai-helper: Get and apply ESAI strategies.ai in levels/<level>/server.zip"
     echo "Options:"
     echo "    -d|--dir                                      BF2 server installation directory. Defaults to '/server/bf2'"
     echo "    -m|--mod                                      Mod. E.g. 'bf2' or 'xpack'. Defaults to 'bf2'"
@@ -240,7 +240,7 @@ if [ -n "$GET_GAMEMODES" ]; then
     fi
     for i in $( echo "$SERVER_ZIPS" | sort -n ); do
         LEVEL=$( echo "$i" | xargs dirname | xargs basename )
-        for j in $( unzip -l "$i" | awk '{print $4}' | grep -iE "GameModes/[^/]+/[0-9]+/.+" | cut -d '/' -f2-3 | sort -n | uniq || true ); do
+        for j in $( unzip -l "$i" | awk '{print $4}' | grep -iE "gamemodes/[^/]+/[0-9]+/.+" | cut -d '/' -f2-3 | sort -n | uniq || true ); do
             GAMEMODE=$( echo "$j" | cut -d '/' -f1 )
             SIZE=$( echo "$j" | cut -d '/' -f2 )
             echo "$LEVEL $GAMEMODE $SIZE"
@@ -256,7 +256,7 @@ if [ -n "$GET_MAPLIST" ]; then
     fi
     for i in $( echo "$SERVER_ZIPS" | sort -n ); do
         LEVEL=$( echo "$i" | xargs dirname | xargs basename )
-        for j in $( unzip -l "$i" | awk '{print $4}' | grep -iE "GameModes/[^/]+/[0-9]+/.+" | cut -d '/' -f2-3 | sort -n | uniq || true ); do
+        for j in $( unzip -l "$i" | awk '{print $4}' | grep -iE "gamemodes/[^/]+/[0-9]+/.+" | cut -d '/' -f2-3 | sort -n | uniq || true ); do
             GAMEMODE=$( echo "$j" | cut -d '/' -f1 )
             SIZE=$( echo "$j" | cut -d '/' -f2 )
             echo "maplist.append $LEVEL $GAMEMODE $SIZE"
@@ -279,7 +279,7 @@ if [ -n "$GET_LEVEL_STRATEGIES" ]; then
         exit 1
     fi
     for i in $SERVER_ZIPS; do
-        STRATEGIES_AI=$( unzip -l "$i" | grep -iE "GameModes/[^/]+/[0-9]+/[^/]+/Strategies.ai" | awk '{print $4}' | sort -n | uniq || true )
+        STRATEGIES_AI=$( unzip -l "$i" | grep -iE "gamemodes/[^/]+/[0-9]+/[^/]+/strategies.ai" | awk '{print $4}' | sort -n | uniq || true )
         if [ -n "$STRATEGIES_AI" ]; then
             for s in $STRATEGIES_AI; do
                 echo "$i $s"
@@ -299,7 +299,7 @@ if [ -n "$GET_LEVEL_STRATEGIESCONTENT" ]; then
     ERR=
     for i in $SERVER_ZIPS; do
         echo "Looking in: $i" >&2
-        STRATEGIES_AI=$( unzip -l "$i" | grep -iE "GameModes/[^/]+/[0-9]+/[^/]+/Strategies.ai" | awk '{print $4}' | sort -n | uniq || true )
+        STRATEGIES_AI=$( unzip -l "$i" | grep -iE "gamemodes/[^/]+/[0-9]+/[^/]+/strategies.ai" | awk '{print $4}' | sort -n | uniq || true )
         if [ -n "$STRATEGIES_AI" ]; then
             for s in $STRATEGIES_AI; do
                 echo "Content of $s in $i:" >&2
@@ -364,8 +364,8 @@ if [ -n "$APPLY_LEVEL_STRATEGY" ] || [ -n "$DELETE_LEVEL_STRATEGY" ] || [ -n "$A
     fi
     echo "$CONTENT" | while read -r LEVEL GAMEMODE SIZE STRATEGY; do
         SERVER_ZIP="$DIR/mods/$MOD/levels/$LEVEL/server.zip"
-        if ! unzip -l "$SERVER_ZIP" | grep "GameModes/$GAMEMODE/$SIZE" > /dev/null; then
-            echo "The gamemode '$GAMEMODE' does not exist in $SERVER_ZIP"
+        if ! unzip -l "$SERVER_ZIP" | grep -iE "gamemodes/$GAMEMODE/$SIZE/" > /dev/null; then
+            echo "The gamemode '$GAMEMODE' does not exist in $SERVER_ZIP at gamemodes/$GAMEMODE/$SIZE/"
             echo "To get a list of available gamemodes, run:"
             echo "   esai-helper -m "$MOD" get gamemodes"
             exit 1
@@ -384,12 +384,12 @@ if [ -n "$APPLY_LEVEL_STRATEGY" ] || [ -n "$DELETE_LEVEL_STRATEGY" ] || [ -n "$A
             cd "$DIR/mods/$MOD/levels/$LEVEL"
             SERVER_ZIP="$PWD/server.zip"
             STRATEGIES_AI=$( find "$DIR" | grep -E "mods/$MOD/esai/mapfiles/[^/]+/$STRATEGY/strategies.ai" | head -n1 || true )
-            STRATEGIES_AI_DESTINATION_IN_ZIP="GameModes/$GAMEMODE/$SIZE/ai/Strategies.ai"
+            STRATEGIES_AI_DESTINATION_IN_ZIP="gamemodes/$GAMEMODE/$SIZE/ai/strategies.ai"
             echo "Applying strategy $STRATEGIES_AI to $SERVER_ZIP at $STRATEGIES_AI_DESTINATION_IN_ZIP"
             mkdir -p "$( dirname "$STRATEGIES_AI_DESTINATION_IN_ZIP" )" # Same layout as content of server.zip
             cp -f "$STRATEGIES_AI" "$STRATEGIES_AI_DESTINATION_IN_ZIP"
-            zip -qru server.zip GameModes
-            rm -rf "$DIR/mods/$MOD/levels/$LEVEL/GameModes"
+            zip -qru server.zip gamemodes
+            rm -rf "$DIR/mods/$MOD/levels/$LEVEL/gamemodes"
         done
     fi
 
@@ -397,7 +397,7 @@ if [ -n "$APPLY_LEVEL_STRATEGY" ] || [ -n "$DELETE_LEVEL_STRATEGY" ] || [ -n "$A
         echo "$CONTENT" | while read -r LEVEL GAMEMODE SIZE STRATEGY; do
             cd "$DIR/mods/$MOD/levels/$LEVEL"
             SERVER_ZIP="$PWD/server.zip"
-            EXISTING_STRATEGIES_AI=$( unzip -l "$SERVER_ZIP" | grep -iE "GameModes/$GAMEMODE/$SIZE/(ai|AI)/Strategies.ai" | awk '{print $4}' || true )
+            EXISTING_STRATEGIES_AI=$( unzip -l "$SERVER_ZIP" | grep -iE "gamemodes/$GAMEMODE/$SIZE/ai/strategies.ai" | awk '{print $4}' || true )
             if [ -n "$EXISTING_STRATEGIES_AI" ]; then
                 for i in $EXISTING_STRATEGIES_AI; do
                     echo "Removing existing strategy $i from $SERVER_ZIP at $i"
