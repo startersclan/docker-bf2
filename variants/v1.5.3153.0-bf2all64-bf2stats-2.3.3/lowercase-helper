@@ -1,0 +1,70 @@
+#!/bin/sh
+set -eu
+
+usage() {
+    echo "$0 The BF2 linux server requires all files to be in lowercase, except python files. See <bf2_installation_path>/readmes/readme-linux.txt"
+    echo "   This script lowercases a given directory and all descendent folders"
+    echo "Examples:"
+    echo "  $0 --dir /server/bf2/mods/bf2/ESAI"
+}
+
+# Get some options
+while test $# -gt 0; do
+    case "$1" in
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        -d|--dir)
+            shift
+            if test $# -gt 0; then
+                DIR="$1"
+                shift
+            fi
+            ;;
+        *)
+            echo "Invalid option '$1'" 1>&2
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ -z "$DIR" ]; then
+    echo "Specify a directory as the first argument"
+    usage()
+    exit 1
+fi
+
+# Lowercase this directory
+if basename "$DIR" | grep -E '[A-Z]' > /dev/null; then
+    DIR_LOWERCASED="$( dirname "$DIR" )/$( basename "$DIR" | tr '[:upper:]' '[:lower:]' )"
+    mv -v "$DIR" "$DIR_LOWERCASED" 2>&1 || true
+    DIR="$DIR_LOWERCASED"
+fi
+
+# Lowercase descendent directories starting from the parent-most
+i=1
+while true; do
+    DIRS=$( find "$DIR" -mindepth "$i" -maxdepth "$i" -type d | grep -E '[A-Z]' || true )
+    if [ -z "$DIRS" ]; then
+        break
+    fi
+    echo "$DIRS" | while read -r d; do
+        mv -v "$d" "$( echo "$d" | tr '[:upper:]' '[:lower:]' )"
+    done
+    i=$(( $i + 1 ))
+done
+
+# Lowercase descendent files starting from the parent-most
+i=1
+while true; do
+    FILES=$( find "$DIR" -mindepth "$i" -maxdepth "$i" -type f | grep -E '[A-Z]' || true )
+    if [ -z "$FILES" ]; then
+        break
+    fi
+    echo "$FILES" | while read -r f; do
+        mv -v "$f" "$( echo "$f" | tr '[:upper:]' '[:lower:]' )"
+    done
+    i=$(( $i + 1 ))
+done

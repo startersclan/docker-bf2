@@ -16,6 +16,42 @@ $VARIANTS = @(
         # Metadata object
         _metadata = @{
             platforms = 'linux/386,linux/amd64'
+            components = @( 'bf2all64' )
+            installer_version = '1.5.3153.0'
+            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
+        }
+        # Docker image tag
+        tag = 'v1.5.3153.0-bf2all64'
+        tag_as_latest = $false
+    }
+    @{
+        # Metadata object
+        _metadata = @{
+            platforms = 'linux/386,linux/amd64'
+            components = @( 'bf2all64', 'bf2stats-2.3.3' )
+            installer_version = '1.5.3153.0'
+            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
+        }
+        # Docker image tag
+        tag = 'v1.5.3153.0-bf2all64-bf2stats-2.3.3'
+        tag_as_latest = $false
+    }
+    @{
+        # Metadata object
+        _metadata = @{
+            platforms = 'linux/386,linux/amd64'
+            components = @( 'bf2all64', 'bf2stats-3.1.1' )
+            installer_version = '1.5.3153.0'
+            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
+        }
+        # Docker image tag
+        tag = 'v1.5.3153.0-bf2all64-bf2stats-3.1.1'
+        tag_as_latest = $false
+    }
+    @{
+        # Metadata object
+        _metadata = @{
+            platforms = 'linux/386,linux/amd64'
             components = @( 'bf2hub' )
             installer_version = '1.5.3153.0'
             installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
