@@ -40,7 +40,7 @@ services:
           set -eu
           esai-helper --mod bf2all64 apply default-strategy mediumfca
           esai-helper --mod bf2all64 apply -f /esai-optimized-strategies-bf2all64.txt
-          exec ./start.sh"
+          exec ./start.sh
 
 networks:
   default:
