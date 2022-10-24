@@ -190,6 +190,22 @@ EXPOSE 16567/udp
 EXPOSE 29900/udp
 # HEALTHCHECK CMD nc -w 1 -vzu 127.0.0.1 16567 && nc -w 1 -vzu 127.0.0.1 29900
 WORKDIR /server/bf2
+
+"@
+if ('bf2all64' -in $VARIANT['_metadata']['components']) {
+    @"
+CMD [ "./start.sh", "+modPath", "mods/bf2all64" ]
+
+"@
+}elseif ('fh2' -in $VARIANT['_metadata']['components']) {
+    @"
+CMD [ "./start.sh", "+modPath", "mods/fh2" ]
+
+"@
+}else {
+    @"
 CMD [ "./start.sh" ]
 
 "@
+}
+
