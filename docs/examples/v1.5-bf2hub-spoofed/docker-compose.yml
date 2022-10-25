@@ -29,6 +29,8 @@ services:
       - bf2web.gamespy.com:92.51.180.45 # bf2hub.com ASP web server IP
       - gamestats.gamespy.com:92.51.180.45 # bf2hub.com ASP web server IP
       - eapusher.dice.se:92.51.180.45 # bf2hub.com ASP web server IP
+    healthcheck:
+      test: /healthcheck localhost 29900
     tty: true
     stdin_open: true
 

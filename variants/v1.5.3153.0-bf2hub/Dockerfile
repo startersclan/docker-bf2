@@ -59,6 +59,7 @@ COPY esai-helper /usr/local/bin/esai-helper
 COPY esai-optimized-strategies-bf2.txt /esai-optimized-strategies-bf2.txt
 COPY esai-optimized-strategies-bf2all64.txt /esai-optimized-strategies-bf2all64.txt
 COPY esai-optimized-strategies-xpack.txt /esai-optimized-strategies-xpack.txt
+COPY healthcheck /healthcheck
 COPY lowercase-helper /usr/local/bin/lowercase-helper
 # Install network utilities which can be useful for debugging issues
 # Install unzip and zip for the sake of applying ESAI strategies in ./mods/*/levels/*/server.zip at './GameModes/[gpm_coop|gpm_cq|sp1|sp2|sp3]/[16|32|64]/AI/Strategies.ai'
@@ -69,8 +70,8 @@ RUN export DEBIAN_FRONTEND=noninteractive \
         conntrack dnsutils iproute2 netcat net-tools tcpdump \
         unzip zip \
     && rm -rf /var/lib/apt/lists/*
-EXPOSE 16567/udp
-EXPOSE 29900/udp
-# HEALTHCHECK CMD nc -w 1 -vzu 127.0.0.1 16567 && nc -w 1 -vzu 127.0.0.1 29900
+# EXPOSE 16567/udp
+# EXPOSE 29900/udp
+# HEALTHCHECK CMD /healthcheck
 WORKDIR /server/bf2
 CMD [ "./start.sh" ]
