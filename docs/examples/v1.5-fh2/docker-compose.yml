@@ -13,6 +13,8 @@ services:
     ports:
       - 16567:16567/udp
       - 29900:29900/udp
+    healthcheck:
+      test: /healthcheck localhost 29900
     networks:
       - default
     tty: true

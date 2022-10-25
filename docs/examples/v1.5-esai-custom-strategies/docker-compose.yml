@@ -17,6 +17,8 @@ services:
       - 29900:29900/udp
     networks:
       - default
+    healthcheck:
+      test: /healthcheck localhost 29900
     tty: true
     stdin_open: true
     entrypoint:
