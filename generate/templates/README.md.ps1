@@ -132,6 +132,12 @@ docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 delete
 
 ## FAQ
 
+### Q: Server not listed on master server
+
+A: Ensure you spoof Gamespy DNS for the gameserver. See [this example](docs/examples/v1.5-bf2hub-spoofed).
+
+In addition, the gameserver lists its info on master server based on the `sv.serverPort` and `sv.gameSpyPort` in `serversettings.con`. If you are running on non-standard ports instead of the standard gameserver ports UDP `16567` and UDP `29900`, you need to use those ports in `docker-compose.yml` and `serversettings.con`.
+
 ### Q: Server not listed on master server after `docker-compose down && docker-compose up`
 
 A: This is caused by stale UDP conntrack entries which are not deleted up by `docker` on container teardown. See [this issue](https://github.com/moby/moby/issues/8795).
@@ -187,11 +193,19 @@ udp      17 77 src=172.17.48.2 dst=92.51.181.102 sport=29900 dport=27900 src=92.
 udp      17 26 src=172.17.64.2 dst=92.51.181.102 sport=29900 dport=29910 [UNREPLIED] src=92.51.181.102 dst=192.168.1.100 sport=29910 dport=40589 mark=0 use=1
 udp      17 106 src=92.51.149.13 dst=192.168.1.100 sport=58665 dport=29900 src=172.17.64.2 dst=92.51.149.13 sport=29900 dport=58665 [ASSURED] mark=0 use=1
 
-# Delete the stale UDP conntrack entries destined for the BF2Hub master server
-$ sudo conntrack -D -p udp --dst 92.51.181.102
+# Delete the stale UDP conntrack entries from gameserver destined for BF2Hub master server
+$ conntrack -D -p udp --orig-port-dst 27900
 udp      17 24 src=172.17.64.2 dst=92.51.181.102 sport=29900 dport=27900 [UNREPLIED] src=92.51.181.102 dst=192.168.1.100 sport=27900 dport=40589 mark=0 use=1
-udp      17 25 src=172.17.64.2 dst=92.51.181.102 sport=29900 dport=29910 [UNREPLIED] src=92.51.181.102 dst=192.168.1.100 sport=29910 dport=40589 mark=0 use=1
+udp      17 77 src=172.17.48.2 dst=92.51.181.102 sport=29900 dport=27900 src=92.51.181.102 dst=192.168.1.100 sport=27900 dport=29900 [ASSURED] mark=0 use=1
 conntrack v1.4.5 (conntrack-tools): 2 flow entries have been deleted
+$ conntrack -D -p udp --orig-port-dst 29910
+udp      17 25 src=172.17.64.2 dst=92.51.181.102 sport=29900 dport=29910 [UNREPLIED] src=92.51.181.102 dst=192.168.1.100 sport=29910 dport=40589 mark=0 use=1
+conntrack v1.4.5 (conntrack-tools): 1 flow entries have been deleted
+
+# Delete the stale UDP conntrack entries from master listing server destined for gameserver
+$ conntrack -D -p udp --orig-port-src 58665
+udp      17 106 src=92.51.149.13 dst=192.168.1.100 sport=58665 dport=29900 src=172.17.64.2 dst=92.51.149.13 sport=29900 dport=58665 [ASSURED] mark=0 use=1
+conntrack v1.4.5 (conntrack-tools): 1 flow entries have been deleted
 
 # Get UDP conntrack entries
 # Line 1: BF2 server talking with the BF2Hub master server. It is now [ASSURED] which is expected
