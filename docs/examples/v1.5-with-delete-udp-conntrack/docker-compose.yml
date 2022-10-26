@@ -1,6 +1,7 @@
 version: '2.2'
 services:
   # This init container is to delete stale UDP conntrack entries linked to the BF2 master server
+  # It deletes conntrack entries every 10 seconds, terminating after 60 seconds, when the gameserver should have fully started.
   # See: https://github.com/moby/moby/issues/8795
   init-container:
     image: alpine:3.12
@@ -15,8 +16,14 @@ services:
       - |
           set -eu
           apk add --no-cache conntrack-tools
-          conntrack -D -p udp --orig-port-dst 27900 || true
-          conntrack -D -p udp --orig-port-dst 27910 || true
+          i=0
+          while [ "$$i" -lt 60 ]; do
+              conntrack -D -p udp --orig-port-dst 27900 || true
+              conntrack -D -p udp --orig-port-dst 27910 || true
+              conntrack -D -p udp --orig-port-src 58665 || true
+              i=$$(( $$i + 10 ))
+              sleep 10
+          done
 
   # This is the official BF2 1.5 dedicated server. It does not work unless DNS spoofing is added.
   bf2:

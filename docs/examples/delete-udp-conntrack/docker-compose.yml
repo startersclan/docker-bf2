@@ -1,6 +1,7 @@
 version: '2.2'
 services:
-  # This is a daemon that listens to docker container start events, and deletes stale UDP conntrack entries linked to the BF2 master server
+  # This is a daemon that listens to docker container events, and deletes stale UDP conntrack entries linked to the BF2 master server and master listing server
+  # The most important deletion is on a healthcheck event (e.g. healthy), so ensure there is a healthcheck for the bf2 container
   # See: https://github.com/moby/moby/issues/8795
   delete-udp-conntrack:
     image: docker:20.10.20
@@ -18,7 +19,8 @@ services:
       - |
           set -eu
           apk add --no-cache conntrack-tools
-          docker events --filter type=container --filter event=start | while read; do
+          docker events --filter type=container --filter event=create --filter event=start --filter event=health_status | while read; do
               conntrack -D -p udp --orig-port-dst 27900 || true
               conntrack -D -p udp --orig-port-dst 27910 || true
+              conntrack -D -p udp --orig-port-src 58665 || true
           done
