@@ -14,16 +14,16 @@ All images contain [`Battlefield 2 Server 1.50`](https://www.bf-games.net/downlo
 |:-------:|:---------:|
 | `:v1.5.3153.0`, `:latest` | [View](variants/v1.5.3153.0 ) |
 | `:v1.5.3153.0-bf2all64` | [View](variants/v1.5.3153.0-bf2all64 ) |
-| `:v1.5.3153.0-bf2all64-bf2stats-2.3.3` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.3.3 ) |
+| `:v1.5.3153.0-bf2all64-bf2stats-2.4.0` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.4.0 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-3.1.1` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-3.1.1 ) |
 | `:v1.5.3153.0-bf2hub` | [View](variants/v1.5.3153.0-bf2hub ) |
-| `:v1.5.3153.0-bf2stats-2.3.3` | [View](variants/v1.5.3153.0-bf2stats-2.3.3 ) |
+| `:v1.5.3153.0-bf2stats-2.4.0` | [View](variants/v1.5.3153.0-bf2stats-2.4.0 ) |
 | `:v1.5.3153.0-bf2stats-3.1.1` | [View](variants/v1.5.3153.0-bf2stats-3.1.1 ) |
 | `:v1.5.3153.0-fh2-4.6.304` | [View](variants/v1.5.3153.0-fh2-4.6.304 ) |
 
 - `bf2all64` - [BF2All64](https://www.bf-games.net/downloads/2533/bf2-singleplayer-all-in-one-package.html) mod.
 - `bf2hub` - Includes [BF2Hub](https://www.bf2hub.com/home/serversetup.php) server binaries.
-- `bf2stats-2.3.3` - Includes [BF2Statistics](https://github.com/startersclan/bf2stats) 2 python files to send stats snapshots to the [ASP](https://github.com/startersclan/bf2stats) v2 webserver. See [here](https://github.com/startersclan/bf2stats) for a fully dockerized example.
+- `bf2stats-2.4.0` - Includes [BF2Statistics](https://github.com/startersclan/bf2stats) 2 python files to send stats snapshots to the [ASP](https://github.com/startersclan/bf2stats) v2 webserver. See [here](https://github.com/startersclan/bf2stats) for a fully dockerized example.
 - `bf2stats-3.1.1` - Includes [BF2Statistics](https://github.com/startersclan/StatsPython) 3 python files to send stats snapshots to the [ASP](https://github.com/startersclan/ASP) v3 webserver. See [here](https://github.com/startersclan/ASP) for a fully dockerized example.
 - `fh2` - [Forgotten Hope 2](http://www.forgottenhope.warumdarum.de) mod
 
@@ -52,7 +52,7 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
     -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
     -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
-    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.3.3
+    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.4.0
 
 # bf2 server with bf2stats 3 python files and custom configs
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
@@ -205,4 +205,31 @@ $ sudo conntrack -L -p udp | grep 92.51
 udp      17 114 src=172.17.64.2 dst=92.51.181.102 sport=29900 dport=27900 src=92.51.181.102 dst=192.168.1.100 sport=27900 dport=29900 [ASSURED] mark=0 use=1
 udp      17 25 src=172.17.64.2 dst=92.51.181.102 sport=29900 dport=29910 [UNREPLIED] src=92.51.181.102 dst=192.168.1.100 sport=29910 dport=29900 mark=0 use=1
 udp      17 119 src=92.51.149.13 dst=192.168.1.100 sport=58665 dport=29900 src=172.17.64.2 dst=92.51.149.13 sport=29900 dport=58665 [ASSURED] mark=0 use=1
+```
+
+## Development
+
+Requires Windows `powershell` or [`pwsh`](https://github.com/PowerShell/PowerShell).
+
+```powershell
+# Install Generate-DockerImageVariants module: https://github.com/theohbrothers/Generate-DockerImageVariants
+Install-Module -Name Generate-DockerImageVariants -Repository PSGallery -Scope CurrentUser -Force -Verbose
+
+# Edit ./generate templates
+
+# Generate the variants
+Generate-DockerImageVariants .
+```
+
+### Bump a variant
+
+```sh
+# Replace occurrences with new semver
+git ls-files | grep -E '^(docs|generate)' | xargs sed -i 's/2.3.3/2.4.0/'
+
+# Update the sha256sum of archives if needed
+vi generate/templates/Dockerfile.ps1
+
+# Generate the variants
+Generate-DockerImageVariants .
 ```

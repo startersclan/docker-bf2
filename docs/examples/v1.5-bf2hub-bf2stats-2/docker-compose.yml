@@ -4,7 +4,7 @@ services:
   # It works by spoofing Gamespy DNS to use BF2Hub as the master server, and spoofing Gamespy DNS to use your ASP web server as the stats system.
   # For a full bf2stats 2 stack example, see https://github.com/startersclan/bf2stats
   bf2:
-    image: startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.3.1
+    image: startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.4.0
     volumes:
       - ./config/bf2/mods/bf2/ai/aidefault-custom.ai:/server/bf2/mods/bf2/ai/aidefault.ai:ro # Customize bots
       - ./config/bf2/mods/bf2/ai/aibehaviours-fixlookatwrapper.ai:/server/bf2/mods/bf2/ai/aibehaviours.ai:ro # LoopAtWrapper fix
