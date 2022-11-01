@@ -28,7 +28,7 @@ $VARIANTS | % {
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Display system info (linux)
       run: |
@@ -45,14 +45,14 @@ $VARIANTS | % {
 
     # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v1
+      uses: docker/setup-qemu-action@v2
 
     - name: Set up Docker Buildx
       id: buildx
       uses: docker/setup-buildx-action@master
 
     - name: Cache Docker layers
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: /tmp/.buildx-cache
         key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -61,8 +61,6 @@ $VARIANTS | % {
 
     - name: Prepare
       id: prep
-      env:
-        DOCKERHUB_REGISTRY_USER: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
       run: |
         set -e
 
@@ -70,25 +68,26 @@ $VARIANTS | % {
         # CI_PROJECT_NAMESPACE=$( echo "${{ github.repository }}" | cut -d '/' -f 1 )
         # CI_PROJECT_NAME=$( echo "${{ github.repository }}" | cut -d '/' -f 2 )
 
-        # Get <branch_name> from refs/heads/<branch_name>, or <tag-name> from refs/tags/<tag_name>. E.g. . E.g. 'master', 'v1.2.3'
+        # Get ref, i.e. <branch_name> from refs/heads/<branch_name>, or <tag-name> from refs/tags/<tag_name>. E.g. 'master' or 'v1.2.3'
         REF=$( echo "${GITHUB_REF}" | rev | cut -d '/' -f 1 | rev )
+
         # Get commit hash E.g. 'b29758a'
         SHA_SHORT=$( echo "${GITHUB_SHA}" | cut -c1-7 )
 
-        # Generate the final tags. E.g. 'master-v1.0.0-alpine' and 'master-b29758a-v1.0.0-alpine'
+        # Generate the final tags. E.g. 'master-mytag' and 'master-b29758a-mytag'
         VARIANT_TAG_WITH_REF="${REF}-${VARIANT_TAG}"
         VARIANT_TAG_WITH_REF_AND_SHA_SHORT="${REF}-${SHA_SHORT}-${VARIANT_TAG}"
 
-        # Set step output(s)
-        # echo "::set-output name=CI_PROJECT_NAMESPACE::$CI_PROJECT_NAMESPACE"
-        # echo "::set-output name=CI_PROJECT_NAME::$CI_PROJECT_NAME"
-        # echo "::set-output name=REF::$REF"
-        # echo "::set-output name=SHA_SHORT::$SHA_SHORT"
-        # echo "::set-output name=REF_AND_SHA_SHORT::$REF_AND_SHA_SHORT"
-        echo "::set-output name=CONTEXT::$VARIANT_BUILD_DIR"
-        echo "::set-output name=VARIANT_TAG::$VARIANT_TAG"
-        echo "::set-output name=VARIANT_TAG_WITH_REF::$VARIANT_TAG_WITH_REF"
-        echo "::set-output name=VARIANT_TAG_WITH_REF_AND_SHA_SHORT::$VARIANT_TAG_WITH_REF_AND_SHA_SHORT"
+        # Pass variables to next step
+        # echo "CI_PROJECT_NAMESPACE=$CI_PROJECT_NAMESPACE" >> $GITHUB_ENV
+        # echo "CI_PROJECT_NAME=$CI_PROJECT_NAME" >> $GITHUB_ENV
+        # echo "REF=$REF" >> $GITHUB_ENV
+        # echo "SHA_SHORT=$SHA_SHORT" >> $GITHUB_ENV
+        # echo "REF_AND_SHA_SHORT=$REF_AND_SHA_SHORT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
+        echo "VARIANT_TAG=$VARIANT_TAG" >> $GITHUB_ENV
+        echo "VARIANT_TAG_WITH_REF=$VARIANT_TAG_WITH_REF" >> $GITHUB_ENV
+        echo "VARIANT_TAG_WITH_REF_AND_SHA_SHORT=$VARIANT_TAG_WITH_REF_AND_SHA_SHORT" >> $GITHUB_ENV
 
     - name: Login to docker registry
       if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
@@ -104,14 +103,14 @@ $VARIANTS | % {
       id: docker_build_pr
       # Run only on pull requests
       if: github.event_name == 'pull_request'
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v3
       with:
-        context: `${{ steps.prep.outputs.CONTEXT }}
+        context: `${{ env.VARIANT_BUILD_DIR }}
         platforms: $( $_['_metadata']['platforms'] -join ',' )
         push: false
         tags: |
-          `${{ github.repository }}:`${{ steps.prep.outputs.VARIANT_TAG_WITH_REF }}
-          `${{ github.repository }}:`${{ steps.prep.outputs.VARIANT_TAG_WITH_REF_AND_SHA_SHORT }}
+          `${{ github.repository }}:`${{ env.VARIANT_TAG_WITH_REF }}
+          `${{ github.repository }}:`${{ env.VARIANT_TAG_WITH_REF_AND_SHA_SHORT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
 
@@ -119,28 +118,28 @@ $VARIANTS | % {
       id: docker_build_master
       # Run only on master
       if: github.ref == 'refs/heads/master'
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v3
       with:
-        context: `${{ steps.prep.outputs.CONTEXT }}
+        context: `${{ env.VARIANT_BUILD_DIR }}
         platforms: $( $_['_metadata']['platforms'] -join ',' )
         push: true
         tags: |
-          `${{ github.repository }}:`${{ steps.prep.outputs.VARIANT_TAG_WITH_REF }}
-          `${{ github.repository }}:`${{ steps.prep.outputs.VARIANT_TAG_WITH_REF_AND_SHA_SHORT }}
+          `${{ github.repository }}:`${{ env.VARIANT_TAG_WITH_REF }}
+          `${{ github.repository }}:`${{ env.VARIANT_TAG_WITH_REF_AND_SHA_SHORT }}
         cache-to: type=local,dest=/tmp/.buildx-cache
 
     - name: Build and push (release)
       id: docker_build_release
       if: startsWith(github.ref, 'refs/tags/')
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v3
       with:
-        context: `${{ steps.prep.outputs.CONTEXT }}
+        context: `${{ env.VARIANT_BUILD_DIR }}
         platforms: $( $_['_metadata']['platforms'] -join ',' )
         push: true
         tags: |
-          `${{ github.repository }}:`${{ steps.prep.outputs.VARIANT_TAG }}
-          `${{ github.repository }}:`${{ steps.prep.outputs.VARIANT_TAG_WITH_REF }}
-          `${{ github.repository }}:`${{ steps.prep.outputs.VARIANT_TAG_WITH_REF_AND_SHA_SHORT }}
+          `${{ github.repository }}:`${{ env.VARIANT_TAG }}
+          `${{ github.repository }}:`${{ env.VARIANT_TAG_WITH_REF }}
+          `${{ github.repository }}:`${{ env.VARIANT_TAG_WITH_REF_AND_SHA_SHORT }}
 
 "@
 
@@ -174,7 +173,6 @@ if ( $_['tag_as_latest'] ) {
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
       # Drafts your next Release notes as Pull Requests are merged into "master"
       - uses: release-drafter/release-drafter@v5
         with:
@@ -195,20 +193,13 @@ if ( $_['tag_as_latest'] ) {
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Resolve tag
-        id: resolve-tag
-        run: |
-          # Get <branch_name> from refs/heads/<branch_name>, or <tag-name> from refs/tags/<tag_name>. E.g. . E.g. 'master', 'v1.2.3'
-          REF=$( echo "${GITHUB_REF}" | rev | cut -d '/' -f 1 | rev )
-          echo "::set-output name=REF::$REF"
       # Drafts your next Release notes as Pull Requests are merged into "master"
       - uses: release-drafter/release-drafter@v5
         with:
           config-name: release-drafter.yml
           publish: true
-          name: ${{ steps.resolve-tag.outputs.REF }}
-          tag: ${{ steps.resolve-tag.outputs.REF }}
+          name: ${{ github.ref_name }} # E.g. 'master' or 'v1.2.3'
+          tag: ${{ github.ref_name }} # E.g. 'master' or 'v1.2.3'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
