@@ -28,12 +28,12 @@ $VARIANTS = @(
         # Metadata object
         _metadata = @{
             platforms = 'linux/386,linux/amd64'
-            components = @( 'bf2all64', 'bf2stats-2.4.0' )
+            components = @( 'bf2all64', 'bf2stats-2.4.1' )
             installer_version = '1.5.3153.0'
             installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
         }
         # Docker image tag
-        tag = 'v1.5.3153.0-bf2all64-bf2stats-2.4.0'
+        tag = 'v1.5.3153.0-bf2all64-bf2stats-2.4.1'
         tag_as_latest = $false
     }
     @{
@@ -64,12 +64,12 @@ $VARIANTS = @(
         # Metadata object
         _metadata = @{
             platforms = 'linux/386,linux/amd64'
-            components = @( 'bf2stats-2.4.0' )
+            components = @( 'bf2stats-2.4.1' )
             installer_version = '1.5.3153.0'
             installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
         }
         # Docker image tag
-        tag = 'v1.5.3153.0-bf2stats-2.4.0'
+        tag = 'v1.5.3153.0-bf2stats-2.4.1'
         tag_as_latest = $false
     }
     @{
