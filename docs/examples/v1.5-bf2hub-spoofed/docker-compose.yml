@@ -1,7 +1,6 @@
 version: '2.2'
 services:
-  # This is identical to the `v1.5-bf2hub` example
-  # It runs the official BF2 1.5 dedicated server binaries, and spoofs Gamespy DNS to use BF2Hub as the master server and the ASP web server
+  # This is identical to the `v1.5-bf2hub` example, except that it runs the official BF2 1.5 dedicated server binaries, and spoofs Gamespy DNS to use BF2Hub as the master server and the ASP web server
   # Server will be unranked since there is no custom ASP web server stats system
   bf2:
     image: startersclan/docker-bf2:v1.5.3153.0
