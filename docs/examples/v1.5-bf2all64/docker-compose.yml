@@ -15,16 +15,16 @@ services:
       - 29900:29900/udp
     extra_hosts:
       - battlefield2.available.gamespy.com:192.168.1.100 # Your master server IP
-      - battlefield2.master.gamespy.com:92.51.181.102 # Your master server IP
-      - battlefield2.ms14.gamespy.com:92.51.181.102 # Your master server IP
-      - master.gamespy.com:92.51.181.102 # Your master server IP
-      - motd.gamespy.com:92.51.181.102 # Your master server IP
-      - gpsp.gamespy.com:92.51.181.102 # Your master server IP
-      - gpcm.gamespy.com:92.51.181.102 # Your master server IP
-      - gamespy.com:92.51.181.102 # Your master server IP
-      - bf2web.gamespy.com:92.51.180.45 # Your ASP web server IP
-      - gamestats.gamespy.com:92.51.180.45 # Your ASP web server IP
-      - eapusher.dice.se:92.51.180.45 # Your ASP web server IP
+      - battlefield2.master.gamespy.com:192.168.1.100 # Your master server IP
+      - battlefield2.ms14.gamespy.com:192.168.1.100 # Your master server IP
+      - master.gamespy.com:192.168.1.100 # Your master server IP
+      - motd.gamespy.com:192.168.1.100 # Your master server IP
+      - gpsp.gamespy.com:192.168.1.100 # Your master server IP
+      - gpcm.gamespy.com:192.168.1.100 # Your master server IP
+      - gamespy.com:192.168.1.100 # Your master server IP
+      - bf2web.gamespy.com:192.168.1.100 # Your ASP web server IP
+      - gamestats.gamespy.com:192.168.1.100 # Your ASP web server IP
+      - eapusher.dice.se:192.168.1.100 # Your ASP web server IP
     networks:
       - default
     healthcheck:
