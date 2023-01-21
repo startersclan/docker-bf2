@@ -18,6 +18,15 @@ RUN mkdir -p /server
 RUN cat /install/license.sh | sed 's/^more/cat/' > /install/license-fixed.sh # Show the licenses without a pager
 RUN cd /install && printf '\naccept\n\nyes\n/server\ny\n' | sh /install/license-fixed.sh # Agree to licenses
 
+# Install bf2all64 mod
+WORKDIR /root
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
+RUN curl -sSLO https://files.startersclan.com/ea/bf2/bf2all64_v1.0_setup.zip
+RUN sha256sum bf2all64_v1.0_setup.zip | grep '^4ee82d91043c4afbf1bed50787cbf98af124bd7e6c608cdb0f5115c7761024f1 '
+RUN unzip bf2all64_v1.0_setup.zip -d extract
+RUN rm -rf /server/bf2/mods/bf2all64
+RUN mv extract/bf2all64 /server/bf2/mods
+
 # Install bf2stats 2
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
@@ -65,4 +74,4 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 # EXPOSE 29900/udp
 # HEALTHCHECK CMD /healthcheck
 WORKDIR /server/bf2
-CMD [ "./start.sh" ]
+CMD [ "./start.sh", "+modPath", "mods/bf2all64" ]
