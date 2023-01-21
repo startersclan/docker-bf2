@@ -104,14 +104,14 @@ RUN cp -r 2197486/*/. /server/bf2/python/bf2/
 
 "@
 }
-if ('bf2stats-3.1.1' -in $VARIANT['_metadata']['components']) {
+if ('bf2stats-3.1.2' -in $VARIANT['_metadata']['components']) {
     @"
 # Install bf2stats 3
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
-RUN curl -sSLO https://github.com/startersclan/StatsPython/archive/refs/tags/3.1.1.zip
-RUN sha256sum 3.1.1.zip | grep '^fb739d900ea59e82147a6da9d7e72b329425b315bd8a08749a90fefc15365798 '
-RUN unzip 3.1.1.zip -d extract
+RUN curl -sSLO https://github.com/startersclan/StatsPython/archive/refs/tags/3.1.2.zip
+RUN sha256sum 3.1.2.zip | grep '^21958c614ce880f63cd4c5a9db366ccacf68674cd89f50bbf95d9aa2d9bca878 '
+RUN unzip 3.1.2.zip -d extract
 RUN cp -r extract/*/. /server/bf2/python/bf2/
 
 
