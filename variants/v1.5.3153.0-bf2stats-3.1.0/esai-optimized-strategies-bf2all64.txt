@@ -2,51 +2,51 @@
 # Format: <level> <gamemode> <size> <strategy>
 # Usage:
 # 1. The following level-gamemode-strategy entries may be generated (with an empty <strategy> field):
-#       esai-helper --mod bf2 get gamemodes
+#       esai-helper --mod bf2all64 get gamemodes
 # 2. Edit <strategy> field to your liking. To get all available strategies:
-#       esai-helper --mod bf2 get strategies
+#       esai-helper --mod bf2all64 get strategies
 # 3. Apply these ESAI strategies:
-#       esai-helper --mod bf2 apply -f esai-optimized-strategies-bf2.txt
+#       esai-helper --mod bf2all64 apply -f esai-optimized-strategies-bf2all64.txt
 # 4. Remove these ESAI strategies:
-#       esai-helper --mod bf2 delete -f esai-optimized-strategies-bf2.txt
+#       esai-helper --mod bf2all64 delete -f esai-optimized-strategies-bf2all64.txt
 # NOTE: Commented out maps do not have an optimized ESAI strategy
 
 dalian_plant gpm_coop 16 smallmap
+dalian_plant gpm_coop 32 smallmap
+dalian_plant gpm_coop 64 largemap
 dalian_plant gpm_cq 16 smallmap
 dalian_plant gpm_cq 32 smallmap
 dalian_plant gpm_cq 64 largemap
+dalian_plant gpm_cq 128 largemap
 dalian_plant sp1 16 smallmap
+dalian_plant sp2 32 smallmap
+dalian_plant sp3 64 largemap
 daqing_oilfields gpm_coop 16 smallmap
+daqing_oilfields gpm_coop 32 mediummap
+daqing_oilfields gpm_coop 64 largefcapf
 daqing_oilfields gpm_cq 16 smallmap
 daqing_oilfields gpm_cq 32 mediummap
 daqing_oilfields gpm_cq 64 largefcapf
 daqing_oilfields sp1 16 smallmap
+daqing_oilfields sp2 32 mediummap
+daqing_oilfields sp3 64 largefcapf
 dragon_valley gpm_coop 16 smallmap
+dragon_valley gpm_coop 32 mediumfcapfpb
+dragon_valley gpm_coop 64 largefcapfpb
 dragon_valley gpm_cq 16 smallmap
 dragon_valley gpm_cq 32 mediumfcapfpb
 dragon_valley gpm_cq 64 largefcapfpb
 dragon_valley gpm_cq 128 largefcapfpb
-dragon_valley gpm_sl 16 smallmap
-dragon_valley gpm_sl 32 mediumfcapfpb
-dragon_valley gpm_sl 64 largefcapfpb
-dragon_valley gpm_sl 128 largefcapfpb
 dragon_valley sp1 16 smallmap
-dragon_valley sp1 32 mediumfcapfpb
-dragon_valley sp1 64 largefcapfpb
-dragon_valley sp1 128 largefcapfpb
-dragon_valley sp2 16 smallmap
 dragon_valley sp2 32 mediumfcapfpb
-dragon_valley sp2 64 largefcapfpb
-dragon_valley sp2 128 largefcapfpb
-dragon_valley sp3 16 smallmap
-dragon_valley sp3 32 mediumfcapfpb
 dragon_valley sp3 64 largefcapfpb
-dragon_valley sp3 128 largefcapfpb
 fushe_pass gpm_coop 16 smallmap
-fushe_pass gpm_cq 16 smallmap
-fushe_pass gpm_cq 32 mediumpf
+fushe_pass gpm_coop 32 mediumpf
+fushe_pass gpm_coop 64 largepf
 fushe_pass gpm_cq 64 largepf
 fushe_pass sp1 16 smallmap
+fushe_pass sp2 32 mediumpf
+fushe_pass sp3 64 largepf
 # greatwall gpm_coop 16 -
 # greatwall gpm_cq 16 -
 # greatwall gpm_cq 32 -
@@ -54,89 +54,134 @@ fushe_pass sp1 16 smallmap
 # greatwall sp1 32 -
 # greatwall sp1 64 -
 gulf_of_oman gpm_coop 16 smallmap
+gulf_of_oman gpm_coop 32 smallfca
+gulf_of_oman gpm_coop 64 mediumfca
 gulf_of_oman gpm_cq 16 smallmap
 gulf_of_oman gpm_cq 32 smallfca
 gulf_of_oman gpm_cq 64 mediumfca
 gulf_of_oman sp1 16 smallmap
+gulf_of_oman sp2 32 smallfca
+gulf_of_oman sp3 64 mediumfca
+highway_tampa gpm_coop 16 smallmap
+highway_tampa gpm_coop 32 mediummap
+highway_tampa gpm_coop 64 largemap
 highway_tampa gpm_cq 16 smallmap
 highway_tampa gpm_cq 32 mediummap
 highway_tampa gpm_cq 64 largemap
-highway_tampa gpm_cq 128 largemap
-highway_tampa gpm_cq 8 smallmap
-highway_tampa gpm_sl 16 smallmap
-highway_tampa gpm_sl 32 mediummap
-highway_tampa gpm_sl 64 largemap
-highway_tampa gpm_sl 128 largemap
 highway_tampa sp1 16 smallmap
-highway_tampa sp1 32 mediummap
-highway_tampa sp1 64 largemap
-highway_tampa sp1 128 largemap
-highway_tampa sp2 16 smallmap
 highway_tampa sp2 32 mediummap
-highway_tampa sp2 64 largemap
-highway_tampa sp2 128 largemap
-highway_tampa sp3 16 smallmap
-highway_tampa sp3 32 mediummap
 highway_tampa sp3 64 largemap
-highway_tampa sp3 128 largemap
+kubra_dam gpm_coop 16 smallmap
+kubra_dam gpm_coop 32 mediumpf
+kubra_dam gpm_coop 64 largepf
 kubra_dam gpm_cq 16 smallmap
 kubra_dam gpm_cq 32 mediumpf
 kubra_dam gpm_cq 64 largepf
 kubra_dam sp1 16 smallmap
+kubra_dam sp2 32 mediumpf
+kubra_dam sp3 64 largepf
+mashtuur_city gpm_coop 16 smallmap
+mashtuur_city gpm_coop 32 smallmap
+mashtuur_city gpm_coop 64 mediummap
+mashtuur_city gpm_cq 128 mediummap
 mashtuur_city gpm_cq 16 smallmap
 mashtuur_city gpm_cq 32 smallmap
 mashtuur_city gpm_cq 64 mediummap
 # midnight_sun gpm_coop 16 -
+# midnight_sun gpm_coop 32 -
+# midnight_sun gpm_coop 64 -
 # midnight_sun gpm_cq 16 -
 # midnight_sun gpm_cq 32 -
 # midnight_sun gpm_cq 64 -
-# midnight_sun sp1 16 -`
-# operation_blue_pearl gpm_cq 16 -
-# operation_blue_pearl gpm_cq 32 -
-# operation_blue_pearl gpm_cq 64 -
+# midnight_sun sp1 16 -
+# midnight_sun sp2 32 -
+# midnight_sun sp3 64 -
 operation_clean_sweep gpm_coop 16 smallmap
+operation_clean_sweep gpm_coop 32 mediumfcapf
+operation_clean_sweep gpm_coop 64 mediumfcapf
 operation_clean_sweep gpm_cq 16 smallmap
 operation_clean_sweep gpm_cq 32 mediumfcapf
 operation_clean_sweep gpm_cq 64 mediumfcapf
 operation_clean_sweep sp1 16 smallmap
+operation_clean_sweep sp2 32 mediumfcapf
+operation_clean_sweep sp3 64 mediumfcapf
 # operationharvest gpm_coop 16 -
+# operationharvest gpm_coop 32 -
+# operationharvest gpm_coop 64 -
 # operationharvest gpm_cq 16 -
 # operationharvest gpm_cq 32 -
 # operationharvest gpm_cq 64 -
+# operationharvest gpm_sl 16 -
+# operationharvest gpm_sl 32 -
+# operationharvest gpm_sl 64 -
 # operationharvest sp1 16 -
-# operationroadrage gpm_coop 1 -6
+# operationharvest sp2 32 -
+# operationharvest sp3 64 -
+# operationroadrage gpm_coop 16 -
+# operationroadrage gpm_coop 32 -
+# operationroadrage gpm_coop 64 -
 # operationroadrage gpm_cq 16 -
 # operationroadrage gpm_cq 32 -
 # operationroadrage gpm_cq 64 -
 # operationroadrage sp1 16 -
+# operationroadrage sp2 32 -
+# operationroadrage sp3 64 -
 # operationsmokescreen gpm_coop 16 -
+# operationsmokescreen gpm_coop 32 -
 # operationsmokescreen gpm_cq 16 -
 # operationsmokescreen gpm_cq 32 -
 # operationsmokescreen sp1 16 -
 # operationsmokescreen sp1 32 -
+# operationsmokescreen sp2 32 -
 road_to_jalalabad gpm_coop 16 smallmap
+road_to_jalalabad gpm_coop 32 mediumfcapf
+road_to_jalalabad gpm_coop 64 mediumfcapf
 road_to_jalalabad gpm_cq 16 smallmap
 road_to_jalalabad gpm_cq 32 mediumfcapf
 road_to_jalalabad gpm_cq 64 mediumfcapf
 road_to_jalalabad sp1 16 smallmap
+road_to_jalalabad sp2 32 mediumfcapf
+road_to_jalalabad sp3 64 mediumfcapf
 sharqi_peninsula gpm_coop 16 smallmap
+sharqi_peninsula gpm_coop 32 mediumfcapf
+sharqi_peninsula gpm_coop 64 mediumfcapf
+sharqi_peninsula gpm_cq 128 mediumfcapf
 sharqi_peninsula gpm_cq 16 smallmap
 sharqi_peninsula gpm_cq 32 mediumfcapf
 sharqi_peninsula gpm_cq 64 mediumfcapf
 sharqi_peninsula sp1 16 smallmap
+sharqi_peninsula sp2 32 mediumfcapf
+sharqi_peninsula sp3 64 mediumfcapf
 songhua_stalemate gpm_coop 16 smallmap
+songhua_stalemate gpm_coop 32 mediumfcapf
+songhua_stalemate gpm_coop 64 largefcapf
 songhua_stalemate gpm_cq 16 smallmap
 songhua_stalemate gpm_cq 32 mediumfca
 songhua_stalemate gpm_cq 64 largefca
 songhua_stalemate sp1 16 smallmap
+songhua_stalemate sp2 32 mediumfca
+songhua_stalemate sp3 64 largefca
 # taraba_quarry gpm_coop 16 -
+# taraba_quarry gpm_coop 32 -
 # taraba_quarry gpm_cq 16 -
 # taraba_quarry gpm_cq 32 -
 # taraba_quarry sp1 16 -
-# taraba_quarry sp1 32 -
+# taraba_quarry sp2 32 -
+wake_island_2007 gpm_coop 16 smallmap
+wake_island_2007 gpm_coop 32 smallmap
+wake_island_2007 gpm_coop 64 wake-island-64
+wake_island_2007 gpm_cq 16 smallmap
+wake_island_2007 gpm_cq 32 smallmap
 wake_island_2007 gpm_cq 64 wake-island-64
+wake_island_2007 sp1 16 smallmap
+wake_island_2007 sp2 32 smallmap
+wake_island_2007 sp3 64 wake-island-64
 zatar_wetlands gpm_coop 16 smallmap
+zatar_wetlands gpm_coop 32 mediumfca
+zatar_wetlands gpm_coop 64 mediumfcapf
 zatar_wetlands gpm_cq 16 smallmap
 zatar_wetlands gpm_cq 32 mediumfca
 zatar_wetlands gpm_cq 64 mediumfcapf
 zatar_wetlands sp1 16 smallmap
+zatar_wetlands sp2 32 mediumfca
+zatar_wetlands sp3 64 mediumfcapf
