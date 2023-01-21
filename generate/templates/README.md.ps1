@@ -30,53 +30,49 @@ $(
 )
 - ``bf2all64`` - [BF2All64](https://www.bf-games.net/downloads/2533/bf2-singleplayer-all-in-one-package.html) mod.
 - ``bf2hub`` - Includes [BF2Hub](https://www.bf2hub.com/home/serversetup.php) server binaries.
-- ``bf2stats-2.4.1`` - Includes [BF2Statistics](https://github.com/startersclan/bf2stats) 2 python files to send stats snapshots to the [ASP](https://github.com/startersclan/bf2stats) v2 webserver. See [here](https://github.com/startersclan/bf2stats) for a fully dockerized example.
-- ``bf2stats-3.1.2`` - Includes [BF2Statistics](https://github.com/startersclan/StatsPython) 3 python files to send stats snapshots to the [ASP](https://github.com/startersclan/ASP) v3 webserver. See [here](https://github.com/startersclan/ASP) for a fully dockerized example.
+- ``bf2stats-2.x.x`` - Includes [BF2Statistics](https://github.com/startersclan/bf2stats) 2 python files to send stats snapshots to the [ASP](https://github.com/startersclan/bf2stats) v2 webserver. See [here](https://github.com/startersclan/bf2stats) for a fully dockerized example.
+- ``bf2stats-3.x.x`` - Includes [BF2Statistics](https://github.com/startersclan/StatsPython) 3 python files to send stats snapshots to the [ASP](https://github.com/startersclan/ASP) v3 webserver. See [here](https://github.com/startersclan/ASP) for a fully dockerized example.
 - ``fh2`` - [Forgotten Hope 2](http://www.forgottenhope.warumdarum.de) mod
 
-
-"@
-
-@'
 ## Usage
 
 See [here](docs/examples) for some good examples.
 
-```sh
+``````sh
 # bf2 server
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag )
 
 # bf2 server with custom configs
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro \
     -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro \
-    startersclan/docker-bf2:v1.5.3153.0
+    startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag )
 
 # bf2 server with bf2all64 mod
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0-bf2all64
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'bf2all64' } | Select-Object -First 1 | Select-Object -ExpandProperty tag )
 
 # bf2 server with bf2hub support
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0-bf2hub
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'bf2hub' } | Select-Object -First 1 | Select-Object -ExpandProperty tag )
 
 # bf2 server with bf2stats 2 python files and custom configs
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
     -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
     -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
-    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.4.1
+    startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 )
 
 # bf2 server with bf2stats 3 python files and custom configs
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
     -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
     -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
-    startersclan/docker-bf2:v1.5.3153.0-bf2stats-3.1.0
+    startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 )
 
 # fh2 server
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/fh2/settings/serversettings.con \
     -v maplist.con:/server/bf2/mods/fh2/settings/maplist.con \
-    startersclan/docker-bf2:v1.5.3153.0-fh2-4.6.304
+    startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -eq 'fh2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 )
 
 # Read server readme
 docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/readme-linux.txt # Linux
@@ -86,8 +82,12 @@ docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/read
 docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/eula.txt # EULA for the BF2 dedicated Linux server
 docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/lgpl.txt # LGPL
 docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/pb_eula.txt # EULA for the EULA for PunkBuster
-```
+```````
 
+
+"@
+
+@'
 ## ESAI
 
 ESAI greatly enhances bot performance, and is compatible with any BF2 mod. It is included but not enabled by default.
