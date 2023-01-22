@@ -18,7 +18,7 @@ RUN mkdir -p /server
 RUN cat /install/license.sh | sed 's/^more/cat/' > /install/license-fixed.sh # Show the licenses without a pager
 RUN cd /install && printf '\naccept\n\nyes\n/server\ny\n' | sh /install/license-fixed.sh # Agree to licenses
 
-# Install bf2stats 3
+# Install bf2stats 3.1.0
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 RUN curl -sSLO https://github.com/BF2Statistics/StatsPython/archive/2197486.zip

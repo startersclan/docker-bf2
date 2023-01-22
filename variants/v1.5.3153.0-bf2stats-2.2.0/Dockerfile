@@ -18,7 +18,7 @@ RUN mkdir -p /server
 RUN cat /install/license.sh | sed 's/^more/cat/' > /install/license-fixed.sh # Show the licenses without a pager
 RUN cd /install && printf '\naccept\n\nyes\n/server\ny\n' | sh /install/license-fixed.sh # Agree to licenses
 
-# Install bf2stats 2
+# Install bf2stats 2.2.0
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 RUN curl -sSLO https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/bf2stats/bf2statisitcs_2.2.0.zip # I know, it is mispelled

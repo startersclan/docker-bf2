@@ -27,7 +27,7 @@ RUN unzip bf2all64_v1.0_setup.zip -d extract
 RUN rm -rf /server/bf2/mods/bf2all64
 RUN mv extract/bf2all64 /server/bf2/mods
 
-# Install bf2stats 2
+# Install bf2stats 2.2.0
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 RUN curl -sSLO https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/bf2stats/bf2statisitcs_2.2.0.zip # I know, it is mispelled
