@@ -1,174 +1,49 @@
+# Docker image variants' definitions
+$local:VARIANTS_MATRIX = @(
+    @{
+        package_version = '1.5.3153.0'
+        subvariants = @(
+            @{ components = @(); tag_as_latest = $true }
+            @{ components = @( 'bf2all64' ) }
+            @{ components = @( 'bf2all64', 'bf2stats-2.2.0' ) }
+            @{ components = @( 'bf2all64', 'bf2stats-2.3.4' ) }
+            @{ components = @( 'bf2all64', 'bf2stats-2.4.2' ) }
+            @{ components = @( 'bf2all64', 'bf2stats-3.1.0' ) }
+            @{ components = @( 'bf2all64', 'bf2stats-3.1.2' ) }
+            @{ components = @( 'bf2hub' ) }
+            @{ components = @( 'bf2stats-2.2.0' ) }
+            @{ components = @( 'bf2stats-2.3.4' ) }
+            @{ components = @( 'bf2stats-2.4.2' ) }
+            @{ components = @( 'bf2stats-3.1.0' ) }
+            @{ components = @( 'bf2stats-3.1.2' ) }
+            @{ components = @( 'fh2-4.6.304' ) }
 
+        )
+    }
+)
 $VARIANTS = @(
-    @{
-        # Metadata object
-        _metadata = @{
-            platforms = 'linux/386,linux/amd64'
-            components = @()
-            installer_version = '1.5.3153.0'
-            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
+    foreach ($variant in $VARIANTS_MATRIX){
+        foreach ($subVariant in $variant['subvariants']) {
+            @{
+                # Metadata object
+                _metadata = @{
+                    package_version = $variant['package_version']
+                    package_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
+                    platforms = if ($subVariant['components'] -match 'fh2') { 'linux/amd64' } else { 'linux/386,linux/amd64' }
+                    components = $subVariant['components']
+                }
+                # Docker image tag. E.g. '1.5.3153.0', '1.5.3153.0-bf2stats-2.x.x', '1.5.3153.0-bf2all64-3.x.x'
+                tag = @(
+                        "v$( $variant['package_version'] )"
+                        $subVariant['components'] | ? { $_ }
+                ) -join '-'
+                tag_as_latest = if ( $subVariant.Contains('tag_as_latest') ) {
+                    $subVariant['tag_as_latest']
+                } else {
+                    $false
+                }
+            }
         }
-        # Docker image tag
-        tag = 'v1.5.3153.0'
-        tag_as_latest = $true
-    }
-    @{
-        # Metadata object
-        _metadata = @{
-            platforms = 'linux/386,linux/amd64'
-            components = @( 'bf2all64' )
-            installer_version = '1.5.3153.0'
-            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
-        }
-        # Docker image tag
-        tag = 'v1.5.3153.0-bf2all64'
-        tag_as_latest = $false
-    }
-    @{
-        # Metadata object
-        _metadata = @{
-            platforms = 'linux/386,linux/amd64'
-            components = @( 'bf2all64', 'bf2stats-2.2.0' )
-            installer_version = '1.5.3153.0'
-            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
-        }
-        # Docker image tag
-        tag = 'v1.5.3153.0-bf2all64-bf2stats-2.2.0'
-        tag_as_latest = $false
-    }
-    @{
-        # Metadata object
-        _metadata = @{
-            platforms = 'linux/386,linux/amd64'
-            components = @( 'bf2all64', 'bf2stats-2.3.4' )
-            installer_version = '1.5.3153.0'
-            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
-        }
-        # Docker image tag
-        tag = 'v1.5.3153.0-bf2all64-bf2stats-2.3.4'
-        tag_as_latest = $false
-    }
-    @{
-        # Metadata object
-        _metadata = @{
-            platforms = 'linux/386,linux/amd64'
-            components = @( 'bf2all64', 'bf2stats-2.4.2' )
-            installer_version = '1.5.3153.0'
-            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
-        }
-        # Docker image tag
-        tag = 'v1.5.3153.0-bf2all64-bf2stats-2.4.2'
-        tag_as_latest = $false
-    }
-    @{
-        # Metadata object
-        _metadata = @{
-            platforms = 'linux/386,linux/amd64'
-            components = @( 'bf2all64', 'bf2stats-3.1.0' )
-            installer_version = '1.5.3153.0'
-            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
-        }
-        # Docker image tag
-        tag = 'v1.5.3153.0-bf2all64-bf2stats-3.1.0'
-        tag_as_latest = $false
-    }
-    @{
-        # Metadata object
-        _metadata = @{
-            platforms = 'linux/386,linux/amd64'
-            components = @( 'bf2all64', 'bf2stats-3.1.2' )
-            installer_version = '1.5.3153.0'
-            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
-        }
-        # Docker image tag
-        tag = 'v1.5.3153.0-bf2all64-bf2stats-3.1.2'
-        tag_as_latest = $false
-    }
-    @{
-        # Metadata object
-        _metadata = @{
-            platforms = 'linux/386,linux/amd64'
-            components = @( 'bf2hub' )
-            installer_version = '1.5.3153.0'
-            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
-        }
-        # Docker image tag
-        tag = 'v1.5.3153.0-bf2hub'
-        tag_as_latest = $false
-    }
-    @{
-        # Metadata object
-        _metadata = @{
-            platforms = 'linux/386,linux/amd64'
-            components = @( 'bf2stats-2.2.0' )
-            installer_version = '1.5.3153.0'
-            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
-        }
-        # Docker image tag
-        tag = 'v1.5.3153.0-bf2stats-2.2.0'
-        tag_as_latest = $false
-    }
-    @{
-        # Metadata object
-        _metadata = @{
-            platforms = 'linux/386,linux/amd64'
-            components = @( 'bf2stats-2.3.4' )
-            installer_version = '1.5.3153.0'
-            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
-        }
-        # Docker image tag
-        tag = 'v1.5.3153.0-bf2stats-2.3.4'
-        tag_as_latest = $false
-    }
-    @{
-        # Metadata object
-        _metadata = @{
-            platforms = 'linux/386,linux/amd64'
-            components = @( 'bf2stats-2.4.2' )
-            installer_version = '1.5.3153.0'
-            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
-        }
-        # Docker image tag
-        tag = 'v1.5.3153.0-bf2stats-2.4.2'
-        tag_as_latest = $false
-    }
-    @{
-        # Metadata object
-        _metadata = @{
-            platforms = 'linux/386,linux/amd64'
-            components = @( 'bf2stats-3.1.0' )
-            installer_version = '1.5.3153.0'
-            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
-        }
-        # Docker image tag
-        tag = 'v1.5.3153.0-bf2stats-3.1.0'
-        tag_as_latest = $false
-    }
-    @{
-        # Metadata object
-        _metadata = @{
-            platforms = 'linux/386,linux/amd64'
-            components = @( 'bf2stats-3.1.2' )
-            installer_version = '1.5.3153.0'
-            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
-        }
-        # Docker image tag
-        tag = 'v1.5.3153.0-bf2stats-3.1.2'
-        tag_as_latest = $false
-    }
-    @{
-        # Metadata object
-        _metadata = @{
-            platforms = 'linux/amd64' # fh2 can't get c++6 dependencies for linux/386, so we only build linux/amd64
-            components = @( 'fh2' )
-            installer_version = '1.5.3153.0'
-            installer_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
-            mod_installer_version = '4.6.304'
-            mod_installer_sha256sum = 'bb933052ad20928b5a4bc6c1eeff647d62b0f3b38de46d063101719a9f0cf488'
-        }
-        # Docker image tag
-        tag = 'v1.5.3153.0-fh2-4.6.304'
-        tag_as_latest = $false
     }
 )
 

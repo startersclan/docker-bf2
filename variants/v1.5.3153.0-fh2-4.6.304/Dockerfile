@@ -21,7 +21,7 @@ RUN cd /install && printf '\naccept\n\nyes\n/server\ny\n' | sh /install/license-
 # Install Forgotten Hope 2 mod
 WORKDIR /root
 RUN curl -sSLO https://files.startersclan.com/ea/bf2/fh2-server-4.6.304.tar
-RUN sha256sum fh2-server-4.6.304.tar | grep "bb933052ad20928b5a4bc6c1eeff647d62b0f3b38de46d063101719a9f0cf488"
+RUN sha256sum fh2-server-4.6.304.tar | grep '^bb933052ad20928b5a4bc6c1eeff647d62b0f3b38de46d063101719a9f0cf488 '
 RUN tar -C /server/bf2 -xvf fh2-server-4.6.304.tar
 RUN chown -R root:root /server/bf2
 RUN chmod +x /server/bf2/start-fh2.sh
