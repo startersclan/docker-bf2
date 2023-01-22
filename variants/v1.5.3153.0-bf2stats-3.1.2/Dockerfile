@@ -23,7 +23,6 @@ WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 RUN curl -sSLO https://github.com/startersclan/StatsPython/archive/refs/tags/3.1.2.zip
 RUN echo "21958c614ce880f63cd4c5a9db366ccacf68674cd89f50bbf95d9aa2d9bca878  3.1.2.zip" | sha256sum -c -
-RUN sha256sum 3.1.2.zip | grep '^21958c614ce880f63cd4c5a9db366ccacf68674cd89f50bbf95d9aa2d9bca878 '
 RUN unzip 3.1.2.zip -d extract
 RUN cp -r extract/*/. /server/bf2/python/bf2/
 
