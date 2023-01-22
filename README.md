@@ -15,11 +15,13 @@ All images contain [`Battlefield 2 Server 1.50`](https://www.bf-games.net/downlo
 | `:v1.5.3153.0`, `:latest` | [View](variants/v1.5.3153.0 ) |
 | `:v1.5.3153.0-bf2all64` | [View](variants/v1.5.3153.0-bf2all64 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-2.2.0` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.2.0 ) |
+| `:v1.5.3153.0-bf2all64-bf2stats-2.3.4` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.3.4 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-2.4.2` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.4.2 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-3.1.0` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-3.1.0 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-3.1.2` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-3.1.2 ) |
 | `:v1.5.3153.0-bf2hub` | [View](variants/v1.5.3153.0-bf2hub ) |
 | `:v1.5.3153.0-bf2stats-2.2.0` | [View](variants/v1.5.3153.0-bf2stats-2.2.0 ) |
+| `:v1.5.3153.0-bf2stats-2.3.4` | [View](variants/v1.5.3153.0-bf2stats-2.3.4 ) |
 | `:v1.5.3153.0-bf2stats-2.4.2` | [View](variants/v1.5.3153.0-bf2stats-2.4.2 ) |
 | `:v1.5.3153.0-bf2stats-3.1.0` | [View](variants/v1.5.3153.0-bf2stats-3.1.0 ) |
 | `:v1.5.3153.0-bf2stats-3.1.2` | [View](variants/v1.5.3153.0-bf2stats-3.1.2 ) |
