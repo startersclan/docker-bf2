@@ -27,7 +27,7 @@ RUN unzip bf2all64_v1.0_setup.zip -d extract
 RUN rm -rf /server/bf2/mods/bf2all64
 RUN mv extract/bf2all64 /server/bf2/mods
 
-# Install bf2stats 3
+# Install bf2stats 3.1.0
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 RUN curl -sSLO https://github.com/BF2Statistics/StatsPython/archive/2197486.zip

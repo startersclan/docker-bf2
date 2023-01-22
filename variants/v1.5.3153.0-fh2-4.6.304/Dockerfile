@@ -18,10 +18,10 @@ RUN mkdir -p /server
 RUN cat /install/license.sh | sed 's/^more/cat/' > /install/license-fixed.sh # Show the licenses without a pager
 RUN cd /install && printf '\naccept\n\nyes\n/server\ny\n' | sh /install/license-fixed.sh # Agree to licenses
 
-# Install Forgotten Hope 2 mod
+# Install Forgotten Hope 2 4.6.304
 WORKDIR /root
 RUN curl -sSLO https://files.startersclan.com/ea/bf2/fh2-server-4.6.304.tar
-RUN sha256sum fh2-server-4.6.304.tar | grep '^bb933052ad20928b5a4bc6c1eeff647d62b0f3b38de46d063101719a9f0cf488 '
+RUN echo "bb933052ad20928b5a4bc6c1eeff647d62b0f3b38de46d063101719a9f0cf488  fh2-server-4.6.304.tar" | sha256sum -c -
 RUN tar -C /server/bf2 -xvf fh2-server-4.6.304.tar
 RUN chown -R root:root /server/bf2
 RUN chmod +x /server/bf2/start-fh2.sh

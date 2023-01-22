@@ -27,11 +27,11 @@ RUN unzip bf2all64_v1.0_setup.zip -d extract
 RUN rm -rf /server/bf2/mods/bf2all64
 RUN mv extract/bf2all64 /server/bf2/mods
 
-# Install bf2stats 2
+# Install bf2stats 2.4.2
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 RUN curl -sSLO https://github.com/startersclan/bf2stats/archive/refs/tags/2.4.2.zip
-RUN sha256sum 2.4.2.zip | grep '^f7c47b22e30548737b05ddb9f8ef8e33a108b9184b4b2818759a318bd621f374 '
+RUN echo "f7c47b22e30548737b05ddb9f8ef8e33a108b9184b4b2818759a318bd621f374  2.4.2.zip" | sha256sum -c -
 RUN unzip 2.4.2.zip -d extract
 RUN rm -rf /server/bf2/python
 RUN mv extract/bf2stats-2.4.2/src/python /server/bf2/python

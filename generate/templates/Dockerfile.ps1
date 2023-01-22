@@ -21,8 +21,9 @@ RUN cd /install && printf '\naccept\n\nyes\n/server\ny\n' | sh /install/license-
 
 
 "@
-if ('bf2hub' -in $VARIANT['_metadata']['components']) {
-    @"
+foreach ($c in $VARIANT['_metadata']['components']) {
+    if ($c -eq 'bf2hub') {
+@"
 # Install bf2hub
 WORKDIR /root
 RUN curl -sSLO https://www.bf2hub.com/downloads/BF2Hub-Unranked-Linux-R3.tar.gz
@@ -34,23 +35,9 @@ RUN chmod +x /server/bf2/bin/ia-32/libbf2hub.so /server/bf2/bin/amd-64/libbf2hub
 
 
 "@
-}
-if ('bf2hub' -in $VARIANT['_metadata']['components']) {
-    @"
-# Install bf2hub
-WORKDIR /root
-RUN curl -sSLO https://www.bf2hub.com/downloads/BF2Hub-Unranked-Linux-R3.tar.gz
-RUN sha256sum BF2Hub-Unranked-Linux-R3.tar.gz | grep '^c4b3d583741c500e930502e96c6a43a40f223868c9ca1111c70d80c7e6d2cd2b '
-RUN tar -C /server/bf2 -zxvf BF2Hub-Unranked-Linux-R3.tar.gz -- bin start_bf2hub.sh
-RUN ls -al /server/bf2
-RUN mv /server/bf2/start_bf2hub.sh /server/bf2/start.sh
-RUN chmod +x /server/bf2/bin/ia-32/libbf2hub.so /server/bf2/bin/amd-64/libbf2hub.so
-
-
-"@
-}
-if ('bf2all64' -in $VARIANT['_metadata']['components']) {
-    @"
+    }
+    if ($c -eq 'bf2all64') {
+@"
 # Install bf2all64 mod
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
@@ -62,10 +49,12 @@ RUN mv extract/bf2all64 /server/bf2/mods
 
 
 "@
-}
-if ('bf2stats-2.2.0' -in $VARIANT['_metadata']['components']) {
-    @"
-# Install bf2stats 2
+    }
+    if ($c -match 'bf2stats-(2\.\d+\.\d+)') {
+        $v = $matches[1]
+        if ($v -eq '2.2.0') {
+@"
+# Install bf2stats $v
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 RUN curl -sSLO https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/bf2stats/bf2statisitcs_2.2.0.zip # I know, it is mispelled
@@ -76,38 +65,27 @@ RUN mv "extract/bf2statisitcs 2.2.0/Server Files/Linux/python" /server/bf2/pytho
 
 
 "@
-}
-if ('bf2stats-2.3.4' -in $VARIANT['_metadata']['components']) {
-    @"
-# Install bf2stats 2
+        } else {
+@"
+# Install bf2stats $v
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
-RUN curl -sSLO https://github.com/startersclan/bf2stats/archive/refs/tags/2.3.4.zip
-RUN sha256sum 2.3.4.zip | grep '^37b6c6f08d5ac146185db8f3b2eb41add5f3dfb30ec79dda1b3c86ae7cac17e0 '
-RUN unzip 2.3.4.zip -d extract
+RUN curl -sSLO https://github.com/startersclan/bf2stats/archive/refs/tags/$v.zip
+RUN echo "$( $PASS_VARIABLES['bf2stats_2_sha256sum'] -split "`n" | % { $_.Trim() } | Select-String -SimpleMatch "$v.zip" )" | sha256sum -c -
+RUN unzip $v.zip -d extract
 RUN rm -rf /server/bf2/python
-RUN mv extract/bf2stats-2.3.4/src/python /server/bf2/python
+RUN mv extract/bf2stats-$v/src/python /server/bf2/python
 
 
 "@
-}
-if ('bf2stats-2.4.2' -in $VARIANT['_metadata']['components']) {
-    @"
-# Install bf2stats 2
-WORKDIR /root
-RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
-RUN curl -sSLO https://github.com/startersclan/bf2stats/archive/refs/tags/2.4.2.zip
-RUN sha256sum 2.4.2.zip | grep '^f7c47b22e30548737b05ddb9f8ef8e33a108b9184b4b2818759a318bd621f374 '
-RUN unzip 2.4.2.zip -d extract
-RUN rm -rf /server/bf2/python
-RUN mv extract/bf2stats-2.4.2/src/python /server/bf2/python
+        }
+    }
 
-
-"@
-}
-if ('bf2stats-3.1.0' -in $VARIANT['_metadata']['components']) {
-    @"
-# Install bf2stats 3
+    if ($c -match 'bf2stats-(3\.\d+\.\d+)') {
+        $v = $matches[1]
+        if ($v -eq '3.1.0') {
+@"
+# Install bf2stats $v
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 RUN curl -sSLO https://github.com/BF2Statistics/StatsPython/archive/2197486.zip
@@ -117,27 +95,30 @@ RUN cp -r 2197486/*/. /server/bf2/python/bf2/
 
 
 "@
-}
-if ('bf2stats-3.1.2' -in $VARIANT['_metadata']['components']) {
-    @"
-# Install bf2stats 3
+        } else {
+@"
+# Install bf2stats $v
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
-RUN curl -sSLO https://github.com/startersclan/StatsPython/archive/refs/tags/3.1.2.zip
-RUN sha256sum 3.1.2.zip | grep '^21958c614ce880f63cd4c5a9db366ccacf68674cd89f50bbf95d9aa2d9bca878 '
-RUN unzip 3.1.2.zip -d extract
+RUN curl -sSLO https://github.com/startersclan/StatsPython/archive/refs/tags/$v.zip
+RUN echo "$( $PASS_VARIABLES['bf2stats_3_statspython_sha256sum'] -split "`n" | % { $_.Trim() } | Select-String -SimpleMatch "$v.zip" )" | sha256sum -c -
+RUN sha256sum $v.zip | grep '^21958c614ce880f63cd4c5a9db366ccacf68674cd89f50bbf95d9aa2d9bca878 '
+RUN unzip $v.zip -d extract
 RUN cp -r extract/*/. /server/bf2/python/bf2/
 
 
 "@
-}
-if ('fh2-4.6.304' -in $VARIANT['_metadata']['components']) {
-    @"
-# Install Forgotten Hope 2 mod
+        }
+    }
+
+    if ($c -match 'fh2-(\d+\.\d+\.\d+)') {
+        $v = $matches[1]
+@"
+# Install Forgotten Hope 2 $v
 WORKDIR /root
-RUN curl -sSLO https://files.startersclan.com/ea/bf2/fh2-server-4.6.304.tar
-RUN sha256sum fh2-server-4.6.304.tar | grep '^bb933052ad20928b5a4bc6c1eeff647d62b0f3b38de46d063101719a9f0cf488 '
-RUN tar -C /server/bf2 -xvf fh2-server-4.6.304.tar
+RUN curl -sSLO https://files.startersclan.com/ea/bf2/fh2-server-$v.tar
+RUN echo "$( $PASS_VARIABLES['fh2_sha256sum'] -split "`n" | % { $_.Trim() } | Select-String -SimpleMatch "$v.tar" )" | sha256sum -c -
+RUN tar -C /server/bf2 -xvf fh2-server-$v.tar
 RUN chown -R root:root /server/bf2
 RUN chmod +x /server/bf2/start-fh2.sh
 RUN chmod -R +x /server/bf2/bin
@@ -146,6 +127,7 @@ RUN for i in `$( ls /server/bf2/mods/fh2/levels/*/info/*cq_64_menumap.png | cut 
 
 
 "@
+    }
 }
 
 @'
@@ -189,8 +171,8 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && rm -rf /var/lib/apt/lists/*
 
 "@
-if ('fh2-4.6.304' -in $VARIANT['_metadata']['components']) {
-    @"
+if ($VARIANT['_metadata']['components'] -match 'fh2') {
+@"
 # Install fh2 dependencies
 # Fix error: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.22' not found (required by /server/bf2/bin/amd-64/fh2utils.so)
 # See: https://stackoverflow.com/questions/43070900/version-glibcxx-3-4-22-not-found
@@ -222,17 +204,17 @@ WORKDIR /server/bf2
 
 "@
 if ('bf2all64' -in $VARIANT['_metadata']['components']) {
-    @"
+@"
 CMD [ "./start.sh", "+modPath", "mods/bf2all64" ]
 
 "@
 }elseif ($VARIANT['_metadata']['components'] -match 'fh2') {
-    @"
+@"
 CMD [ "./start.sh", "+modPath", "mods/fh2" ]
 
 "@
 }else {
-    @"
+@"
 CMD [ "./start.sh" ]
 
 "@

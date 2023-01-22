@@ -27,15 +27,6 @@ RUN ls -al /server/bf2
 RUN mv /server/bf2/start_bf2hub.sh /server/bf2/start.sh
 RUN chmod +x /server/bf2/bin/ia-32/libbf2hub.so /server/bf2/bin/amd-64/libbf2hub.so
 
-# Install bf2hub
-WORKDIR /root
-RUN curl -sSLO https://www.bf2hub.com/downloads/BF2Hub-Unranked-Linux-R3.tar.gz
-RUN sha256sum BF2Hub-Unranked-Linux-R3.tar.gz | grep '^c4b3d583741c500e930502e96c6a43a40f223868c9ca1111c70d80c7e6d2cd2b '
-RUN tar -C /server/bf2 -zxvf BF2Hub-Unranked-Linux-R3.tar.gz -- bin start_bf2hub.sh
-RUN ls -al /server/bf2
-RUN mv /server/bf2/start_bf2hub.sh /server/bf2/start.sh
-RUN chmod +x /server/bf2/bin/ia-32/libbf2hub.so /server/bf2/bin/amd-64/libbf2hub.so
-
 # Install ESAI in all mods
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
