@@ -8,10 +8,10 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -
 
 # Install Battlefield 2 server
 WORKDIR /root
-RUN curl -sSLO https://files.startersclan.com/ea/bf2/bf2-linuxded-$( $VARIANT['_metadata']['installer_version'] )-installer.tgz
-RUN sha256sum bf2-linuxded-$( $VARIANT['_metadata']['installer_version'] )-installer.tgz | grep "^$( $VARIANT['_metadata']['installer_sha256sum'] ) "
-RUN tar -zxvf bf2-linuxded-$( $VARIANT['_metadata']['installer_version'] )-installer.tgz
-ENV INSTALLER=bf2-linuxded-$( $VARIANT['_metadata']['installer_version'] )-installer.sh
+RUN curl -sSLO https://files.startersclan.com/ea/bf2/bf2-linuxded-$( $VARIANT['_metadata']['package_version'] )-installer.tgz
+RUN sha256sum bf2-linuxded-$( $VARIANT['_metadata']['package_version'] )-installer.tgz | grep "^$( $VARIANT['_metadata']['package_sha256sum'] ) "
+RUN tar -zxvf bf2-linuxded-$( $VARIANT['_metadata']['package_version'] )-installer.tgz
+ENV INSTALLER=bf2-linuxded-$( $VARIANT['_metadata']['package_version'] )-installer.sh
 RUN sh "`$INSTALLER" --target /install --noexec --info
 RUN sh "`$INSTALLER" --target /install --noexec
 RUN cd /install
@@ -131,13 +131,13 @@ RUN cp -r extract/*/. /server/bf2/python/bf2/
 
 "@
 }
-if ('fh2' -in $VARIANT['_metadata']['components']) {
+if ('fh2-4.6.304' -in $VARIANT['_metadata']['components']) {
     @"
 # Install Forgotten Hope 2 mod
 WORKDIR /root
-RUN curl -sSLO https://files.startersclan.com/ea/bf2/fh2-server-$( $VARIANT['_metadata']['mod_installer_version'] ).tar
-RUN sha256sum fh2-server-$( $VARIANT['_metadata']['mod_installer_version'] ).tar | grep "$( $VARIANT['_metadata']['mod_installer_sha256sum'] )"
-RUN tar -C /server/bf2 -xvf fh2-server-$( $VARIANT['_metadata']['mod_installer_version'] ).tar
+RUN curl -sSLO https://files.startersclan.com/ea/bf2/fh2-server-4.6.304.tar
+RUN sha256sum fh2-server-4.6.304.tar | grep '^bb933052ad20928b5a4bc6c1eeff647d62b0f3b38de46d063101719a9f0cf488 '
+RUN tar -C /server/bf2 -xvf fh2-server-4.6.304.tar
 RUN chown -R root:root /server/bf2
 RUN chmod +x /server/bf2/start-fh2.sh
 RUN chmod -R +x /server/bf2/bin
@@ -189,7 +189,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && rm -rf /var/lib/apt/lists/*
 
 "@
-if ('fh2' -in $VARIANT['_metadata']['components']) {
+if ('fh2-4.6.304' -in $VARIANT['_metadata']['components']) {
     @"
 # Install fh2 dependencies
 # Fix error: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.22' not found (required by /server/bf2/bin/amd-64/fh2utils.so)
@@ -226,7 +226,7 @@ if ('bf2all64' -in $VARIANT['_metadata']['components']) {
 CMD [ "./start.sh", "+modPath", "mods/bf2all64" ]
 
 "@
-}elseif ('fh2' -in $VARIANT['_metadata']['components']) {
+}elseif ($VARIANT['_metadata']['components'] -match 'fh2') {
     @"
 CMD [ "./start.sh", "+modPath", "mods/fh2" ]
 

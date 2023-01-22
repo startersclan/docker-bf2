@@ -72,7 +72,7 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/fh2/settings/serversettings.con \
     -v maplist.con:/server/bf2/mods/fh2/settings/maplist.con \
-    startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -eq 'fh2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 )
+    startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'fh2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 )
 
 # Read server readme
 docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/readme-linux.txt # Linux
