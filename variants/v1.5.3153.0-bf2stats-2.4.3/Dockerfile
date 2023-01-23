@@ -22,7 +22,7 @@ RUN cd /install && printf '\naccept\n\nyes\n/server\ny\n' | sh /install/license-
 WORKDIR /root
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y unzip
 RUN curl -sSLO https://github.com/startersclan/bf2stats/archive/refs/tags/2.4.3.zip
-RUN echo "cca30267afc92f412a5e2511c671cc611abb0780a9656ce4313b4f722160843c  2.4.3.zip" | sha256sum -c -
+RUN echo "8dc15a5398c070f1ceb236c2e78b5d6095338f6e075e4e7ca4345a50f0091cee  2.4.3.zip" | sha256sum -c -
 RUN unzip 2.4.3.zip -d extract
 RUN rm -rf /server/bf2/python
 RUN mv extract/bf2stats-2.4.3/src/python /server/bf2/python
