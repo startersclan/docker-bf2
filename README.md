@@ -16,13 +16,13 @@ All images contain [`Battlefield 2 Server 1.50`](https://www.bf-games.net/downlo
 | `:v1.5.3153.0-bf2all64` | [View](variants/v1.5.3153.0-bf2all64 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-2.2.0` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.2.0 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-2.3.5` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.3.5 ) |
-| `:v1.5.3153.0-bf2all64-bf2stats-2.4.3` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.4.3 ) |
+| `:v1.5.3153.0-bf2all64-bf2stats-2.4.4` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.4.4 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-3.1.0` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-3.1.0 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-3.1.2` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-3.1.2 ) |
 | `:v1.5.3153.0-bf2hub` | [View](variants/v1.5.3153.0-bf2hub ) |
 | `:v1.5.3153.0-bf2stats-2.2.0` | [View](variants/v1.5.3153.0-bf2stats-2.2.0 ) |
 | `:v1.5.3153.0-bf2stats-2.3.5` | [View](variants/v1.5.3153.0-bf2stats-2.3.5 ) |
-| `:v1.5.3153.0-bf2stats-2.4.3` | [View](variants/v1.5.3153.0-bf2stats-2.4.3 ) |
+| `:v1.5.3153.0-bf2stats-2.4.4` | [View](variants/v1.5.3153.0-bf2stats-2.4.4 ) |
 | `:v1.5.3153.0-bf2stats-3.1.0` | [View](variants/v1.5.3153.0-bf2stats-3.1.0 ) |
 | `:v1.5.3153.0-bf2stats-3.1.2` | [View](variants/v1.5.3153.0-bf2stats-3.1.2 ) |
 | `:v1.5.3153.0-fh2-4.6.304` | [View](variants/v1.5.3153.0-fh2-4.6.304 ) |
@@ -58,7 +58,7 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
     -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
     -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
-    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.4.3
+    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.4.4
 
 # bf2 server with bf2stats 3 python files and custom configs
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
