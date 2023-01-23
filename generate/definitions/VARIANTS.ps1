@@ -9,6 +9,7 @@ $local:VARIANTS_MATRIX = @(
             @{ components = @( 'bf2all64', 'bf2stats-2.2.0' ) }
             @{ components = @( 'bf2all64', 'bf2stats-2.3.4' ) }
             @{ components = @( 'bf2all64', 'bf2stats-2.4.3' ) }
+            @{ components = @( 'bf2all64', 'bf2stats-2.3.5' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.0' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.2' ) }
             @{ components = @( 'bf2hub' ) }
