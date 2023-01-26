@@ -57,7 +57,7 @@ $VARIANTS | % {
         path: /tmp/.buildx-cache
         key: ${{ runner.os }}-buildx-${{ env.VARIANT_TAG }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT_TAG }}
+          ${{ runner.os }}-buildx-${{ env.VARIANT_TAG }}-
           ${{ runner.os }}-buildx-
 
     - name: Prepare
