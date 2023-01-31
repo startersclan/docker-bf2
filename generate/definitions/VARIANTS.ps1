@@ -7,14 +7,14 @@ $local:VARIANTS_MATRIX = @(
             @{ components = @(); tag_as_latest = $true }
             @{ components = @( 'bf2all64' ) }
             @{ components = @( 'bf2all64', 'bf2stats-2.2.0' ) }
-            @{ components = @( 'bf2all64', 'bf2stats-2.3.6' ) }
-            @{ components = @( 'bf2all64', 'bf2stats-2.4.4' ) }
+            @{ components = @( 'bf2all64', 'bf2stats-2.3.7' ) }
+            @{ components = @( 'bf2all64', 'bf2stats-2.4.5' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.0' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.2' ) }
             @{ components = @( 'bf2hub' ) }
             @{ components = @( 'bf2stats-2.2.0' ) }
-            @{ components = @( 'bf2stats-2.3.6' ) }
-            @{ components = @( 'bf2stats-2.4.4' ) }
+            @{ components = @( 'bf2stats-2.3.7' ) }
+            @{ components = @( 'bf2stats-2.4.5' ) }
             @{ components = @( 'bf2stats-3.1.0' ) }
             @{ components = @( 'bf2stats-3.1.2' ) }
             @{ components = @( 'fh2-4.6.304' ) }
@@ -67,11 +67,13 @@ b9569819f7c58b70ff3e66d9219aed78ad6433d5cbba58f46b7bc0bf9eeb6d89  2.3.1.zip
 37b6c6f08d5ac146185db8f3b2eb41add5f3dfb30ec79dda1b3c86ae7cac17e0  2.3.4.zip
 81d37e150a44261dbac82b0f2590268ec8a9dc4a311bec0f0bf3a45d2969fb8d  2.3.5.zip
 af34261aec86749a65b358b5325639f724ae84f52c97f8cdddba6e867836e8eb  2.3.6.zip
+89a0f56becd310c02cc7a8200c3a235bde7a7edf0b8b221c42aa60de02ae2d9a  2.3.7.zip
 adb1c8d60b9cafc6f27d6722aa084b0bfefe828653abe8845c8858607cb7e3e0  2.4.0.zip
 f1126f700eabf0164e389bfbf62d74cefe891fe2a888811c1da57a071a35f89f  2.4.1.zip
 f7c47b22e30548737b05ddb9f8ef8e33a108b9184b4b2818759a318bd621f374  2.4.2.zip
 8dc15a5398c070f1ceb236c2e78b5d6095338f6e075e4e7ca4345a50f0091cee  2.4.3.zip
 e9b6fe8ae1f2306b50d60a4ca05a39d02036b40e741884d3860959aa70b2500a  2.4.4.zip
+b0a8b23841c5d3fac51650a6da8ff0e77c1d143a7aaf37c40c498077d71a2a2f  2.4.5.zip
 "@
                             bf2stats_3_statspython_sha256sum = @"
 ab6d0f2dc3c90223524a6d97dd3100796fdf266444b5cd2f066116b977d3551c  3.1.0.zip
