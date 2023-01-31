@@ -9,12 +9,14 @@ $local:VARIANTS_MATRIX = @(
             @{ components = @( 'bf2all64', 'bf2stats-2.2.0' ) }
             @{ components = @( 'bf2all64', 'bf2stats-2.3.7' ) }
             @{ components = @( 'bf2all64', 'bf2stats-2.4.5' ) }
+            @{ components = @( 'bf2all64', 'bf2stats-2.5.0' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.0' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.2' ) }
             @{ components = @( 'bf2hub' ) }
             @{ components = @( 'bf2stats-2.2.0' ) }
             @{ components = @( 'bf2stats-2.3.7' ) }
             @{ components = @( 'bf2stats-2.4.5' ) }
+            @{ components = @( 'bf2stats-2.5.0' ) }
             @{ components = @( 'bf2stats-3.1.0' ) }
             @{ components = @( 'bf2stats-3.1.2' ) }
             @{ components = @( 'fh2-4.6.304' ) }
@@ -74,6 +76,7 @@ f7c47b22e30548737b05ddb9f8ef8e33a108b9184b4b2818759a318bd621f374  2.4.2.zip
 8dc15a5398c070f1ceb236c2e78b5d6095338f6e075e4e7ca4345a50f0091cee  2.4.3.zip
 e9b6fe8ae1f2306b50d60a4ca05a39d02036b40e741884d3860959aa70b2500a  2.4.4.zip
 b0a8b23841c5d3fac51650a6da8ff0e77c1d143a7aaf37c40c498077d71a2a2f  2.4.5.zip
+8dc705319c03fc9083f41f2b988e8dba1d54f43d3dd518fae1e5cb6c9b38a110  2.5.0.zip
 "@
                             bf2stats_3_statspython_sha256sum = @"
 ab6d0f2dc3c90223524a6d97dd3100796fdf266444b5cd2f066116b977d3551c  3.1.0.zip
