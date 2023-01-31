@@ -233,7 +233,7 @@ Generate-DockerImageVariants .
 
 ```sh
 # Replace occurrences with new semver
-git ls-files | grep -E '^(docs|generate)' | xargs sed -i 's/2.3.3/2.4.1/'
+git ls-files | grep -E '^docs' | xargs sed -i 's/2.4.5/2.5.0/'
 
 # Update the sha256sum of archives if needed
 vi generate/templates/Dockerfile.ps1
