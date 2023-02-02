@@ -15,16 +15,16 @@ All images contain [`Battlefield 2 Server 1.50`](https://www.bf-games.net/downlo
 | `:v1.5.3153.0`, `:latest` | [View](variants/v1.5.3153.0 ) |
 | `:v1.5.3153.0-bf2all64` | [View](variants/v1.5.3153.0-bf2all64 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-2.2.0` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.2.0 ) |
-| `:v1.5.3153.0-bf2all64-bf2stats-2.3.7` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.3.7 ) |
-| `:v1.5.3153.0-bf2all64-bf2stats-2.4.5` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.4.5 ) |
-| `:v1.5.3153.0-bf2all64-bf2stats-2.5.0` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.5.0 ) |
+| `:v1.5.3153.0-bf2all64-bf2stats-2.3.8` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.3.8 ) |
+| `:v1.5.3153.0-bf2all64-bf2stats-2.4.6` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.4.6 ) |
+| `:v1.5.3153.0-bf2all64-bf2stats-2.5.1` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.5.1 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-3.1.0` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-3.1.0 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-3.1.2` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-3.1.2 ) |
 | `:v1.5.3153.0-bf2hub` | [View](variants/v1.5.3153.0-bf2hub ) |
 | `:v1.5.3153.0-bf2stats-2.2.0` | [View](variants/v1.5.3153.0-bf2stats-2.2.0 ) |
-| `:v1.5.3153.0-bf2stats-2.3.7` | [View](variants/v1.5.3153.0-bf2stats-2.3.7 ) |
-| `:v1.5.3153.0-bf2stats-2.4.5` | [View](variants/v1.5.3153.0-bf2stats-2.4.5 ) |
-| `:v1.5.3153.0-bf2stats-2.5.0` | [View](variants/v1.5.3153.0-bf2stats-2.5.0 ) |
+| `:v1.5.3153.0-bf2stats-2.3.8` | [View](variants/v1.5.3153.0-bf2stats-2.3.8 ) |
+| `:v1.5.3153.0-bf2stats-2.4.6` | [View](variants/v1.5.3153.0-bf2stats-2.4.6 ) |
+| `:v1.5.3153.0-bf2stats-2.5.1` | [View](variants/v1.5.3153.0-bf2stats-2.5.1 ) |
 | `:v1.5.3153.0-bf2stats-3.1.0` | [View](variants/v1.5.3153.0-bf2stats-3.1.0 ) |
 | `:v1.5.3153.0-bf2stats-3.1.2` | [View](variants/v1.5.3153.0-bf2stats-3.1.2 ) |
 | `:v1.5.3153.0-fh2-4.6.304` | [View](variants/v1.5.3153.0-fh2-4.6.304 ) |
@@ -60,7 +60,7 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
     -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
     -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
-    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.5.0
+    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.5.1
 
 # bf2 server with bf2stats 3 python files and custom configs
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
@@ -233,7 +233,7 @@ Generate-DockerImageVariants .
 
 ```sh
 # Replace occurrences with new semver
-git ls-files | grep -E '^docs' | xargs sed -i 's/2.4.5/2.5.0/'
+git ls-files | grep -E '^docs' | xargs sed -i 's/2.5.0/2.5.1/'
 
 # Update the sha256sum of archives if needed
 vi generate/templates/Dockerfile.ps1
