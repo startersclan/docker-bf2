@@ -70,7 +70,6 @@ RUN set -eux; \
 # Install esai-helper and configs
 COPY esai-helper /usr/local/bin/esai-helper
 COPY esai-optimized-strategies-bf2.txt /esai-optimized-strategies-bf2.txt
-COPY esai-optimized-strategies-bf2all64.txt /esai-optimized-strategies-bf2all64.txt
 COPY esai-optimized-strategies-xpack.txt /esai-optimized-strategies-xpack.txt
 
 COPY healthcheck /healthcheck

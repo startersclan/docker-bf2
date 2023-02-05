@@ -230,8 +230,7 @@ COPY esai-helper /usr/local/bin/esai-helper
 COPY esai-optimized-strategies-bf2.txt /esai-optimized-strategies-bf2.txt
 
 '@
-if ($VARIANT['_metadata']['components'] -match 'aix2') {
-}else {
+if ($VARIANT['_metadata']['components'] -match 'bf2all64') {
 @'
 COPY esai-optimized-strategies-bf2all64.txt /esai-optimized-strategies-bf2all64.txt
 
