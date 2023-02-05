@@ -11,6 +11,27 @@ on:
     branches:
     - master
 jobs:
+  test-nogitdiff:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/powershell:7.2.2-alpine-3.14-20220318
+    steps:
+    - run: |
+        apk add --no-cache git
+    - uses: actions/checkout@v3
+    - name: Ignore git permissions
+      run: |
+        git config --global --add safe.directory "$( pwd )"
+    - name: Generate variants
+      run: |
+        pwsh -Command '
+        $ErrorActionPreference = "Stop"
+        Install-Module -Name Generate-DockerImageVariants -Force -Scope CurrentUser -Verbose
+        Generate-DockerImageVariants .
+        '
+    - name: Test - no git diff
+      run: |
+        git diff --exit-code
 '@
 
 $local:WORKFLOW_JOB_NAMES = $VARIANTS | % { "build-$( $_['tag'].Replace('.', '-') )" }
@@ -177,9 +198,6 @@ if ( $_['tag_as_latest'] ) {
 
   update-draft-release:
     needs: [$( $local:WORKFLOW_JOB_NAMES -join ', ' )]
-"@
-@'
-
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
@@ -189,17 +207,10 @@ if ( $_['tag_as_latest'] ) {
           config-name: release-drafter.yml
           publish: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-'@
-
-@"
-
+          GITHUB_TOKEN: `${{ secrets.GITHUB_TOKEN }}
 
   publish-draft-release:
     needs: [$( $local:WORKFLOW_JOB_NAMES -join ', ' )]
-"@
-@'
-
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
@@ -208,9 +219,23 @@ if ( $_['tag_as_latest'] ) {
         with:
           config-name: release-drafter.yml
           publish: true
-          name: ${{ github.ref_name }} # E.g. 'master' or 'v1.2.3'
-          tag: ${{ github.ref_name }} # E.g. 'master' or 'v1.2.3'
+          name: `${{ github.ref_name }} # E.g. 'master' or 'v1.2.3'
+          tag: `${{ github.ref_name }} # E.g. 'master' or 'v1.2.3'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: `${{ secrets.GITHUB_TOKEN }}
 
-'@
+  update-dockerhub-description:
+    needs: [$( $local:WORKFLOW_JOB_NAMES -join ', ' )]
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Docker Hub Description
+      uses: peter-evans/dockerhub-description@v3
+      with:
+        username: `${{ secrets.DOCKERHUB_REGISTRY_USER }}
+        password: `${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
+        repository: `${{ github.repository }}
+        short-description: `${{ github.event.repository.description }}
+
+"@
