@@ -39,42 +39,45 @@ $(
 See [here](docs/examples) for some good examples.
 
 ``````sh
-# bf2 server
+# BF2 server
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag )
 
-# bf2 server with custom configs
+# BF2 server with custom configs
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro \
     -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro \
     startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag )
 
-# bf2 server with bf2all64 mod
+# BF2 server running AIX 2.0 mod
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'aix2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 )
+
+# BF2 server running BF2All64 mod
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'bf2all64' } | Select-Object -First 1 | Select-Object -ExpandProperty tag )
 
-# bf2 server with bf2hub support
+# BF2 server running BF2Hub binaries
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'bf2hub' } | Select-Object -First 1 | Select-Object -ExpandProperty tag )
 
-# bf2 server with bf2stats 2 python files and custom configs
+# BF2 server with bf2stats 2 python files and custom configs
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
     -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
     -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
     startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 )
 
-# bf2 server with bf2stats 3 python files and custom configs
+# BF2 server with bf2stats 3 python files and custom configs
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
     -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
     -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
     startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 )
 
-# fh2 server
+# BF2 server running Forgotten Hope 2 mod with custom configs
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v serversettings.con:/server/bf2/mods/fh2/settings/serversettings.con \
     -v maplist.con:/server/bf2/mods/fh2/settings/maplist.con \
     startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'fh2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 )
 
-# Read server readme
+# Read BF2 server readme
 docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/readme-linux.txt # Linux
 docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/readmeserver.txt # Windows
 
@@ -97,6 +100,7 @@ A handy tool called [`esai-helper`](vendor/esai-helper) is included in all image
 To use a default strategy for all levels, see [this example](docs/examples/v1.5-esai-default-strategy/).
 
 To override the default strategy with a level-specific strategy, optimized strategies config files are included in each image. These strategies have been optimized by the BF2SP64 community:
+
 - [`/esai-optimized-strategies-bf2.txt`](vendor/esai-optimized-strategies-bf2.txt)
 - [`/esai-optimized-strategies-bf2all64.txt`](vendor/esai-optimized-strategies-bf2all64.txt)
 - [`/esai-optimized-strategies-xpack.txt`](vendor/esai-optimized-strategies-xpack.txt)
@@ -236,7 +240,7 @@ Generate-DockerImageVariants .
 
 ```sh
 # Replace occurrences with new semver
-git ls-files | grep -E '^docs' | xargs sed -i 's/2.4.5/2.5.0/'
+git ls-files | grep -E '^docs' | xargs sed -i 's/2.5.0/2.5.1/'
 
 # Update the sha256sum of archives if needed
 vi generate/templates/Dockerfile.ps1

@@ -39,6 +39,23 @@ RUN set -eux; \
 
 "@
 foreach ($c in $VARIANT['_metadata']['components']) {
+    if ($c -eq 'aix2') {
+@"
+# Install AIX 2.0
+WORKDIR /root
+RUN set -eux; \
+    curl -sSLO https://files.startersclan.com/ea/bf2/AIX2.0_Server_Files.zip; \
+    sha256sum AIX2.0_Server_Files.zip | grep '^8bd635ab6db23e237e77a58f269e0929afac719fabdf9e7979ce1cf3f836b11a '; \
+    unzip AIX2.0_Server_Files.zip -d extract; \
+    rm -rf /server/bf2/mods/aix2; \
+    mv extract/mods/aix2 /server/bf2/mods; \
+    rm -fv AIX2.0_Server_Files.zip; \
+    # Fix serversettings.con for server to start properly
+    sed -i 's/^sv.internet 1/sv.internet 0/' /server/bf2/mods/aix2/settings/serversettings.con;
+
+
+"@
+    }
     if ($c -eq 'bf2hub') {
 @"
 # Install bf2hub
@@ -199,7 +216,16 @@ RUN set -eux; \
 # Install esai-helper and configs
 COPY esai-helper /usr/local/bin/esai-helper
 COPY esai-optimized-strategies-bf2.txt /esai-optimized-strategies-bf2.txt
+
+'@
+if ($VARIANT['_metadata']['components'] -match 'aix2') {
+}else {
+@'
 COPY esai-optimized-strategies-bf2all64.txt /esai-optimized-strategies-bf2all64.txt
+
+'@
+}
+@'
 COPY esai-optimized-strategies-xpack.txt /esai-optimized-strategies-xpack.txt
 
 COPY healthcheck /healthcheck
@@ -210,7 +236,12 @@ COPY healthcheck /healthcheck
 WORKDIR /server/bf2
 
 '@
-if ($VARIANT['_metadata']['components'] -match 'bf2all64') {
+if ($VARIANT['_metadata']['components'] -match 'aix2') {
+@"
+CMD [ "./start.sh", "+modPath", "mods/aix2" ]
+
+"@
+}elseif ($VARIANT['_metadata']['components'] -match 'bf2all64') {
 @"
 CMD [ "./start.sh", "+modPath", "mods/bf2all64" ]
 
