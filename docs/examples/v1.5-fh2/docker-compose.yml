@@ -1,6 +1,6 @@
 version: '2.2'
 services:
-  # This is the official BF2 1.5 dedicated server with the Forgotten Hope 2 mod.
+  # This is the official BF2 1.5 dedicated server running the Forgotten Hope 2 mod.
   bf2:
     image: startersclan/docker-bf2:v1.5.3153.0-fh2-4.6.304
     volumes:

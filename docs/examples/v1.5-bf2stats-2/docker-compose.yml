@@ -1,7 +1,6 @@
 version: '2.2'
 services:
-  # This uses your private master server and private ASP web server as the stats system.
-  # It works by spoofing Gamespy DNS to use your private master server, and spoofing Gamespy DNS to use your ASP web server as the stats system.
+  # This is the official BF2 1.5 dedicated server. It uses your private master server, and your private ASP web server (i.e. stats server) by DNS spoofing
   # For a full bf2stats 2 stack example, see https://github.com/startersclan/bf2stats
   bf2:
     image: startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.5.1

@@ -1,7 +1,7 @@
 version: '2.2'
 services:
-  # This is the official BF2 1.5 dedicated server. It does not work unless DNS spoofing is added.
-  # A default ESAI strategy for all maps is configured in entrypoint
+  # This is the official BF2 1.5 dedicated server.
+  # A default ESAI strategy for maps is configured in entrypoint
   bf2:
     image: startersclan/docker-bf2:v1.5.3153.0
     volumes:

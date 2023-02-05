@@ -1,7 +1,7 @@
 version: '2.2'
 services:
-  # This runs on the official BF2Hub server binaries. It uses BF2Hub as the master server and the ASP web server
-  # Server will be unranked since there is no custom ASP web server stats system
+  # This is the official BF2 1.5 dedicated server running on the official BF2Hub server binaries. It uses BF2Hub as the master server and the ASP web server (i.e. stats server) without needing DNS spoofing.
+  # Server will be unranked because it is not an official BF2Hub ranked server
   bf2:
     image: startersclan/docker-bf2:v1.5.3153.0-bf2hub
     volumes:
