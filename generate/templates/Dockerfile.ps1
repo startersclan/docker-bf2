@@ -174,6 +174,7 @@ RUN set -eux; \
     tar -xvf fh2-server-$v.tar --no-same-owner -C /server/bf2 ; \
     chmod -R +x /server/bf2/bin; \
     mv /server/bf2/start-fh2.sh /server/bf2/start.sh; \
+    chmod +x /server/bf2/start.sh; \
     # Create a default maplist.con, since it is not included by the installer
     for i in `$( ls /server/bf2/mods/fh2/levels/*/info/*cq_64_menumap.png | cut -d '/' -f7 ); do echo "maplist.append \"`$i\" \"gpm_cq\" 64" >> /server/bf2/mods/fh2/settings/maplist.con; done; \
     rm -fv fh2-server-$v.tar;
