@@ -39,50 +39,23 @@ All images contain [`Battlefield 2 Server 1.50`](https://www.bf-games.net/downlo
 
 ## Usage
 
-See [here](docs/examples) for some docker-compose examples.
+Here are some one-liners to quickly start a BF2 server. See [here](docs/examples) for some docker-compose examples.
+
+### BF2
 
 ```sh
 # BF2 server
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0
 
-# BF2 server with custom configs
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
-    -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro \
-    -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro \
-    startersclan/docker-bf2:v1.5.3153.0
+# BF2 server with random coop maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0 bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_coop | shuf > /server/bf2/mods/bf2/settings/maplist.con && exec ./start.sh'
 
-# BF2 server running AIX 2.0 mod
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0-aix2
-
-# BF2 server running BF2All64 mod
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0-bf2all64
-
-# BF2 server running BF2Hub binaries
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0-bf2hub
-
-# BF2 server with bf2stats 2 python files and custom configs
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
-    -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
-    -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
-    -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
-    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.5.1
-
-# BF2 server with bf2stats 3 python files and custom configs
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
-    -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
-    -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
-    -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
-    startersclan/docker-bf2:v1.5.3153.0-bf2stats-3.1.2
-
-# BF2 server running Forgotten Hope 2 mod with custom configs
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
-    -v serversettings.con:/server/bf2/mods/fh2/settings/serversettings.con \
-    -v maplist.con:/server/bf2/mods/fh2/settings/maplist.con \
-    startersclan/docker-bf2:v1.5.3153.0-fh2-4.6.304
+# BF2 server with random conquest maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0 bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq | shuf > /server/bf2/mods/bf2/settings/maplist.con && exec ./start.sh'
 
 # Read BF2 server readme
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/readme-linux.txt # Linux
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/readmeserver.txt # Windows
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/readme-linux.txt
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/readmeserver.txt
 
 # By using this image, you agree to the licenses
 docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/eula.txt # EULA for the BF2 dedicated Linux server
@@ -90,11 +63,152 @@ docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/lgpl
 docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/pb_eula.txt # EULA for the EULA for PunkBuster
 ```
 
+### BF2 (customized)
+
+```sh
+# Generate serversettings.con and customize
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/mods/bf2/settings/serversettings.con > serversettings.con
+# Generate maplist.con (coop)
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_coop' > maplist.con
+# Generate maplist.con (conquest)
+docker run --rm startersclan/docker-bf2:v1.5.3153.0 bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq' > maplist.con
+# BF2 server
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    -v "$(pwd)/serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro" \
+    -v "$(pwd)/maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro" \
+    startersclan/docker-bf2:v1.5.3153.0
+```
+
+### BF2 with BF2Statistics 2.x.x (customized)
+
+```sh
+# Generate serversettings.con and customize
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2all64-bf2stats-2.2.0 cat /server/bf2/mods/bf2/settings/serversettings.con > serversettings.con
+# Generate maplist.con (coop)
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2all64-bf2stats-2.2.0 bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_coop' > maplist.con
+# Generate maplist.con (conquest)
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2all64-bf2stats-2.2.0 bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq' > maplist.con
+# Generate BF2StatisticsConfig.py and customize
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2all64-bf2stats-2.2.0 cat /server/bf2/python/bf2/BF2StatisticsConfig.py > BF2StatisticsConfig.py
+# BF2 server with bf2stats 2 python files and custom configs
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    -v "$(pwd)/serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro" \
+    -v "$(pwd)/maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro" \
+    -v "$(pwd)/BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro" \
+    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.5.1
+```
+
+### BF2 with BF2Statistics 3.x.x (customized)
+
+```sh
+# Generate serversettings.con and customize
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2all64-bf2stats-3.1.0 cat /server/bf2/mods/bf2/settings/serversettings.con > serversettings.con
+# Generate maplist.con (coop)
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2all64-bf2stats-3.1.0 bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_coop' > maplist.con
+# Generate maplist.con (conquest)
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2all64-bf2stats-3.1.0 bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq' > maplist.con
+# Generate BF2StatisticsConfig.py and customize
+docker run --rm -it startersclan/docker-bf2:v1.5.3153.0-bf2all64-bf2stats-3.1.0 cat /server/bf2/python/bf2/BF2StatisticsConfig.py > BF2StatisticsConfig.py
+# BF2 server with bf2stats 3 python files and custom configs
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    -v "$(pwd)/serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro" \
+    -v "$(pwd)/maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro" \
+    -v "$(pwd)/BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro" \
+    startersclan/docker-bf2:v1.5.3153.0-bf2stats-3.1.2
+```
+
+### AIX 2.0 mod
+
+```sh
+# BF2 server running AIX 2.0 mod
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0-aix2
+
+# BF2 server running AIX 2.0 mod with random coop maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0-aix2 bash -c 'esai-helper -m aix2 get maplist | grep gpm_coop | shuf > /server/bf2/mods/aix2/settings/maplist.con && exec ./start.sh +modPath mods/aix2'
+
+# BF2 server running AIX 2.0 mod with random conquest maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0-aix2 bash -c 'esai-helper -m aix2 get maplist | grep gpm_cq | shuf > /server/bf2/mods/aix2/settings/maplist.con && exec ./start.sh +modPath mods/aix2'
+```
+
+### AIX 2.0 mod (customized)
+
+```sh
+# Generate serversettings.con and customize
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-aix2 cat /server/bf2/mods/aix2/settings/serversettings.con > serversettings.con
+# Generate maplist.con (coop)
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-aix2 esai-helper -m aix2 get maplist | grep gpm_coop > maplist.con
+# Generate maplist.con (conquest)
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-aix2 esai-helper -m aix2 get maplist | grep gpm_cq > maplist.con
+# BF2 server running AIX 2.0 mod
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    -v "$(pwd)/serversettings.con:/server/bf2/mods/aix2/settings/serversettings.con:ro" \
+    -v "$(pwd)/maplist.con:/server/bf2/mods/aix2/settings/maplist.con:ro" \
+    startersclan/docker-bf2:v1.5.3153.0-aix2
+```
+
+### BF2All64 mod
+
+```sh
+# BF2 server running BF2All64 mod
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0-bf2all64
+
+# BF2 server running BF2All64 mod with random coop maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0-bf2all64 bash -c 'esai-helper -m bf2all64 get maplist | grep gpm_coop | shuf > /server/bf2/mods/bf2all64/settings/maplist.con && exec ./start.sh +modPath mods/bf2all64'
+
+# BF2 server running BF2All64 mod with random conquest maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0-bf2all64 bash -c 'esai-helper -m bf2all64 get maplist | grep gpm_cq | shuf > /server/bf2/mods/bf2all64/settings/maplist.con && exec ./start.sh +modPath mods/bf2all64'
+```
+
+### BF2All64 mod (customized)
+
+```sh
+# Generate serversettings.con and customize
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2all64 cat /server/bf2/mods/bf2all64/settings/serversettings.con > serversettings.con
+# Generate maplist.con (coop)
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2all64 esai-helper -m bf2all64 get maplist | grep gpm_coop > maplist.con
+# Generate maplist.con (conquest)
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2all64 esai-helper -m bf2all64 get maplist | grep gpm_cq > maplist.con
+# BF2 server running BF2All64 mod
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    -v "$(pwd)/serversettings.con:/server/bf2/mods/bf2all64/settings/serversettings.con:ro" \
+    -v "$(pwd)/maplist.con:/server/bf2/mods/bf2all64/settings/maplist.con:ro" \
+    startersclan/docker-bf2:v1.5.3153.0-bf2all64
+```
+
+### Forgotten Hope 2 mod
+
+```sh
+# BF2 server running Forgotten Hope 2 mod
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0-fh2-4.6.304
+
+# BF2 server running Forgotten Hope 2 mod with random coop maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0-fh2-4.6.304 bash -c 'esai-helper -m fh2 get maplist | grep gpm_coop | shuf > /server/bf2/mods/fh2/settings/maplist.con && exec ./start.sh +modPath mods/fh2'
+
+# BF2 server running Forgotten Hope 2 mod with random conquest maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:v1.5.3153.0-fh2-4.6.304 bash -c 'esai-helper -m fh2 get maplist | grep gpm_cq | shuf > /server/bf2/mods/fh2/settings/maplist.con && exec ./start.sh +modPath mods/fh2'
+```
+
+### Forgotten Hope 2 mod (customized)
+
+```sh
+# Generate serversettings.con and customize
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-fh2-4.6.304 cat /server/bf2/mods/fh2/settings/serversettings.con > serversettings.con
+# Generate maplist.con (coop)
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-fh2-4.6.304 esai-helper -m fh2 get maplist | grep gpm_coop > maplist.con
+# Generate maplist.con (conquest)
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-fh2-4.6.304 esai-helper -m fh2 get maplist | grep gpm_cq > maplist.con
+# BF2 server running fh2 mod
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    -v "$(pwd)/serversettings.con:/server/bf2/mods/fh2/settings/serversettings.con" \
+    -v "$(pwd)/maplist.con:/server/bf2/mods/fh2/settings/maplist.con" \
+    startersclan/docker-bf2:v1.5.3153.0-fh2-4.6.304
+```
+
 ## ESAI
 
 ESAI greatly enhances bot performance, and is compatible with any BF2 mod. It is included but not enabled by default.
 
-A handy tool called [`esai-helper`](vendor/esai-helper) is included in all images. It can be used to list gamemodes, generate maplists for a mod, list a levels' `strategies.ai`, apply default or custom `strategies.ai` to levels, and more. See `esai-helper --help` for usage.
+A handy tool called [sai-helper](vendor/esai-helper) is included in all images. It can be used to list gamemodes, generate maplists for a mod, list a levels' strategies.ai, apply default or custom strategies.ai to levels, and more. See sai-helper --help for usage.
 
 To use a default strategy for all levels, see [this example](docs/examples/v1.5-esai-default-strategy/).
 
@@ -104,7 +218,7 @@ To override the default strategy with a level-specific strategy, optimized strat
 - [`/esai-optimized-strategies-bf2all64.txt`](vendor/esai-optimized-strategies-bf2all64.txt)
 - [`/esai-optimized-strategies-xpack.txt`](vendor/esai-optimized-strategies-xpack.txt)
 
-To use optimized strategies for levels, see [this example](docs/examples/v1.5-esai-optimized-strategies/). For `bf2all64` mod, see [this example](docs/examples/v1.5-bf2all64-esai-optimized-strategies/).
+To use optimized strategies for levels, see [this example](docs/examples/v1.5-esai-optimized-strategies/). For f2all64 mod, see [this example](docs/examples/v1.5-bf2all64-esai-optimized-strategies/).
 
 To use custom strategies for levels, see [example](docs/examples/v1.5-esai-custom-strategies/).
 

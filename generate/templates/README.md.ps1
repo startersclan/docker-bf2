@@ -37,61 +37,171 @@ $(
 
 ## Usage
 
-See [here](docs/examples) for some `docker-compose` examples.
+Here are some one-liners to quickly start a BF2 server. See [here](docs/examples) for some `docker-compose` examples.
+
+### BF2
 
 ``````sh
 # BF2 server
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag )
 
-# BF2 server with custom configs
+# BF2 server with random coop maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_coop | shuf > /server/bf2/mods/bf2/settings/maplist.con && exec ./start.sh'
+
+# BF2 server with random conquest maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq | shuf > /server/bf2/mods/bf2/settings/maplist.con && exec ./start.sh'
+
+# Read BF2 server readme
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/readmes/readme-linux.txt
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/readmes/readmeserver.txt
+
+# By using this image, you agree to the licenses
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/readmes/eula.txt # EULA for the BF2 dedicated Linux server
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/readmes/lgpl.txt # LGPL
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/readmes/pb_eula.txt # EULA for the EULA for PunkBuster
+``````
+
+### BF2 (customized)
+
+``````sh
+# Generate serversettings.con and customize
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/mods/bf2/settings/serversettings.con > serversettings.con
+# Generate maplist.con (coop)
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_coop' > maplist.con
+# Generate maplist.con (conquest)
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq' > maplist.con
+# BF2 server
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
-    -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro \
-    -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro \
-    startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag )
+    -v "`$(pwd)/serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro" \
+    -v "`$(pwd)/maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro" \
+    startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 )
+``````
 
+### BF2 with BF2Statistics 2.x.x (customized)
+
+``````sh
+# Generate serversettings.con and customize
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/mods/bf2/settings/serversettings.con > serversettings.con
+# Generate maplist.con (coop)
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_coop' > maplist.con
+# Generate maplist.con (conquest)
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq' > maplist.con
+# Generate BF2StatisticsConfig.py and customize
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/python/bf2/BF2StatisticsConfig.py > BF2StatisticsConfig.py
+# BF2 server with bf2stats 2 python files and custom configs
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    -v "`$(pwd)/serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro" \
+    -v "`$(pwd)/maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro" \
+    -v "`$(pwd)/BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro" \
+    startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 )
+``````
+
+### BF2 with BF2Statistics 3.x.x (customized)
+
+``````sh
+# Generate serversettings.con and customize
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/mods/bf2/settings/serversettings.con > serversettings.con
+# Generate maplist.con (coop)
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_coop' > maplist.con
+# Generate maplist.con (conquest)
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq' > maplist.con
+# Generate BF2StatisticsConfig.py and customize
+docker run --rm -it startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/python/bf2/BF2StatisticsConfig.py > BF2StatisticsConfig.py
+# BF2 server with bf2stats 3 python files and custom configs
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    -v "`$(pwd)/serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro" \
+    -v "`$(pwd)/maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro" \
+    -v "`$(pwd)/BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro" \
+    startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 )
+``````
+
+### AIX 2.0 mod
+
+``````sh
 # BF2 server running AIX 2.0 mod
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'aix2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 )
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'aix2'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 )
 
+# BF2 server running AIX 2.0 mod with random coop maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'aix2'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c 'esai-helper -m aix2 get maplist | grep gpm_coop | shuf > /server/bf2/mods/aix2/settings/maplist.con && exec ./start.sh +modPath mods/aix2'
+
+# BF2 server running AIX 2.0 mod with random conquest maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'aix2'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c 'esai-helper -m aix2 get maplist | grep gpm_cq | shuf > /server/bf2/mods/aix2/settings/maplist.con && exec ./start.sh +modPath mods/aix2'
+``````
+
+### AIX 2.0 mod (customized)
+
+``````sh
+# Generate serversettings.con and customize
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'aix2'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/mods/aix2/settings/serversettings.con > serversettings.con
+# Generate maplist.con (coop)
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'aix2'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper -m aix2 get maplist | grep gpm_coop > maplist.con
+# Generate maplist.con (conquest)
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'aix2'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper -m aix2 get maplist | grep gpm_cq > maplist.con
+# BF2 server running AIX 2.0 mod
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    -v "`$(pwd)/serversettings.con:/server/bf2/mods/aix2/settings/serversettings.con:ro" \
+    -v "`$(pwd)/maplist.con:/server/bf2/mods/aix2/settings/maplist.con:ro" \
+    startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'aix2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 )
+``````
+
+### BF2All64 mod
+
+``````sh
 # BF2 server running BF2All64 mod
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'bf2all64' } | Select-Object -First 1 | Select-Object -ExpandProperty tag )
 
-# BF2 server running BF2Hub binaries
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'bf2hub' } | Select-Object -First 1 | Select-Object -ExpandProperty tag )
+# BF2 server running BF2All64 mod with random coop maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'bf2all64'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c 'esai-helper -m bf2all64 get maplist | grep gpm_coop | shuf > /server/bf2/mods/bf2all64/settings/maplist.con && exec ./start.sh +modPath mods/bf2all64'
 
-# BF2 server with bf2stats 2 python files and custom configs
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
-    -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
-    -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
-    -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
-    startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 )
+# BF2 server running BF2All64 mod with random conquest maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'bf2all64'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c 'esai-helper -m bf2all64 get maplist | grep gpm_cq | shuf > /server/bf2/mods/bf2all64/settings/maplist.con && exec ./start.sh +modPath mods/bf2all64'
+``````
 
-# BF2 server with bf2stats 3 python files and custom configs
-docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
-    -v serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con \
-    -v maplist.con:/server/bf2/mods/bf2/settings/maplist.con \
-    -v BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro \
-    startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 )
+### BF2All64 mod (customized)
 
-# BF2 server running Forgotten Hope 2 mod with custom configs
+``````sh
+# Generate serversettings.con and customize
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'bf2all64'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/mods/bf2all64/settings/serversettings.con > serversettings.con
+# Generate maplist.con (coop)
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'bf2all64'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper -m bf2all64 get maplist | grep gpm_coop > maplist.con
+# Generate maplist.con (conquest)
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'bf2all64'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper -m bf2all64 get maplist | grep gpm_cq > maplist.con
+# BF2 server running BF2All64 mod
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
-    -v serversettings.con:/server/bf2/mods/fh2/settings/serversettings.con \
-    -v maplist.con:/server/bf2/mods/fh2/settings/maplist.con \
+    -v "`$(pwd)/serversettings.con:/server/bf2/mods/bf2all64/settings/serversettings.con:ro" \
+    -v "`$(pwd)/maplist.con:/server/bf2/mods/bf2all64/settings/maplist.con:ro" \
+    startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'bf2all64' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 )
+``````
+
+### Forgotten Hope 2 mod
+
+``````sh
+# BF2 server running Forgotten Hope 2 mod
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'fh2' } | Select-Object -First 1 | Select-Object -ExpandProperty tag )
+
+# BF2 server running Forgotten Hope 2 mod with random coop maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'fh2'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c 'esai-helper -m fh2 get maplist | grep gpm_coop | shuf > /server/bf2/mods/fh2/settings/maplist.con && exec ./start.sh +modPath mods/fh2'
+
+# BF2 server running Forgotten Hope 2 mod with random conquest maps
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'fh2'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c 'esai-helper -m fh2 get maplist | grep gpm_cq | shuf > /server/bf2/mods/fh2/settings/maplist.con && exec ./start.sh +modPath mods/fh2'
+``````
+
+### Forgotten Hope 2 mod (customized)
+
+``````sh
+# Generate serversettings.con and customize
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'fh2'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/mods/fh2/settings/serversettings.con > serversettings.con
+# Generate maplist.con (coop)
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'fh2'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper -m fh2 get maplist | grep gpm_coop > maplist.con
+# Generate maplist.con (conquest)
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'fh2'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper -m fh2 get maplist | grep gpm_cq > maplist.con
+# BF2 server running fh2 mod
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    -v "`$(pwd)/serversettings.con:/server/bf2/mods/fh2/settings/serversettings.con" \
+    -v "`$(pwd)/maplist.con:/server/bf2/mods/fh2/settings/maplist.con" \
     startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'fh2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 )
-
-# Read BF2 server readme
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/readme-linux.txt # Linux
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/readmeserver.txt # Windows
-
-# By using this image, you agree to the licenses
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/eula.txt # EULA for the BF2 dedicated Linux server
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/lgpl.txt # LGPL
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/readmes/pb_eula.txt # EULA for the EULA for PunkBuster
 ```````
 
-
-"@
-
-@'
 ## ESAI
 
 ESAI greatly enhances bot performance, and is compatible with any BF2 mod. It is included but not enabled by default.
@@ -102,39 +212,43 @@ To use a default strategy for all levels, see [this example](docs/examples/v1.5-
 
 To override the default strategy with a level-specific strategy, optimized strategies config files are included in each image. These strategies have been optimized by the BF2SP64 community:
 
-- [`/esai-optimized-strategies-bf2.txt`](vendor/esai-optimized-strategies-bf2.txt)
-- [`/esai-optimized-strategies-bf2all64.txt`](vendor/esai-optimized-strategies-bf2all64.txt)
-- [`/esai-optimized-strategies-xpack.txt`](vendor/esai-optimized-strategies-xpack.txt)
+- [``/esai-optimized-strategies-bf2.txt``](vendor/esai-optimized-strategies-bf2.txt)
+- [``/esai-optimized-strategies-bf2all64.txt``](vendor/esai-optimized-strategies-bf2all64.txt)
+- [``/esai-optimized-strategies-xpack.txt``](vendor/esai-optimized-strategies-xpack.txt)
 
 To use optimized strategies for levels, see [this example](docs/examples/v1.5-esai-optimized-strategies/). For `bf2all64` mod, see [this example](docs/examples/v1.5-bf2all64-esai-optimized-strategies/).
 
 To use custom strategies for levels, see [example](docs/examples/v1.5-esai-custom-strategies/).
 
-```sh
+``````sh
 # Read ESAI readmes
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/mods/bf2/esai/readme.txt
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/mods/bf2/esai/directory.txt
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/mods/bf2/esai/docs/credits.txt
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat "/server/bf2/mods/bf2/esai/docs/quick start.txt"
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat "/server/bf2/mods/bf2/esai/docs/users guide.txt"
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/mods/bf2/esai/docs/version.txt
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/mods/bf2/esai/mapfiles/dir.txt
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 cat /server/bf2/mods/bf2/esai/plugin/dir.txt
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/mods/bf2/esai/readme.txt
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/mods/bf2/esai/directory.txt
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/mods/bf2/esai/docs/credits.txt
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat "/server/bf2/mods/bf2/esai/docs/quick start.txt"
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat "/server/bf2/mods/bf2/esai/docs/users guide.txt"
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/mods/bf2/esai/docs/version.txt
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/mods/bf2/esai/mapfiles/dir.txt
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/mods/bf2/esai/plugin/dir.txt
 
 # esai-helper useful one-liners
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --help # See usage
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 get gamemodes # Get gamemodes
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 get levels # Get levels
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 get maplist # Generate a maplist for maplist.con
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 get mods # Get mods
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 get strategies # Get strategies
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 apply default-strategy <strategy> # Apply a default strategy
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 apply <level> <gamemode> <size> <strategy> # Apply a strategy for a level
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 delete <level> <gamemode> <size> <strategy> # Delete a strategy for a level
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 apply -f strategies.txt # Apply strategies for levels
-docker run --rm startersclan/docker-bf2:v1.5.3153.0 esai-helper --mod bf2 delete -f strategies.txt # Delete strategies for levels
-```
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper --help # See usage
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper --mod bf2 get gamemodes # Get gamemodes
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper --mod bf2 get levels # Get levels
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper --mod bf2 get maplist # Generate a maplist for maplist.con
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper --mod bf2 get mods # Get mods
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper --mod bf2 get strategies # Get strategies
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper --mod bf2 apply default-strategy <strategy> # Apply a default strategy
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper --mod bf2 apply <level> <gamemode> <size> <strategy> # Apply a strategy for a level
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper --mod bf2 delete <level> <gamemode> <size> <strategy> # Delete a strategy for a level
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper --mod bf2 apply -f strategies.txt # Apply strategies for levels
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) esai-helper --mod bf2 delete -f strategies.txt # Delete strategies for levels
+``````
 
+
+"@
+
+@'
 ## FAQ
 
 ### Q: Server not listed on master server
