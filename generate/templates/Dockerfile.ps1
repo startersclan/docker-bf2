@@ -19,6 +19,7 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
 
 # Install Battlefield 2 server
 WORKDIR /root
+COPY aibehaviours-fixlookatwrapper.ai /aibehaviours-fixlookatwrapper.ai
 RUN set -eux; \
     curl -sSLO https://files.startersclan.com/ea/bf2/bf2-linuxded-$( $VARIANT['_metadata']['package_version'] )-installer.tgz; \
     sha256sum bf2-linuxded-$( $VARIANT['_metadata']['package_version'] )-installer.tgz | grep "^$( $VARIANT['_metadata']['package_sha256sum'] ) "; \
@@ -34,7 +35,13 @@ RUN set -eux; \
     # Agree to licenses
     printf '\naccept\n\nyes\n/server\ny\n' | sh /install/license-fixed.sh; \
     find /server; \
-    rm -rf /install;
+    rm -rf /install; \
+    # Apply the LookAtWrapper fix to prevent crashes when playing with bots
+    mv -v /server/bf2/mods/bf2/ai/aibehaviours.ai /server/bf2/mods/bf2/ai/aibehaviours.ai.original; \
+    cp -v /aibehaviours-fixlookatwrapper.ai /server/bf2/mods/bf2/ai/aibehaviours.ai; \
+    mv -v /server/bf2/mods/xpack/ai/aibehaviours.ai /server/bf2/mods/xpack/ai/aibehaviours.ai.original; \
+    cp -v /aibehaviours-fixlookatwrapper.ai /server/bf2/mods/xpack/ai/aibehaviours.ai; \
+    rm -v /aibehaviours-fixlookatwrapper.ai
 
 
 "@
@@ -76,13 +83,18 @@ RUN set -eux; \
 @"
 # Install bf2all64 mod
 WORKDIR /root
+COPY aibehaviours-fixlookatwrapper.ai /aibehaviours-fixlookatwrapper.ai
 RUN set -eux; \
     curl -sSLO https://files.startersclan.com/ea/bf2/bf2all64_v1.0_setup.zip; \
     sha256sum bf2all64_v1.0_setup.zip | grep '^4ee82d91043c4afbf1bed50787cbf98af124bd7e6c608cdb0f5115c7761024f1 '; \
     unzip bf2all64_v1.0_setup.zip -d extract; \
     rm -rf /server/bf2/mods/bf2all64; \
     mv extract/bf2all64 /server/bf2/mods; \
-    rm -fv bf2all64_v1.0_setup.zip;
+    rm -fv bf2all64_v1.0_setup.zip; \
+    # Apply the LookAtWrapper fix to prevent crashes when playing with bots
+    mv -v /server/bf2/mods/bf2all64/ai/aibehaviours.ai /server/bf2/mods/bf2all64/ai/aibehaviours.ai.original; \
+    cp -v /aibehaviours-fixlookatwrapper.ai /server/bf2/mods/bf2all64/ai/aibehaviours.ai; \
+    rm -v /aibehaviours-fixlookatwrapper.ai
 
 
 "@

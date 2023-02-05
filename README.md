@@ -30,6 +30,7 @@ All images contain [`Battlefield 2 Server 1.50`](https://www.bf-games.net/downlo
 | `:v1.5.3153.0-bf2stats-3.1.2` | [View](variants/v1.5.3153.0-bf2stats-3.1.2 ) |
 | `:v1.5.3153.0-fh2-4.6.304` | [View](variants/v1.5.3153.0-fh2-4.6.304 ) |
 
+- `aix2` - [AIX-2.0](https://www.moddb.com/mods/allied-intent-xtended/downloads/aix-20-server-files) mod.
 - `bf2all64` - [BF2All64](https://www.bf-games.net/downloads/2533/bf2-singleplayer-all-in-one-package.html) mod.
 - `bf2hub` - Includes [BF2Hub](https://www.bf2hub.com/home/serversetup.php) server binaries.
 - `bf2stats-2.x.x` - Includes [BF2Statistics](https://github.com/startersclan/bf2stats) 2 python files to send stats snapshots to the [ASP](https://github.com/startersclan/bf2stats) v2 webserver. See [here](https://github.com/startersclan/bf2stats) for a fully dockerized example.
@@ -38,7 +39,7 @@ All images contain [`Battlefield 2 Server 1.50`](https://www.bf-games.net/downlo
 
 ## Usage
 
-See [here](docs/examples) for some good examples.
+See [here](docs/examples) for some docker-compose examples.
 
 ```sh
 # BF2 server
