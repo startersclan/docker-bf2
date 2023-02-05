@@ -5,6 +5,7 @@ $local:VARIANTS_MATRIX = @(
         package_sha256sum = '4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6'
         subvariants = @(
             @{ components = @(); tag_as_latest = $true }
+            @{ components = @( 'aix2' ) }
             @{ components = @( 'bf2all64' ) }
             @{ components = @( 'bf2all64', 'bf2stats-2.2.0' ) }
             @{ components = @( 'bf2all64', 'bf2stats-2.3.8' ) }
@@ -45,23 +46,16 @@ $VARIANTS = @(
                 } else {
                     $false
                 }
-            }
-        }
-    }
-)
-
-# Docker image variants' definitions (shared)
-$VARIANTS_SHARED = @{
-    buildContextFiles = @{
-        templates = @{
-            'Dockerfile' = @{
-                common = $true
-                includeHeader = $false
-                includeFooter = $false
-                passes = @(
-                    @{
-                        variables = @{
-                            bf2stats_2_sha256sum = @"
+                buildContextFiles = @{
+                    templates = @{
+                        'Dockerfile' = @{
+                            common = $true
+                            includeHeader = $false
+                            includeFooter = $false
+                            passes = @(
+                                @{
+                                    variables = @{
+                                        bf2stats_2_sha256sum = @"
 4e91c5cdda63aaff1e2ccc20f40befcb603000eac25221be4cefbdebfdee6aec  2.3.0.zip
 b9569819f7c58b70ff3e66d9219aed78ad6433d5cbba58f46b7bc0bf9eeb6d89  2.3.1.zip
 448bc8a9d5adbad509f6d79e53ae030d4a5e0948bb301aaafe42c5442c1ffeef  2.3.2.zip
@@ -81,27 +75,36 @@ b0a8b23841c5d3fac51650a6da8ff0e77c1d143a7aaf37c40c498077d71a2a2f  2.4.5.zip
 8dc705319c03fc9083f41f2b988e8dba1d54f43d3dd518fae1e5cb6c9b38a110  2.5.0.zip
 3d736d1990d452e5da3f24d7d0eb1091a85a286239b5667fab98518cb1c115c9  2.5.1.zip
 "@
-                            bf2stats_3_statspython_sha256sum = @"
+                                        bf2stats_3_statspython_sha256sum = @"
 ab6d0f2dc3c90223524a6d97dd3100796fdf266444b5cd2f066116b977d3551c  3.1.0.zip
 fb739d900ea59e82147a6da9d7e72b329425b315bd8a08749a90fefc15365798  3.1.1.zip
 21958c614ce880f63cd4c5a9db366ccacf68674cd89f50bbf95d9aa2d9bca878  3.1.2.zip
 "@
-                            fh2_sha256sum = @"
+                                        fh2_sha256sum = @"
 bb933052ad20928b5a4bc6c1eeff647d62b0f3b38de46d063101719a9f0cf488  fh2-server-4.6.304.tar
 "@
+                                    }
+                                }
+                            )
                         }
                     }
-                )
+                    copies = @(
+                        '/vendor/ESAI-Standard-v4.2.zip'
+                        '/vendor/esai-helper'
+                        '/vendor/esai-optimized-strategies-bf2.txt'
+                        if ($subVariant['components'] -match 'bf2all64') {
+                            '/vendor/esai-optimized-strategies-bf2all64.txt'
+                        }
+                        '/vendor/esai-optimized-strategies-xpack.txt'
+                        '/vendor/healthcheck'
+                        '/vendor/lowercase-helper'
+                    )
+                }
             }
         }
-        copies = @(
-            '/vendor/ESAI-Standard-v4.2.zip'
-            '/vendor/esai-helper'
-            '/vendor/esai-optimized-strategies-bf2.txt'
-            '/vendor/esai-optimized-strategies-bf2all64.txt'
-            '/vendor/esai-optimized-strategies-xpack.txt'
-            '/vendor/healthcheck'
-            '/vendor/lowercase-helper'
-        )
     }
+)
+
+# Docker image variants' definitions (shared)
+$VARIANTS_SHARED = @{
 }

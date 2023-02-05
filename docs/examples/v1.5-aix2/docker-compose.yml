@@ -1,0 +1,23 @@
+version: '2.2'
+services:
+  # This is the official BF2 1.5 dedicated server running the AIX 2.0 mod.
+  bf2:
+    image: startersclan/docker-bf2:v1.5.3153.0-aix2
+    volumes:
+      - ./config/bf2/mods/bf2all64/ai/aidefault-custom.ai:/server/bf2/mods/bf2all64/ai/aidefault.ai:ro # Customize bots
+      # - ./config/bf2/mods/bf2all64/ai/aidefaultstrategies-custom-esai.ai:/server/bf2/mods/bf2all64/ai/aidefaultstrategies.ai:ro # Enable ESAI with a default strategy for all maps. The same can be achieved using: esai-helper apply default-strategy mediumfca
+      # - ./config/bf2/mods/bf2all64/ai/aidefaultstrategiesadd-custom-esai.ai:/server/bf2/mods/bf2all64/ai/aidefaultstrategiesadd.ai:ro # Enable ESAI with a default strategy for all maps. The same can be achieved using: esai-helper apply default-strategy mediumfca
+      - ./config/bf2/mods/bf2all64/settings/serversettings-custom.con:/server/bf2/mods/bf2all64/settings/serversettings.con:ro # Server config
+      - ./config/bf2/mods/bf2all64/settings/maplist-custom-coop.con:/server/bf2/mods/bf2all64/settings/maplist.con:ro # Maplist
+    ports:
+      - 16567:16567/udp
+      - 29900:29900/udp
+    networks:
+      - default
+    healthcheck:
+      test: /healthcheck localhost 29900
+    tty: true
+    stdin_open: true
+
+networks:
+  default:
