@@ -28,6 +28,7 @@ $(
     }
 }) -join ''
 )
+- ``aix2`` - [AIX-2.0](https://www.moddb.com/mods/allied-intent-xtended/downloads/aix-20-server-files) mod.
 - ``bf2all64`` - [BF2All64](https://www.bf-games.net/downloads/2533/bf2-singleplayer-all-in-one-package.html) mod.
 - ``bf2hub`` - Includes [BF2Hub](https://www.bf2hub.com/home/serversetup.php) server binaries.
 - ``bf2stats-2.x.x`` - Includes [BF2Statistics](https://github.com/startersclan/bf2stats) 2 python files to send stats snapshots to the [ASP](https://github.com/startersclan/bf2stats) v2 webserver. See [here](https://github.com/startersclan/bf2stats) for a fully dockerized example.
@@ -36,7 +37,7 @@ $(
 
 ## Usage
 
-See [here](docs/examples) for some good examples.
+See [here](docs/examples) for some `docker-compose` examples.
 
 ``````sh
 # BF2 server

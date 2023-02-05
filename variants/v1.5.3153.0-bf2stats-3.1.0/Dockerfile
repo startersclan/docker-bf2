@@ -18,6 +18,7 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
 
 # Install Battlefield 2 server
 WORKDIR /root
+COPY aibehaviours-fixlookatwrapper.ai /aibehaviours-fixlookatwrapper.ai
 RUN set -eux; \
     curl -sSLO https://files.startersclan.com/ea/bf2/bf2-linuxded-1.5.3153.0-installer.tgz; \
     sha256sum bf2-linuxded-1.5.3153.0-installer.tgz | grep "^4d849218c1725e7bd6a7e7f164e27b036248f8ded2e30340dd0722c1dfffbab6 "; \
@@ -33,7 +34,13 @@ RUN set -eux; \
     # Agree to licenses
     printf '\naccept\n\nyes\n/server\ny\n' | sh /install/license-fixed.sh; \
     find /server; \
-    rm -rf /install;
+    rm -rf /install; \
+    # Apply the LookAtWrapper fix to prevent crashes when playing with bots
+    mv -v /server/bf2/mods/bf2/ai/aibehaviours.ai /server/bf2/mods/bf2/ai/aibehaviours.ai.original; \
+    cp -v /aibehaviours-fixlookatwrapper.ai /server/bf2/mods/bf2/ai/aibehaviours.ai; \
+    mv -v /server/bf2/mods/xpack/ai/aibehaviours.ai /server/bf2/mods/xpack/ai/aibehaviours.ai.original; \
+    cp -v /aibehaviours-fixlookatwrapper.ai /server/bf2/mods/xpack/ai/aibehaviours.ai; \
+    rm -v /aibehaviours-fixlookatwrapper.ai
 
 # Install bf2stats 3.1.0
 WORKDIR /root

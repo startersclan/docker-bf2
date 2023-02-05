@@ -89,6 +89,7 @@ bb933052ad20928b5a4bc6c1eeff647d62b0f3b38de46d063101719a9f0cf488  fh2-server-4.6
                         }
                     }
                     copies = @(
+                        '/vendor/aibehaviours-fixlookatwrapper.ai'
                         '/vendor/ESAI-Standard-v4.2.zip'
                         '/vendor/esai-helper'
                         '/vendor/esai-optimized-strategies-bf2.txt'
