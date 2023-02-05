@@ -230,7 +230,7 @@ COPY esai-helper /usr/local/bin/esai-helper
 COPY esai-optimized-strategies-bf2.txt /esai-optimized-strategies-bf2.txt
 
 '@
-if ($VARIANT['_metadata']['components'] -match 'bf2all64') {
+if ($VARIANT['_metadata']['components'] -contains 'bf2all64') {
 @'
 COPY esai-optimized-strategies-bf2all64.txt /esai-optimized-strategies-bf2all64.txt
 
@@ -247,12 +247,12 @@ COPY healthcheck /healthcheck
 WORKDIR /server/bf2
 
 '@
-if ($VARIANT['_metadata']['components'] -match 'aix2') {
+if ($VARIANT['_metadata']['components'] -contains 'aix2') {
 @"
 CMD [ "./start.sh", "+modPath", "mods/aix2" ]
 
 "@
-}elseif ($VARIANT['_metadata']['components'] -match 'bf2all64') {
+}elseif ($VARIANT['_metadata']['components'] -contains 'bf2all64') {
 @"
 CMD [ "./start.sh", "+modPath", "mods/bf2all64" ]
 
