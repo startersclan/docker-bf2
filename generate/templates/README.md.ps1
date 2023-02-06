@@ -9,7 +9,7 @@ Dockerized [Battlefield 2 Server](https://www.ea.com/games/battlefield/battlefie
 
 ## Tags
 
-All images contain [``Battlefield 2 Server 1.50``](https://www.bf-games.net/downloads/category/153/serverfiles.html), and include [Enhanced Strategic AI (ESAI)](https://www.moddb.com/mods/esai-enhanced-strategic-ai), which may be activated if needed.
+All images contain [``Battlefield 2 Server 1.50``](https://www.bf-games.net/downloads/category/153/serverfiles.html), and include [Enhanced Strategic AI (ESAI)](#esai), which may be activated if needed.
 
 | Tag | Dockerfile Build Context |
 |:-------:|:---------:|
@@ -31,13 +31,15 @@ $(
 - ``aix2`` - [AIX-2.0](https://www.moddb.com/mods/allied-intent-xtended/downloads/aix-20-server-files) mod.
 - ``bf2all64`` - [BF2All64](https://www.bf-games.net/downloads/2533/bf2-singleplayer-all-in-one-package.html) mod.
 - ``bf2hub`` - Includes [BF2Hub](https://www.bf2hub.com/home/serversetup.php) server binaries.
-- ``bf2stats-2.x.x`` - Includes [BF2Statistics](https://github.com/startersclan/bf2stats) 2 python files to send stats snapshots to the [ASP](https://github.com/startersclan/bf2stats) v2 webserver. See [here](https://github.com/startersclan/bf2stats) for a fully dockerized example.
-- ``bf2stats-3.x.x`` - Includes [BF2Statistics](https://github.com/startersclan/StatsPython) 3 python files to send stats snapshots to the [ASP](https://github.com/startersclan/ASP) v3 webserver. See [here](https://github.com/startersclan/ASP) for a fully dockerized example.
+- ``bf2stats-2.x.x`` - Includes [BF2Statistics 2.x.x python files](https://github.com/startersclan/bf2stats) to send stats snapshots to the [BF2Statistics 2.x.x ASP](https://github.com/startersclan/bf2stats) webserver. See [here](https://github.com/startersclan/bf2stats) for a fully dockerized example.
+- ``bf2stats-3.x.x`` - Includes [BF2Statistics 3.x.x python files](https://github.com/startersclan/StatsPython) to send stats snapshots to the [BF2Statistics 3.x.x ASP](https://github.com/startersclan/ASP) webserver. See [here](https://github.com/startersclan/ASP) for a fully dockerized example.
 - ``fh2`` - [Forgotten Hope 2](http://www.forgottenhope.warumdarum.de) mod
 
 ## Usage
 
-Here are some one-liners to quickly start a BF2 server. See [here](docs/examples) for some `docker-compose` examples.
+Here are some one-liners to quickly start a BF2 server.
+
+If you want the BF2 server to be listed on a master server, see [DNS Spoofing](#dns-spoofing).
 
 ### BF2
 
@@ -61,7 +63,7 @@ docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] }
 docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/readmes/pb_eula.txt # EULA for the EULA for PunkBuster
 ``````
 
-### BF2 (customized)
+To customize the server, edit ``serversettings.con`` and ``maplist.con`` accordingly, and start the server:
 
 ``````sh
 # Generate serversettings.con and customize
@@ -77,7 +79,19 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 )
 ``````
 
-### BF2 with BF2Statistics 2.x.x (customized)
+See ``docker-compose`` examples:
+
+- [BF2 LAN server](docs/examples/v1.5)
+- [BF2 server with PRMasterServer as master server](docs/examples/v1.5-prmasterserver)
+- [BF2 server with BF2Hub as master server](docs/examples/v1.5-bf2hub-spoofed)
+- [BF2 server with BF2Hub as master server (using bf2hub binaries)](docs/examples/v1.5-bf2hub)
+- [BF2 LAN server with an ESAI default strategy](docs/examples/v1.5-esai-default-strategy)
+- [BF2 LAN server with community-optimized ESAI strategies](docs/examples/v1.5-esai-optimized-strategies)
+- [BF2 LAN server with custom ESAI strategies](docs/examples/v1.5-esai-custom-strategies)
+
+### BF2 with BF2Statistics 2.x.x
+
+To customize the server, edit ``serversettings.con`` and ``maplist.con`` accordingly, and start the server with [DNS spoofing](#dns-spoofing-for-server-to-send-stats-snapshots-to-bf2statistics-2xx) to the ASP webserver ``192.168.1.100``:
 
 ``````sh
 # Generate serversettings.con and customize
@@ -89,14 +103,25 @@ docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['comp
 # Generate BF2StatisticsConfig.py and customize
 docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/python/bf2/BF2StatisticsConfig.py > BF2StatisticsConfig.py
 # BF2 server with bf2stats 2 python files and custom configs
+# It requires BF2Statistics v2.x.x ASP server to be running on 192.168.1.100
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v "`$(pwd)/serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro" \
     -v "`$(pwd)/maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro" \
     -v "`$(pwd)/BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro" \
+    --add-host bf2web.gamespy.com:192.168.1.100 \
+    --add-host gamestats.gamespy.com:192.168.1.100 \
+    --add-host eapusher.dice.se:192.168.1.100 \
     startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 )
 ``````
 
-### BF2 with BF2Statistics 3.x.x (customized)
+See ``docker-compose`` examples:
+
+- [BF2 LAN server with BF2Statistics 2.x.x ASP as stats server](docs/examples/v1.5-bf2stats-2)
+- [BF2 server with BF2Hub as master server and BF2Statistics 2.x.x ASP as stats server](docs/examples/v1.5-bf2hub-bf2stats-2)
+
+### BF2 with BF2Statistics 3.x.x
+
+To customize the server, edit ``serversettings.con`` and ``maplist.con`` accordingly, and start the server with [DNS spoofing](#dns-spoofing-for-server-to-send-stats-snapshots-to-bf2statistics-3xx) to the ASP webserver ``192.168.1.100``:
 
 ``````sh
 # Generate serversettings.con and customize
@@ -112,8 +137,16 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v "`$(pwd)/serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro" \
     -v "`$(pwd)/maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro" \
     -v "`$(pwd)/BF2StatisticsConfig.py:/server/bf2/python/bf2/BF2StatisticsConfig.py:ro" \
+    --add-host bf2web.gamespy.com:192.168.1.100 \
+    --add-host gamestats.gamespy.com:192.168.1.100 \
+    --add-host eapusher.dice.se:192.168.1.100 \
     startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 )
 ``````
+
+See ``docker-compose`` examples:
+
+- [BF2 LAN server with BF2Statistics 3.x.x ASP as stats server](docs/examples/v1.5-bf2stats-3)
+- [BF2 server with BF2Hub as master server and BF2Statistics 3.x.x ASP as stats server](docs/examples/v1.5-bf2hub-bf2stats-3)
 
 ### AIX 2.0 mod
 
@@ -128,7 +161,7 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'aix2'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c 'esai-helper -m aix2 get maplist | grep gpm_cq | shuf > /server/bf2/mods/aix2/settings/maplist.con && exec ./start.sh +modPath mods/aix2'
 ``````
 
-### AIX 2.0 mod (customized)
+To customize the server, edit ``serversettings.con`` and ``maplist.con`` accordingly:
 
 ``````sh
 # Generate serversettings.con and customize
@@ -144,6 +177,10 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'aix2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 )
 ``````
 
+See ``docker-compose`` examples:
+
+- [BF2 LAN server running AIX 2.0 mod](docs/examples/v1.5-aix2)
+
 ### BF2All64 mod
 
 ``````sh
@@ -157,7 +194,7 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'bf2all64'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c 'esai-helper -m bf2all64 get maplist | grep gpm_cq | shuf > /server/bf2/mods/bf2all64/settings/maplist.con && exec ./start.sh +modPath mods/bf2all64'
 ``````
 
-### BF2All64 mod (customized)
+To customize the server, edit ``serversettings.con`` and ``maplist.con`` accordingly:
 
 ``````sh
 # Generate serversettings.con and customize
@@ -173,6 +210,11 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -contains 'bf2all64' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 )
 ``````
 
+See ``docker-compose`` examples:
+
+- [BF2 LAN server running BF2All64 mod](docs/examples/v1.5-bf2all64)
+- [BF2 LAN server running BF2All64 mod with ESAI optimized strategies](docs/examples/v1.5-bf2all64-esai-optimized-strategies)
+
 ### Forgotten Hope 2 mod
 
 ``````sh
@@ -186,7 +228,7 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'fh2'} | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c 'esai-helper -m fh2 get maplist | grep gpm_cq | shuf > /server/bf2/mods/fh2/settings/maplist.con && exec ./start.sh +modPath mods/fh2'
 ``````
 
-### Forgotten Hope 2 mod (customized)
+To customize the server, edit ``serversettings.con`` and ``maplist.con`` accordingly:
 
 ``````sh
 # Generate serversettings.con and customize
@@ -202,9 +244,119 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'fh2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 )
 ```````
 
+See ``docker-compose`` examples:
+
+- [BF2 LAN server running Forgotten Hope 2 mod](docs/examples/v1.5-fh2)
+
+## DNS spoofing
+
+### DNS spoofing: for server to be listed on BF2Hub master server
+
+If you want the BF2 server to be listed a public master server such as [BF2Hub](https://bf2hub.com/servers), for better server discoverability by clients and to make it easier for clients to connect to your server, DNS spoofing is needed for the BF2 server. DNS spoofing can be done using ``--add-host`` on ``docker run``, or ``extra_hosts`` key in ``docker-compose.yml``.
+
+To list a BF2 server on BF2Hub (IP address ``92.51.181.102``):
+
+> If the server is behind NAT, ensure to port-forward both UDP ports ``16567`` and ``29900`` to your server. ``sv.internet 1`` must be used in ``serversettings.con`` (already present by default).
+
+> The server will be listed as an unranked server on BF2Hub, since it is not a BF2Hub official server.
+
+``````sh
+# BF2 server listed on BF2Hub
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    --add-host battlefield2.available.gamespy.com:92.51.181.102 \
+    --add-host battlefield2.master.gamespy.com:92.51.181.102 \
+    --add-host battlefield2.ms14.gamespy.com:92.51.181.102 \
+    --add-host master.gamespy.com:92.51.181.102 \
+    --add-host motd.gamespy.com:92.51.181.102 \
+    --add-host gpsp.gamespy.com:92.51.181.102 \
+    --add-host gpcm.gamespy.com:92.51.181.102 \
+    --add-host gamespy.com:92.51.181.102 \
+    startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag )
+``````
+
+To get BF2Hub.com IP addresses:
+
+``````sh
+nslookup servers.bf2hub.com
+``````
+
+See `docker-compose` example:
+
+- [Public server listed on BF2Hub](docs/examples/v1.5-bf2hub-spoofed)
+
+### DNS spoofing: for server to be listed on PRMasterServer master server
+
+If you want the BF2 server to be listed on a private master server such as [PRMasterServer](https://github.com/startersclan/prmasterserver), for better server discoverability by clients and to make it easier for clients to connect to your server, DNS spoofing is needed for the BF2 server. DNS spoofing can be done using ``--add-host`` on ``docker run``, or ``extra_hosts`` key in ``docker-compose.yml``.
+
+To list a BF2 server on `PRMasterServer` (assuming ``PRMasterServer`` IP address is ``192.168.1.100``):
+
+> If the server is behind NAT, ensure to port-forward both UDP ports `16567` and `29900` to your server. ``sv.internet 1`` must be used in ``serversettings.con`` (already present by default).
+
+``````sh
+# BF2 server listed on PRMasterServer
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    --add-host battlefield2.available.gamespy.com:92.51.181.102 \
+    --add-host battlefield2.master.gamespy.com:92.51.181.102 \
+    --add-host battlefield2.ms14.gamespy.com:92.51.181.102 \
+    --add-host master.gamespy.com:92.51.181.102 \
+    --add-host motd.gamespy.com:92.51.181.102 \
+    --add-host gpsp.gamespy.com:92.51.181.102 \
+    --add-host gpcm.gamespy.com:92.51.181.102 \
+    --add-host gamespy.com:92.51.181.102 \
+    startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag )
+``````
+
+See ``docker-compose`` examples:
+
+- [Public server listed on PRMasterServer](docs/examples/v1.5-prmasterserver)
+
+### DNS spoofing: for server to send stats snapshots to BF2Statistics 2.x.x
+
+In order for ``bf2stats-2.x.x`` variants to be able to send stats snapshots to a [BF2Statistics 2.x.x ASP](https://github.com/startersclan/bf2stats) webserver, DNS spoofing is needed for the BF2 server. DNS spoofing can be done using ``--add-host`` on ``docker run``, or ``extra_hosts`` key in ``docker-compose.yml``.
+
+To send stats snapshots from ``bf2stats-2.x.x`` (assuming ``BF2Statistics 2.x.x ASP`` webserver IP address is ``192.168.1.100``):
+
+``````sh
+# BF2 server with BF2Statistics
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    --add-host bf2web.gamespy.com:192.168.1.100 \
+    --add-host gamestats.gamespy.com:192.168.1.100 \
+    --add-host eapusher.dice.se:192.168.1.100 \
+    startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 )
+``````
+
+See ``docker-compose`` examples:
+
+- [BF2 server with BF2Statistics 2.x.x ASP as stats server](docs/examples/v1.5-bf2stats-2)
+- [BF2 server with BF2Hub as master server and BF2Statistics 2.x.x ASP as stats server](docs/examples/v1.5-bf2hub-bf2stats-2)
+
+### DNS spoofing: for server to send stats snapshots to BF2Statistics 3.x.x
+
+In order for ``bf2stats-3.x.x`` variants to be able to send stats snapshots to a [BF2Statistics 3.x.x ASP](https://github.com/startersclan/ASP) webserver, DNS spoofing is needed for the BF2 server. DNS spoofing can be done using ``--add-host`` on ``docker run``, or ``extra_hosts`` key in ``docker-compose.yml``.
+
+To send stats snapshots from ``bf2stats-3.x.x`` (assuming `BF2Statistics 3.x.x ASP` webserver IP address is `192.168.1.100`):
+
+``````sh
+# BF2 server with BF2Statistics
+docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
+    --add-host bf2web.gamespy.com:192.168.1.100 \
+    --add-host gamestats.gamespy.com:192.168.1.100 \
+    --add-host eapusher.dice.se:192.168.1.100 \
+    startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 )
+``````
+
+See ``docker-compose`` examples:
+
+- [BF2 server with BF2Statistics 3.x.x ASP as stats server](docs/examples/v1.5-bf2stats-3)
+- [BF2 server with BF2Hub as master server and BF2Statistics 3.x.x ASP as stats server](docs/examples/v1.5-bf2hub-bf2stats-3)
+
+
+"@
+
+@'
 ## ESAI
 
-ESAI greatly enhances bot performance, and is compatible with any BF2 mod. It is included but not enabled by default.
+[ESAI](https://www.moddb.com/mods/esai-enhanced-strategic-ai) greatly enhances bot performance, and is compatible with any BF2 mod. It is included but not enabled by default.
 
 A handy tool called [`esai-helper`](vendor/esai-helper) is included in all images. It can be used to list gamemodes, generate maplists for a mod, list a levels' `strategies.ai`, apply default or custom `strategies.ai` to levels, and more. See `esai-helper --help` for usage.
 
@@ -212,14 +364,18 @@ To use a default strategy for all levels, see [this example](docs/examples/v1.5-
 
 To override the default strategy with a level-specific strategy, optimized strategies config files are included in each image. These strategies have been optimized by the BF2SP64 community:
 
-- [``/esai-optimized-strategies-bf2.txt``](vendor/esai-optimized-strategies-bf2.txt)
-- [``/esai-optimized-strategies-bf2all64.txt``](vendor/esai-optimized-strategies-bf2all64.txt)
-- [``/esai-optimized-strategies-xpack.txt``](vendor/esai-optimized-strategies-xpack.txt)
+- [`/esai-optimized-strategies-bf2.txt`](vendor/esai-optimized-strategies-bf2.txt)
+- [`/esai-optimized-strategies-bf2all64.txt`](vendor/esai-optimized-strategies-bf2all64.txt)
+- [`/esai-optimized-strategies-xpack.txt`](vendor/esai-optimized-strategies-xpack.txt)
 
 To use optimized strategies for levels, see [this example](docs/examples/v1.5-esai-optimized-strategies/). For `bf2all64` mod, see [this example](docs/examples/v1.5-bf2all64-esai-optimized-strategies/).
 
 To use custom strategies for levels, see [example](docs/examples/v1.5-esai-custom-strategies/).
 
+
+'@
+
+@"
 ``````sh
 # Read ESAI readmes
 docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/mods/bf2/esai/readme.txt
