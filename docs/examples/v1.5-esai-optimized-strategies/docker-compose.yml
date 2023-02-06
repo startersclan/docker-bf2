@@ -6,8 +6,6 @@ services:
     image: startersclan/docker-bf2:v1.5.3153.0
     volumes:
       - ./config/bf2/mods/bf2/ai/aidefault-custom.ai:/server/bf2/mods/bf2/ai/aidefault.ai:ro # Customize bots
-      # - ./config/bf2/mods/bf2/ai/aidefaultstrategies-custom-esai.ai:/server/bf2/mods/bf2/ai/aidefaultstrategies.ai:ro # Enable ESAI with a default strategy for all maps. The same can be achieved using: esai-helper apply default-strategy mediumfca
-      # - ./config/bf2/mods/bf2/ai/aidefaultstrategiesadd-custom-esai.ai:/server/bf2/mods/bf2/ai/aidefaultstrategiesadd.ai:ro # Enable ESAI with a default strategy for all maps. The same can be achieved using: esai-helper apply default-strategy mediumfca
       - ./config/bf2/mods/bf2/settings/serversettings-custom.con:/server/bf2/mods/bf2/settings/serversettings.con:ro # Server config
       - ./config/bf2/mods/bf2/settings/maplist-custom-coop.con:/server/bf2/mods/bf2/settings/maplist.con:ro # Maplist
     ports:
