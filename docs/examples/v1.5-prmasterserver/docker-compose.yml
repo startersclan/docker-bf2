@@ -1,6 +1,6 @@
 version: '2.2'
 services:
-  # This is the official BF2 1.5 dedicated server.
+  # This is the official BF2 1.5 dedicated server. It uses PRMasterserver as the master server.
   bf2:
     image: startersclan/docker-bf2:v1.5.3153.0
     volumes:

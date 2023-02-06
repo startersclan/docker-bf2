@@ -1,7 +1,7 @@
 version: '2.2'
 services:
-  # This is the official BF2 1.5 dedicated server. It uses your private master server, and your private ASP web server (i.e. stats server) by DNS spoofing
-  # For a full bf2stats 2 stack example, see https://github.com/startersclan/bf2stats
+  # This is the official BF2 1.5 dedicated server. It uses your private master server, and your private BF2Statistics 2.x.x ASP web server (i.e. stats server) by DNS spoofing
+  # For a full BF2Statistics 2.x.x stack example, see https://github.com/startersclan/bf2stats
   bf2:
     image: startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.5.1
     volumes:

@@ -83,6 +83,7 @@ See ``docker-compose`` examples:
 
 - [BF2 LAN server](docs/examples/v1.5)
 - [BF2 server with PRMasterServer as master server](docs/examples/v1.5-prmasterserver)
+- [BF2 server with PRMasterServer as master server running as a sidecar](docs/examples/v1.5-prmasterserver)
 - [BF2 server with BF2Hub as master server](docs/examples/v1.5-bf2hub-spoofed)
 - [BF2 server with BF2Hub as master server (using bf2hub binaries)](docs/examples/v1.5-bf2hub)
 - [BF2 LAN server with an ESAI default strategy](docs/examples/v1.5-esai-default-strategy)
@@ -102,8 +103,7 @@ docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['comp
 docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq' > maplist.con
 # Generate BF2StatisticsConfig.py and customize
 docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/python/bf2/BF2StatisticsConfig.py > BF2StatisticsConfig.py
-# BF2 server with bf2stats 2 python files and custom configs
-# It requires BF2Statistics v2.x.x ASP server to be running on 192.168.1.100
+# BF2 server with BF2Statistics 2.x.x
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v "`$(pwd)/serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro" \
     -v "`$(pwd)/maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro" \
@@ -132,7 +132,7 @@ docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['comp
 docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq' > maplist.con
 # Generate BF2StatisticsConfig.py and customize
 docker run --rm -it startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/python/bf2/BF2StatisticsConfig.py > BF2StatisticsConfig.py
-# BF2 server with bf2stats 3 python files and custom configs
+# BF2 server with BF2Statistics 3.x.x
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v "`$(pwd)/serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro" \
     -v "`$(pwd)/maplist.con:/server/bf2/mods/bf2/settings/maplist.con:ro" \
@@ -261,7 +261,7 @@ To list a BF2 server on BF2Hub (IP address ``92.51.181.102``):
 > The server will be listed as an unranked server on BF2Hub, since it is not a BF2Hub official server.
 
 ``````sh
-# BF2 server listed on BF2Hub
+# BF2 server with BF2Hub as master server
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     --add-host battlefield2.available.gamespy.com:92.51.181.102 \
     --add-host battlefield2.master.gamespy.com:92.51.181.102 \
@@ -282,7 +282,7 @@ nslookup servers.bf2hub.com
 
 See `docker-compose` example:
 
-- [Public server listed on BF2Hub](docs/examples/v1.5-bf2hub-spoofed)
+- [BF2 server with BF2Hub as master server](docs/examples/v1.5-bf2hub-spoofed)
 
 ### DNS spoofing: for server to be listed on PRMasterServer master server
 
@@ -293,22 +293,23 @@ To list a BF2 server on `PRMasterServer` (assuming ``PRMasterServer`` IP address
 > If the server is behind NAT, ensure to port-forward both UDP ports `16567` and `29900` to your server. ``sv.internet 1`` must be used in ``serversettings.con`` (already present by default).
 
 ``````sh
-# BF2 server listed on PRMasterServer
+# BF2 server with PRMasterServer as master server
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
-    --add-host battlefield2.available.gamespy.com:92.51.181.102 \
-    --add-host battlefield2.master.gamespy.com:92.51.181.102 \
-    --add-host battlefield2.ms14.gamespy.com:92.51.181.102 \
-    --add-host master.gamespy.com:92.51.181.102 \
-    --add-host motd.gamespy.com:92.51.181.102 \
-    --add-host gpsp.gamespy.com:92.51.181.102 \
-    --add-host gpcm.gamespy.com:92.51.181.102 \
-    --add-host gamespy.com:92.51.181.102 \
+    --add-host battlefield2.available.gamespy.com:192.168.1.100 \
+    --add-host battlefield2.master.gamespy.com:192.168.1.100 \
+    --add-host battlefield2.ms14.gamespy.com:192.168.1.100 \
+    --add-host master.gamespy.com:192.168.1.100 \
+    --add-host motd.gamespy.com:192.168.1.100 \
+    --add-host gpsp.gamespy.com:192.168.1.100 \
+    --add-host gpcm.gamespy.com:192.168.1.100 \
+    --add-host gamespy.com:192.168.1.100 \
     startersclan/docker-bf2:$( $VARIANTS | ? { $_['tag_as_latest'] } | Select-Object -ExpandProperty tag )
 ``````
 
 See ``docker-compose`` examples:
 
-- [Public server listed on PRMasterServer](docs/examples/v1.5-prmasterserver)
+- [BF2 server with PRMasterServer as master server](docs/examples/v1.5-prmasterserver)
+- [BF2 server with PRMasterServer as master server running as a sidecar](docs/examples/v1.5-prmasterserver)
 
 ### DNS spoofing: for server to send stats snapshots to BF2Statistics 2.x.x
 
@@ -317,7 +318,7 @@ In order for ``bf2stats-2.x.x`` variants to be able to send stats snapshots to a
 To send stats snapshots from ``bf2stats-2.x.x`` (assuming ``BF2Statistics 2.x.x ASP`` webserver IP address is ``192.168.1.100``):
 
 ``````sh
-# BF2 server with BF2Statistics
+# BF2 server with BF2Statistics 2.x.x
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     --add-host bf2web.gamespy.com:192.168.1.100 \
     --add-host gamestats.gamespy.com:192.168.1.100 \
@@ -337,7 +338,7 @@ In order for ``bf2stats-3.x.x`` variants to be able to send stats snapshots to a
 To send stats snapshots from ``bf2stats-3.x.x`` (assuming `BF2Statistics 3.x.x ASP` webserver IP address is `192.168.1.100`):
 
 ``````sh
-# BF2 server with BF2Statistics
+# BF2 server with BF2Statistics 3.x.x
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     --add-host bf2web.gamespy.com:192.168.1.100 \
     --add-host gamestats.gamespy.com:192.168.1.100 \

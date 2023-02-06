@@ -1,0 +1,53 @@
+version: '2.2'
+services:
+  # This is the official BF2 1.5 dedicated server. It uses PRMasterserver as the master server (sidecar).
+  bf2:
+    image: startersclan/docker-bf2:v1.5.3153.0
+    volumes:
+      - ./config/bf2/mods/bf2/ai/aidefault-custom.ai:/server/bf2/mods/bf2/ai/aidefault.ai:ro # Customize bots
+      - ./config/bf2/mods/bf2/settings/serversettings-custom.con:/server/bf2/mods/bf2/settings/serversettings.con:ro # Server config
+      - ./config/bf2/mods/bf2/settings/maplist-custom-coop.con:/server/bf2/mods/bf2/settings/maplist.con:ro # Maplist (coop)
+    ports:
+      - 16567:16567/udp
+      - 29900:29900/udp
+    networks:
+      - default
+      - gamespy-network
+    depends_on:
+      - prmasterserver
+    healthcheck:
+      test: /healthcheck localhost 29900
+    tty: true
+    stdin_open: true
+
+  # The Gamespy master server
+  prmasterserver:
+    image: startersclan/prmasterserver:v0.1.0
+    volumes:
+      - prmasterserver-volume:/data
+    ports:
+      - 29900:29900/tcp # Login server
+      - 29901:29901/tcp # Login server
+      - 28910:28910/tcp # Master server
+      - 27900:27900/udp # Master server
+      - 29910:29910/udp # CD key server
+    networks:
+      # Spoof all gamespy DNS for the BF2 server connected to this network
+      gamespy-network:
+        aliases:
+          - battlefield2.available.gamespy.com
+          - battlefield2.master.gamespy.com
+          - battlefield2.ms14.gamespy.com
+          - gamestats.gamespy.com
+          - master.gamespy.com
+          - motd.gamespy.com
+          - gpsp.gamespy.com
+          - gpcm.gamespy.com
+          - gamespy.com
+
+networks:
+  default:
+  gamespy-network:
+
+volumes:
+  prmasterserver-volume:
