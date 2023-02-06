@@ -96,13 +96,13 @@ To customize the server, edit ``serversettings.con`` and ``maplist.con`` accordi
 
 ``````sh
 # Generate serversettings.con and customize
-docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/mods/bf2/settings/serversettings.con > serversettings.con
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 ) cat /server/bf2/mods/bf2/settings/serversettings.con > serversettings.con
 # Generate maplist.con (coop)
-docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_coop' > maplist.con
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_coop' > maplist.con
 # Generate maplist.con (conquest)
-docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq' > maplist.con
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq' > maplist.con
 # Generate BF2StatisticsConfig.py and customize
-docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/python/bf2/BF2StatisticsConfig.py > BF2StatisticsConfig.py
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-2' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 ) cat /server/bf2/python/bf2/BF2StatisticsConfig.py > BF2StatisticsConfig.py
 # BF2 server with BF2Statistics 2.x.x
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v "`$(pwd)/serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro" \
@@ -125,13 +125,13 @@ To customize the server, edit ``serversettings.con`` and ``maplist.con`` accordi
 
 ``````sh
 # Generate serversettings.con and customize
-docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/mods/bf2/settings/serversettings.con > serversettings.con
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 ) cat /server/bf2/mods/bf2/settings/serversettings.con > serversettings.con
 # Generate maplist.con (coop)
-docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_coop' > maplist.con
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_coop' > maplist.con
 # Generate maplist.con (conquest)
-docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq' > maplist.con
+docker run --rm startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 ) bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq' > maplist.con
 # Generate BF2StatisticsConfig.py and customize
-docker run --rm -it startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -First 1 ) cat /server/bf2/python/bf2/BF2StatisticsConfig.py > BF2StatisticsConfig.py
+docker run --rm -it startersclan/docker-bf2:$( $VARIANTS | ? { $_['_metadata']['components'] -match 'bf2stats-3' } | Select-Object -ExpandProperty tag | Sort-Object | Select-Object -Last 1 ) cat /server/bf2/python/bf2/BF2StatisticsConfig.py > BF2StatisticsConfig.py
 # BF2 server with BF2Statistics 3.x.x
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v "`$(pwd)/serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro" \
