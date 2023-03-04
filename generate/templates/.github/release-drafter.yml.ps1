@@ -1,15 +1,15 @@
 @'
-name-template: '$RESOLVED_VERSION  🌈'
-tag-template: '$RESOLVED_VERSION'
+name-template: 'v$RESOLVED_VERSION 🌈'
+tag-template: 'v$RESOLVED_VERSION'
 categories:
   - title: '🚀 Features'
     labels:
       - 'feature'
       - 'enhancement'
+      - 'change'
   - title: '🐛 Bug Fixes'
     labels:
       - 'fix'
-      - 'bugfix'
       - 'bug'
   - title: '🖊️ Refactors'
     labels:
@@ -27,27 +27,26 @@ change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 version-resolver:
   major:
     labels:
-      # - 'major'
       - 'breaking'
   minor:
     labels:
-      # - 'minor'
       - 'feature'
       - 'enhancement'
+      - 'change'
       - 'refactor'
   patch:
     labels:
-      # - 'patch'
       - 'fix'
-      - 'bugfix'
       - 'bug'
       - 'style'
       - 'docs'
       - 'documentation'
+      - 'chore'
   default: patch
 sort-by: title
 template: |
   ## Changes
 
   $CHANGES
+
 '@
