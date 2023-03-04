@@ -42,8 +42,7 @@ $VARIANTS | % {
   build-$( $_['tag'].Replace('.', '-') ):
     runs-on: ubuntu-latest
     env:
-      VARIANT_TAG: $( $_['tag'] )
-      VARIANT_BUILD_DIR: $( $_['build_dir_rel'] )
+      VARIANT: $( $_['tag'] )
 "@
 @'
 
@@ -70,99 +69,91 @@ $VARIANTS | % {
 
     - name: Set up Docker Buildx
       id: buildx
-      uses: docker/setup-buildx-action@master
+      uses: docker/setup-buildx-action@v2
 
     - name: Cache Docker layers
       uses: actions/cache@v3
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT_TAG }}-${{ github.sha }}
+        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT_TAG }}-
+          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
           ${{ runner.os }}-buildx-
 
+    # This step generates the docker tags
     - name: Prepare
       id: prep
       run: |
         set -e
 
-        # Get 'namespace' and 'project-name' from 'namespace/project-name'
-        # CI_PROJECT_NAMESPACE=$( echo "${{ github.repository }}" | cut -d '/' -f 1 )
-        # CI_PROJECT_NAME=$( echo "${{ github.repository }}" | cut -d '/' -f 2 )
-
-        # Get ref, i.e. <branch_name> from refs/heads/<branch_name>, or <tag-name> from refs/tags/<tag_name>. E.g. 'master' or 'v1.2.3'
+        # Get ref, i.e. <branch_name> from refs/heads/<branch_name>, or <tag-name> from refs/tags/<tag_name>. E.g. 'master' or 'v0.0.0'
         REF=$( echo "${GITHUB_REF}" | rev | cut -d '/' -f 1 | rev )
 
-        # Get commit hash E.g. 'b29758a'
-        SHA_SHORT=$( echo "${GITHUB_SHA}" | cut -c1-7 )
+        # Get short commit hash E.g. 'abc0123'
+        SHA=$( echo "${GITHUB_SHA}" | cut -c1-7 )
 
-        # Generate the final tags. E.g. 'master-mytag' and 'master-b29758a-mytag'
-        VARIANT_TAG_WITH_REF="${REF}-${VARIANT_TAG}"
-        VARIANT_TAG_WITH_REF_AND_SHA_SHORT="${REF}-${SHA_SHORT}-${VARIANT_TAG}"
+        # Generate docker image tags
+        # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
+        # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        REF_VARIANT="${REF}-${VARIANT}"
+        REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        # echo "CI_PROJECT_NAMESPACE=$CI_PROJECT_NAMESPACE" >> $GITHUB_ENV
-        # echo "CI_PROJECT_NAME=$CI_PROJECT_NAME" >> $GITHUB_ENV
-        # echo "REF=$REF" >> $GITHUB_ENV
-        # echo "SHA_SHORT=$SHA_SHORT" >> $GITHUB_ENV
-        # echo "REF_AND_SHA_SHORT=$REF_AND_SHA_SHORT" >> $GITHUB_ENV
         echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT_TAG=$VARIANT_TAG" >> $GITHUB_ENV
-        echo "VARIANT_TAG_WITH_REF=$VARIANT_TAG_WITH_REF" >> $GITHUB_ENV
-        echo "VARIANT_TAG_WITH_REF_AND_SHA_SHORT=$VARIANT_TAG_WITH_REF_AND_SHA_SHORT" >> $GITHUB_ENV
+        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
 
-    - name: Login to docker registry
+    - name: Login to Docker Hub registry
+      # Run on master and tags
       if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      run: echo "${DOCKERHUB_REGISTRY_PASSWORD}" | docker login -u "${DOCKERHUB_REGISTRY_USER}" --password-stdin
-      env:
-        DOCKERHUB_REGISTRY_USER: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        DOCKERHUB_REGISTRY_PASSWORD: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
+        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
 
 
 '@
 @"
     - name: Build (PRs)
-      id: docker_build_pr
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
       with:
-        context: `${{ env.VARIANT_BUILD_DIR }}
+        context: $( $_['build_dir_rel'] )
         platforms: $( $_['_metadata']['platforms'] -join ',' )
         push: false
         tags: |
-          `${{ github.repository }}:`${{ env.VARIANT_TAG_WITH_REF }}
-          `${{ github.repository }}:`${{ env.VARIANT_TAG_WITH_REF_AND_SHA_SHORT }}
+          `${{ github.repository }}:`${{ env.REF_VARIANT }}
+          `${{ github.repository }}:`${{ env.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
     - name: Build and push (master)
-      id: docker_build_master
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
       with:
-        context: `${{ env.VARIANT_BUILD_DIR }}
+        context: $( $_['build_dir_rel'] )
         platforms: $( $_['_metadata']['platforms'] -join ',' )
         push: true
         tags: |
-          `${{ github.repository }}:`${{ env.VARIANT_TAG_WITH_REF }}
-          `${{ github.repository }}:`${{ env.VARIANT_TAG_WITH_REF_AND_SHA_SHORT }}
+          `${{ github.repository }}:`${{ env.REF_VARIANT }}
+          `${{ github.repository }}:`${{ env.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
     - name: Build and push (release)
-      id: docker_build_release
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
-        context: `${{ env.VARIANT_BUILD_DIR }}
+        context: $( $_['build_dir_rel'] )
         platforms: $( $_['_metadata']['platforms'] -join ',' )
         push: true
         tags: |
-          `${{ github.repository }}:`${{ env.VARIANT_TAG }}
-          `${{ github.repository }}:`${{ env.VARIANT_TAG_WITH_REF }}
-          `${{ github.repository }}:`${{ env.VARIANT_TAG_WITH_REF_AND_SHA_SHORT }}
+          `${{ github.repository }}:`${{ env.VARIANT }}
+          `${{ github.repository }}:`${{ env.REF_VARIANT }}
+          `${{ github.repository }}:`${{ env.REF_SHA_VARIANT }}
 
 "@
 
@@ -183,13 +174,6 @@ if ( $_['tag_as_latest'] ) {
       run: |
         rm -rf /tmp/.buildx-cache
         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-    - name: List docker images
-      run: docker images
-
-    - name: Clean-up
-      run: docker logout
-      if: always()
 '@
 }
 
