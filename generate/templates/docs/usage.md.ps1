@@ -380,11 +380,13 @@ In addition, the gameserver lists its info on master server based on the `sv.ser
 
 ### Q: Server not listed on master server after `docker-compose down && docker-compose up`
 
-A: This is caused by stale UDP conntrack entries which are not deleted up by `docker` on container teardown. See [this issue](https://github.com/moby/moby/issues/8795).
+A: This is caused by stale [UDP conntrack entries which are not deleted](https://github.com/moby/moby/issues/8795) by `docker` on container teardown that was recently fixed in docker [`v23.0.0`](https://github.com/moby/moby/pull/44752).
 
-The solution is to run a sidecar container that deletes the stale UDP conntrack entries on BF2 container startup, see [this example](examples/delete-udp-conntrack). Alternatively, a sidecar `init-container` can achieve the same result, see [this example](examples/v1.5-with-delete-udp-conntrack). Alternatively, run on host networking (i.e. `network_mode: host` in docker-compose.yml) to avoid SNAT completely, but that is not advised because it defeats the purpose of containerization.
+For older docker version, the solution is to run a sidecar container that deletes the stale UDP conntrack entries on BF2 container startup, see [this example](examples/delete-udp-conntrack). Alternatively, a sidecar `init-container` can achieve the same result, see [this example](examples/v1.5-with-delete-udp-conntrack). Alternatively, run on host networking (i.e. `network_mode: host` in docker-compose.yml) to avoid SNAT completely, but that is not advised because it defeats the purpose of containerization.
 
 To illustate the details:
+
+<details>
 
 ```sh
 # Start BF2 server
@@ -392,9 +394,9 @@ $ docker-compose up
 $ sleep 10
 
 # Get UDP conntrack entries
-# 91.51.181.102:27900 is BF2Hub master server
-# 91.51.181.102:29910 is BF2Hub cdkey server
-# 91.51.149.13 is the BF2Hub master listing server
+# 92.51.181.102:27900 is BF2Hub master server
+# 92.51.181.102:29910 is BF2Hub cdkey server
+# 92.51.149.13 is the BF2Hub master listing server
 # 192.168.1.100 is our host machine's IP address
 # 172.17.48.2:29900 is the bf2 container's IP address and gamespy port
 # 1st line: On init, the BF2 server talks to the BF2Hub master server and registers itself to be listed. After which, both send heartbeats to each other at regular intervals. Hence [ASSURED]
@@ -448,15 +450,16 @@ udp      17 106 src=92.51.149.13 dst=192.168.1.100 sport=58665 dport=29900 src=1
 conntrack v1.4.5 (conntrack-tools): 1 flow entries have been deleted
 
 # Get UDP conntrack entries
-# Line 1: BF2 server talking with the BF2Hub master server. It is now [ASSURED] which is expected
-# Line 2: BF2 server talking with the BF2Hub cd key server. [UNREPLIED] is expected
+# Line 1: BF2 server talking with the BF2Hub cd key server. [UNREPLIED] is expected
+# Line 2: BF2 server talking with the BF2Hub master server. It is now [ASSURED] which is expected
 # Line 3: The master listing server talks with the BF2 server. [ASSURED] is expected
 # Now we see that the new BF2 container IP (172.17.64.2) correctly talks with the BF2Hub master server, and our server is now listed
 $ sudo conntrack -L -p udp | grep 92.51
-udp      17 114 src=172.17.64.2 dst=92.51.181.102 sport=29900 dport=27900 src=92.51.181.102 dst=192.168.1.100 sport=27900 dport=29900 [ASSURED] mark=0 use=1
 udp      17 25 src=172.17.64.2 dst=92.51.181.102 sport=29900 dport=29910 [UNREPLIED] src=92.51.181.102 dst=192.168.1.100 sport=29910 dport=29900 mark=0 use=1
+udp      17 114 src=172.17.64.2 dst=92.51.181.102 sport=29900 dport=27900 src=92.51.181.102 dst=192.168.1.100 sport=27900 dport=29900 [ASSURED] mark=0 use=1
 udp      17 119 src=92.51.149.13 dst=192.168.1.100 sport=58665 dport=29900 src=172.17.64.2 dst=92.51.149.13 sport=29900 dport=58665 [ASSURED] mark=0 use=1
 ```
 
+</details>
 '@
 
