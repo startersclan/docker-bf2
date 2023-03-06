@@ -448,3 +448,255 @@ udp      17 119 src=92.51.149.13 dst=192.168.1.100 sport=58665 dport=29900 src=1
 ```
 
 </details>
+
+### Q: Server not listed on master server on Kubernetes
+
+A: If the pod is not running on `hostNetwork: true`, the Kubernetes [Container Network Interface (CNI)](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/) is likely performing SNAT (via `iptables` `POSTROUTING` rules) on outgoing UDP packets from the gameserver pod, thereby changing the gameserver's source port(s).
+
+The easy solution is to use `hostNework: true` for `bf2` pods. However, this has security implications since the is running in the host's network namespace.
+
+Better solutions:
+
+- Change the CNI configuration to perform SNAT while still preserving the outgoing port(s), for `bf2` pods. However, not many CNIs offer this kind of customization.
+- Disable outgoing SNAT via the CNI configuration specifically for `bf2` pods, so that the CNI does not create an `iptables` `POSTROUTING` table `SNAT` or `MASQUERADE` rule that mutates the gameserver outgoing traffic ports. Then manually create a `POSTROUTING` rule that preserves the UDP ports `16567` (`sv.serverPort`) and `29900` (`sv.gameSpyPort`), especially so for the `sv.gameSpyPort` which is responsible for talking with the gamespy master server, for example:
+
+    ```sh
+    # This inserts two rules to the top of the POSTROUTING table, that performs outgoing SNAT while still preserving the outgoing UDP ports 16567 and 29900 for the bf2 server
+    iptables -t nat -I POSTROUTING 1 -p udp --sport=16567 -j MASQUERADE --to-ports=16567
+    iptables -t nat -I POSTROUTING 1 -p udp --sport=29900 -j MASQUERADE --to-ports=29900
+    ```
+
+To illustrate the problem:
+
+<details>
+
+Run the gameserver.
+
+The `tcpdump` in the gameserver pod is generally good. The first outgoing packet's random outgoing UDP port `56631` is fine. The second outgoing packet's outgoing UDP port `29900` is correct. However as seen later on the host, both outgoing ports are randomized by the CNI. This second outgoing packet has created a `conntrack` entry mapping UDP port `10.0.1.2.29900 -> 92.51.181.102.27900` in the container to UDP port `192.168.1.100.58159 -> 92.51.181.102.27900` on the host. When the master server replies `92.51.181.102.27900 -> 192.168.1.100.29900` to the host, it cannot be mapped to `92.51.181.102.27900 -> 10.0.1.2.29900` in the pod because of the existing `conntrack` entry, so a new `conntrack` is created `92.51.181.102.1024 > 10.0.1.2.29900` with a wrong master server source port `1024`. With a wrong master server source port, the gameserver cannot properly register itself with the master server:
+
+```sh
+# 92.51.181.102:27900 is BF2Hub master server
+# 92.51.181.102:29910 is BF2Hub cdkey server
+# 92.204.50.3 is the BF2Hub master listing server
+# 192.168.1.100 is the kubernetes host machine's IP address
+# 10.0.1.2:29900 is the bf2 pod's IP address and gamespy port
+
+# In pod
+$ tcpdump -p udp -n -A
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
+12:54:28.995563 IP 10.0.1.2.56631 > 92.51.181.102.27900: UDP, length 18
+E...2.@.@...
+.&.\3.f.7l...B. ....battlefield2.
+12:54:29.236465 IP 92.51.181.102.27900 > 10.0.1.2.56631: UDP, length 7
+E..#....q./.\3.f
+.&.l..7..kI..   ....
+12:54:31.265344 IP 92.204.50.3.59171 > 10.0.1.2.29900: UDP, length 11
+E..'e...q.$A\.2.
+.&..#}...,Y...qYQU....
+12:54:32.205484 IP 10.0.1.2.29900 > 92.51.181.102.27900: UDP, length 831
+E..[3r@.@...
+.&.\3.f}.l..GE.....zlocalip0.10.0.1.2.localport.29900.natneg.0.statechanged.3.gamename.battlefield2.hostname..gamename.battlefield2.gamever.1.5.3153-802.0.mapname..gametype..gamevariant..numplayers..maxplayers..gamemode.openplaying.password..timelimit..roundtime..hostport..bf2_dedicated..bf2_ranked..bf2_anticheat..bf2_os.linux-64.bf2_autorec..bf2_d_idx..bf2_d_dl..bf2_voip..bf2_autobalanced..bf2_friendlyfire..bf2_tkmode..bf2_startdelay..bf2_spawntime..bf2_sponsortext..bf2_sponsorlogo_url..bf2_communitylogo_url..bf2_scorelimit..bf2_ticketratio..bf2_teamratio..bf2_team1..bf2_team2..bf2_bots..bf2_pure..bf2_mapsize..bf2_globalunlocks..bf2_fps.34.000000.bf2_plasma..bf2_reservedslots..bf2_coopbotratio..bf2_coopbotcount..bf2_coopbotdiff..bf2_novehicles.....player_.score_.ping_.team_.deaths_.pid_.skill_.AIBot_....team_t.score_t..MEC.0.EU.0.
+12:54:32.205709 IP 10.0.1.2.29900 > 92.204.50.3.59171: UDP, length 777
+E..%q.@.@..b
+.&.\.2.}..#.....qYQUsplitnum...hostname..gamename.battlefield2.gamever.1.5.3153-802.0.mapname..gametype..gamevariant..numplayers..maxplayers..gamemode.openplaying.password..timelimit..roundtime..hostport..bf2_dedicated..bf2_ranked..bf2_anticheat..bf2_os.linux-64.bf2_autorec..bf2_d_idx..bf2_d_dl..bf2_voip..bf2_autobalanced..bf2_friendlyfire..bf2_tkmode..bf2_startdelay..bf2_spawntime..bf2_sponsortext..bf2_sponsorlogo_url..bf2_communitylogo_url..bf2_scorelimit..bf2_ticketratio..bf2_teamratio..bf2_team1..bf2_team2..bf2_bots..bf2_pure..bf2_mapsize..bf2_globalunlocks..bf2_fps.34.000000.bf2_plasma..bf2_reservedslots..bf2_coopbotratio..bf2_coopbotcount..bf2_coopbotdiff..bf2_novehicles....player_...score_...ping_...team_...deaths_...pid_...skill_...AIBot_.....team_t..MEC.EU..score_t..0.0...
+12:54:32.447508 IP 92.51.181.102.1024 > 10.0.1.2.29900: UDP, length 28
+E..8....r...\3.f
+.&...}..$.V......z7sv"3i00B48153267D01.
+12:54:32.448025 IP 10.0.1.2.29900 > 92.51.181.102.1024: UDP, length 34
+E..>3.@.@...
+.&.\3.f}....*B.....zlTE1YLS3GwjGfT+6atCy/gxSSAQA.
+12:54:32.688665 IP 92.51.181.102.1024 > 10.0.1.2.29900: UDP, length 7
+E..#....r...\3.f
+.&...}.......
+...z
+12:54:51.526895 IP 92.204.50.3.59171 > 10.0.1.2.29900: UDP, length 7
+E..#f...q.$>\.2.
+.&..#}....]..   cwbI
+12:54:51.547225 IP 10.0.1.2.29900 > 92.204.50.3.59171: UDP, length 7
+E..#|R@.@...
+.&.\.2.}..#.... cwbI0.
+```
+
+The `tcpdump` on the kubernetes host is generally good. The first random outgoing packet's UDP port `6127` is fine. But the second random outgoing packet's UDP port `58159`:
+
+```sh
+# On host
+$ tcpdump -p udp -n -A
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
+12:54:28.995659 IP 192.168.1.100.6127 > 92.51.181.102.27900: UDP, length 18
+E...2.@.?.60....\3.f..l....1	....battlefield2.
+12:54:29.236405 IP 92.51.181.102.27900 > 192.168.1.100.6127: UDP, length 7
+E..#....r..?\3.f....l.........	...............
+12:54:31.265287 IP 92.204.50.3.59171 > 192.168.1.100.29900: UDP, length 11
+E..'e...r...\.2......#}........qYQU...........
+12:54:32.205551 IP 192.168.1.100.58159 > 92.51.181.102.27900: UDP, length 831
+E..[3r@.?.2.....\3.f./l..G.^....zlocalip0.10.0.1.2.localport.29900.natneg.0.statechanged.3.gamename.battlefield2.hostname..gamename.battlefield2.gamever.1.5.3153-802.0.mapname..gametype..gamevariant..numplayers..maxplayers..gamemode.openplaying.password..timelimit..roundtime..hostport..bf2_dedicated..bf2_ranked..bf2_anticheat..bf2_os.linux-64.bf2_autorec..bf2_d_idx..bf2_d_dl..bf2_voip..bf2_autobalanced..bf2_friendlyfire..bf2_tkmode..bf2_startdelay..bf2_spawntime..bf2_sponsortext..bf2_sponsorlogo_url..bf2_communitylogo_url..bf2_scorelimit..bf2_ticketratio..bf2_teamratio..bf2_team1..bf2_team2..bf2_bots..bf2_pure..bf2_mapsize..bf2_globalunlocks..bf2_fps.34.000000.bf2_plasma..bf2_reservedslots..bf2_coopbotratio..bf2_coopbotcount..bf2_coopbotdiff..bf2_novehicles.....player_.score_.ping_.team_.deaths_.pid_.skill_.AIBot_....team_t.score_t..MEC.0.EU.0.
+12:54:32.205718 IP 192.168.1.100.29900 > 92.204.50.3.59171: UDP, length 777
+E..%q.@.?.v.....\.2.}..#..S^.qYQUsplitnum...hostname..gamename.battlefield2.gamever.1.5.3153-802.0.mapname..gametype..gamevariant..numplayers..maxplayers..gamemode.openplaying.password..timelimit..roundtime..hostport..bf2_dedicated..bf2_ranked..bf2_anticheat..bf2_os.linux-64.bf2_autorec..bf2_d_idx..bf2_d_dl..bf2_voip..bf2_autobalanced..bf2_friendlyfire..bf2_tkmode..bf2_startdelay..bf2_spawntime..bf2_sponsortext..bf2_sponsorlogo_url..bf2_communitylogo_url..bf2_scorelimit..bf2_ticketratio..bf2_teamratio..bf2_team1..bf2_team2..bf2_bots..bf2_pure..bf2_mapsize..bf2_globalunlocks..bf2_fps.34.000000.bf2_plasma..bf2_reservedslots..bf2_coopbotratio..bf2_coopbotcount..bf2_coopbotdiff..bf2_novehicles....player_...score_...ping_...team_...deaths_...pid_...skill_...AIBot_.....team_t..MEC.EU..score_t..0.0...
+12:54:32.447422 IP 92.51.181.102.27900 > 192.168.1.100.29900: UDP, length 28
+E..8....s..)\3.f....l.}..$........z7sv"3i00B48153267D01.
+12:54:32.448042 IP 192.168.1.100.29900 > 92.51.181.102.27900: UDP, length 34
+E..>3.@.?.5.....\3.f}.l..*.A....zlTE1YLS3GwjGfT+6atCy/gxSSAQA.
+12:54:32.688615 IP 92.51.181.102.27900 > 192.168.1.100.29900: UDP, length 7
+E..#....s..=\3.f....l.}....,..
+...z...........
+12:54:51.526835 IP 92.204.50.3.59171 > 192.168.1.100.29900: UDP, length 7
+E..#f...r...\.2......#}.......	cwbI...........
+12:54:51.547273 IP 192.168.1.100.29900 > 92.204.50.3.59171: UDP, length 7
+E..#|R@.?.o<....\.2.}..#..P\	cwbI0.
+```
+
+The `conntrack` table is generally good, except there is an invalid destination port `dport=1024` to the master server from inside the gameserver pod, as explained earlier:
+
+```sh
+# Line 2: BF2 server talking with the BF2Hub cd key server. [UNREPLIED] is expected
+# Line 1: BF2 server talking with the BF2Hub master server. It is now [ASSURED] which is expected. However, the master server source port should be 27900 instead of 1024
+# Line 3: The master listing server talks with the BF2 server. [ASSURED] is expected
+$ conntrack -L -p udp | grep 29900
+udp      17 21 src=10.0.1.2 dst=92.51.181.102 sport=32001 dport=29910 [UNREPLIED] src=92.51.181.102 dst=192.168.0.196 sport=29910 dport=32001 mark=0 use=1
+udp      17 89 src=92.51.181.102 dst=192.168.1.100 sport=27900 dport=29900 src=10.0.1.2 dst=92.51.181.102 sport=29900 dport=1024 [ASSURED] mark=0 use=1
+udp      17 175 src=92.204.50.3 dst=192.168.1.100 sport=59171 dport=29900 src=10.0.1.2 dst=92.204.50.3 sport=29900 dport=59171 [ASSURED] mark=0 use=1
+```
+
+The cause is a CNI (`calico` in this case) `iptables` `POSTROUTING` `MASQUERADE` rule which randomizes the source port(s) of the gameserver pod's outgoing traffic:
+
+```sh
+$ iptables -t nat -L POSTROUTING -nv
+Chain POSTROUTING (policy ACCEPT 95 packets, 6144 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+2059K  130M cali-POSTROUTING  all  --  *      *       0.0.0.0/0            0.0.0.0/0            /* cali:O3lYWMrLQYEMJtB5 */
+2908K  184M CNI-HOSTPORT-MASQ  all  --  *      *       0.0.0.0/0            0.0.0.0/0            /* CNI portfwd requiring masquerade */
+2909K  184M KUBE-POSTROUTING  all  --  *      *       0.0.0.0/0            0.0.0.0/0            /* kubernetes postrouting rules */
+    0     0 MASQUERADE  all  --  *      !docker0  172.17.0.0/16        0.0.0.0/0
+
+$ iptables -t nat -S |grep -E 'MASQUERADE|SNAT'
+-A cali-nat-outgoing -m comment --comment "cali:5nyjfg7Yyt12dDfu" -m set --match-set cali40masq-ipam-pools src -m set ! --match-set cali40all-ipam-pools dst -j MASQUERADE --random-fully
+```
+
+Hence, the gameserver is not listed on the master server.
+
+</details>
+
+To illustrate the solution:
+
+<details>
+
+The solution is to insert two rules into the iptables `POSTROUTING` table:
+
+```sh
+# This inserts two rules at the top of the POSTROUTING table, that performs outgoing SNAT while still preserving the outgoing UDP port(s) 16567 and 29900 for the bf2 server
+iptables -t nat -I POSTROUTING 1 -p udp --sport=16567 -j MASQUERADE --to-ports=16567
+iptables -t nat -I POSTROUTING 1 -p udp --sport=29900 -j MASQUERADE --to-ports=29900
+
+$ iptables -t nat -L POSTROUTING -nv
+Chain POSTROUTING (policy ACCEPT 95 packets, 6144 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+ 0    96 MASQUERADE  udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp spt:16567 masq ports: 16567
+ 0   195 MASQUERADE  udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp spt:29900 masq ports: 29900
+2059K  130M cali-POSTROUTING  all  --  *      *       0.0.0.0/0            0.0.0.0/0            /* cali:O3lYWMrLQYEMJtB5 */
+2908K  184M CNI-HOSTPORT-MASQ  all  --  *      *       0.0.0.0/0            0.0.0.0/0            /* CNI portfwd requiring masquerade */
+2909K  184M KUBE-POSTROUTING  all  --  *      *       0.0.0.0/0            0.0.0.0/0            /* kubernetes postrouting rules */
+    0     0 MASQUERADE  all  --  *      !docker0  172.17.0.0/16        0.0.0.0/0
+```
+
+Run the gameserver.
+
+The `tcpdump` in the gameserver pod is good. The first random outgoing packet's UDP port `43085` is fine. The second outgoing packet's outgoing UDP port `29900` is correct. Master server replies on the correct UDP source port `27900`:
+
+```sh
+# 92.51.181.102:27900 is BF2Hub master server
+# 92.51.181.102:29910 is BF2Hub cdkey server
+# 92.204.50.3 is the BF2Hub master listing server
+# 192.168.1.100 is the kubernetes host machine's IP address
+# 10.0.1.2:29900 is the bf2 pod's IP address and gamespy port
+
+# In pod
+$ tcpdump -p udp -n -A
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
+13:10:51.284905 IP 10.0.1.2.43085 > 92.51.181.102.27900: UDP, length 18
+E....3@.@.JS
+...\3.f.Ml....d ....battlefield2.
+13:10:51.522886 IP 92.51.181.102.27900 > 10.0.1.2.43085: UDP, length 7
+E..#....r..     \3.f
+...l..M.. O..   ....
+13:10:51.908569 IP 92.204.50.3.59171 > 10.0.1.2.29900: UDP, length 11
+E..'g!..q..6\.2.
+....#}........oxGS....
+13:10:54.088919 IP 10.0.1.2.29900 > 92.51.181.102.27900: UDP, length 831
+E..[0.@.@.D.
+...\3.f}.l..G...T...localip0.10.0.1.2.localport.29900.natneg.0.statechanged.3.gamename.battlefield2.hostname..gamename.battlefield2.gamever.1.5.3153-802.0.mapname..gametype..gamevariant..numplayers..maxplayers..gamemode.openplaying.password..timelimit..roundtime..hostport..bf2_dedicated..bf2_ranked..bf2_anticheat..bf2_os.linux-64.bf2_autorec..bf2_d_idx..bf2_d_dl..bf2_voip..bf2_autobalanced..bf2_friendlyfire..bf2_tkmode..bf2_startdelay..bf2_spawntime..bf2_sponsortext..bf2_sponsorlogo_url..bf2_communitylogo_url..bf2_scorelimit..bf2_ticketratio..bf2_teamratio..bf2_team1..bf2_team2..bf2_bots..bf2_pure..bf2_mapsize..bf2_globalunlocks..bf2_fps.39.000000.bf2_plasma..bf2_reservedslots..bf2_coopbotratio..bf2_coopbotcount..bf2_coopbotdiff..bf2_novehicles.....player_.score_.ping_.team_.deaths_.pid_.skill_.AIBot_....team_t.score_t..CH.0.US.0.
+13:10:54.089237 IP 10.0.1.2.29900 > 92.204.50.3.59171: UDP, length 776
+E..$6.@.@...
+...\.2.}..#..B..oxGSsplitnum...hostname..gamename.battlefield2.gamever.1.5.3153-802.0.mapname..gametype..gamevariant..numplayers..maxplayers..gamemode.openplaying.password..timelimit..roundtime..hostport..bf2_dedicated..bf2_ranked..bf2_anticheat..bf2_os.linux-64.bf2_autorec..bf2_d_idx..bf2_d_dl..bf2_voip..bf2_autobalanced..bf2_friendlyfire..bf2_tkmode..bf2_startdelay..bf2_spawntime..bf2_sponsortext..bf2_sponsorlogo_url..bf2_communitylogo_url..bf2_scorelimit..bf2_ticketratio..bf2_teamratio..bf2_team1..bf2_team2..bf2_bots..bf2_pure..bf2_mapsize..bf2_globalunlocks..bf2_fps.39.000000.bf2_plasma..bf2_reservedslots..bf2_coopbotratio..bf2_coopbotcount..bf2_coopbotdiff..bf2_novehicles....player_...score_...ping_...team_...deaths_...pid_...skill_...AIBot_.....team_t..CH.US..score_t..0.0...
+13:10:54.330283 IP 92.51.181.102.27900 > 10.0.1.2.29900: UDP, length 28
+E..8....r...\3.f
+...l.}..$]....T...|#G2,l00B48153267D01.
+13:10:54.348646 IP 10.0.1.2.29900 > 92.51.181.102.27900: UDP, length 34
+E..>0.@.@.G.
+...\3.f}.l..*.t.T...+ozUhb51x7cpIi+xhCLoE4MXga0A.
+13:10:54.589484 IP 92.51.181.102.27900 > 10.0.1.2.29900: UDP, length 7
+E..#....r...\3.f
+...l.}....f..
+T...
+13:11:12.739887 IP 92.204.50.3.59171 > 10.0.1.2.29900: UDP, length 7
+E..#g'..q..4\.2.
+....#}.......   2TRR
+13:11:12.748529 IP 10.0.1.2.29900 > 92.204.50.3.59171: UDP, length 7
+E..#;(@.@..3
+...\.2.}..#..?. 2TRR0.
+```
+
+The `tcpdump` on the kubernetes host is good. The first random outgoing packet's UDP port `43085` is fine. The second outgoing packet's outgoing UDP port `29900` is correct. Master server replies on the correct UDP source port `27900`:
+
+```sh
+
+# On host
+$ tcpdump -p udp -n -A
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
+13:10:51.284977 IP 192.168.1.100.43085 > 92.51.181.102.27900: UDP, length 18
+E....3@.?.:.....\3.f.Ml....1	....battlefield2.
+13:10:51.522815 IP 92.51.181.102.27900 > 192.168.1.100.43085: UDP, length 7
+E..#....s..<\3.f....l..M......	...............
+13:10:51.908344 IP 92.204.50.3.59171 > 192.168.1.100.29900: UDP, length 11
+E..'g!..r..i\.2......#}...~....oxGS...........
+13:10:54.088984 IP 192.168.1.100.29900 > 92.51.181.102.27900: UDP, length 831
+E..[0.@.?.5.....\3.f}.l..G.^.T...localip0.10.0.1.2.localport.29900.natneg.0.statechanged.3.gamename.battlefield2.hostname..gamename.battlefield2.gamever.1.5.3153-802.0.mapname..gametype..gamevariant..numplayers..maxplayers..gamemode.openplaying.password..timelimit..roundtime..hostport..bf2_dedicated..bf2_ranked..bf2_anticheat..bf2_os.linux-64.bf2_autorec..bf2_d_idx..bf2_d_dl..bf2_voip..bf2_autobalanced..bf2_friendlyfire..bf2_tkmode..bf2_startdelay..bf2_spawntime..bf2_sponsortext..bf2_sponsorlogo_url..bf2_communitylogo_url..bf2_scorelimit..bf2_ticketratio..bf2_teamratio..bf2_team1..bf2_team2..bf2_bots..bf2_pure..bf2_mapsize..bf2_globalunlocks..bf2_fps.39.000000.bf2_plasma..bf2_reservedslots..bf2_coopbotratio..bf2_coopbotcount..bf2_coopbotdiff..bf2_novehicles.....player_.score_.ping_.team_.deaths_.pid_.skill_.AIBot_....team_t.score_t..CH.0.US.0.
+13:10:54.089261 IP 192.168.1.100.29900 > 92.204.50.3.59171: UDP, length 776
+E..$6.@.?.......\.2.}..#..S].oxGSsplitnum...hostname..gamename.battlefield2.gamever.1.5.3153-802.0.mapname..gametype..gamevariant..numplayers..maxplayers..gamemode.openplaying.password..timelimit..roundtime..hostport..bf2_dedicated..bf2_ranked..bf2_anticheat..bf2_os.linux-64.bf2_autorec..bf2_d_idx..bf2_d_dl..bf2_voip..bf2_autobalanced..bf2_friendlyfire..bf2_tkmode..bf2_startdelay..bf2_spawntime..bf2_sponsortext..bf2_sponsorlogo_url..bf2_communitylogo_url..bf2_scorelimit..bf2_ticketratio..bf2_teamratio..bf2_team1..bf2_team2..bf2_bots..bf2_pure..bf2_mapsize..bf2_globalunlocks..bf2_fps.39.000000.bf2_plasma..bf2_reservedslots..bf2_coopbotratio..bf2_coopbotcount..bf2_coopbotdiff..bf2_novehicles....player_...score_...ping_...team_...deaths_...pid_...skill_...AIBot_.....team_t..CH.US..score_t..0.0...
+13:10:54.330094 IP 92.51.181.102.27900 > 192.168.1.100.29900: UDP, length 28
+E..8....s..&\3.f....l.}..$M....T...|#G2,l00B48153267D01.
+13:10:54.348692 IP 192.168.1.100.29900 > 92.51.181.102.27900: UDP, length 34
+E..>0.@.?.7.....\3.f}.l..*.A.T...+ozUhb51x7cpIi+xhCLoE4MXga0A.
+13:10:54.589366 IP 92.51.181.102.27900 > 192.168.1.100.29900: UDP, length 7
+E..#....s..:\3.f....l.}...z...
+T..............
+13:11:12.739834 IP 92.204.50.3.59171 > 192.168.1.100.29900: UDP, length 7
+E..#g'..r..g\.2......#}.......	2TRR...........
+13:11:12.748565 IP 192.168.1.100.29900 > 92.204.50.3.59171: UDP, length 7
+E..#;(@.?..f....\.2.}..#..P\	2TRR0.
+13:11:14.112726 IP 192.168.1.100.29900 > 92.51.181.102.27900: UDP, length 5
+E..!=.@.?.+.....\3.f}.l....$.T...
+13:11:14.113853 IP 192.168.1.100.29900 > 92.51.181.102.29910: UDP, length 4
+E.. =.@.?.+.....\3.f}.t....#;
+.9
+```
+
+The `conntrack` table is good, with source ports `UDP` `29900` preserved:
+
+```sh
+$ conntrack -L -p udp | grep 29900
+# Line 1: BF2 server talking with the BF2Hub cd key server. [UNREPLIED] is expected
+# Line 2: BF2 server talking with the BF2Hub master server. It is now [ASSURED] which is expected
+# Line 3: The master listing server talks with the BF2 server. [ASSURED] is expected
+udp      17 21 src=10.0.1.2 dst=92.51.181.102 sport=29900 dport=29910 [UNREPLIED] src=92.51.181.102 dst=192.168.1.100 sport=29910 dport=29900 mark=0 use=1
+udp      17 173 src=92.204.50.3 dst=192.168.1.100 sport=59171 dport=29900 src=10.0.1.2 dst=92.204.50.3 sport=29900 dport=59171 [ASSURED] mark=0 use=1
+udp      17 171 src=10.0.1.2 dst=92.51.181.102 sport=29900 dport=27900 src=92.51.181.102 dst=192.168.1.100 sport=27900 dport=29900 [ASSURED] mark=0 use=1
+```
+
+The gameserver is listed on the master server.
+
+</details>
