@@ -60,11 +60,12 @@ RUN set -eux; \
 # Install bf2stats 3.1.0
 WORKDIR /root
 RUN set -eux; \
-    curl -sSLO https://github.com/BF2Statistics/StatsPython/archive/2197486.zip; \
-    sha256sum 2197486.zip | grep '^881ddc8f77a573be661f68a146883bc5e23b3d1b1a4d4323496d66d405744232 '; \
-    unzip 2197486.zip -d 2197486; \
-    cp -r 2197486/*/. /server/bf2/python/bf2/; \
-    rm -fv 2197486.zip;
+    curl -sSLO https://github.com/startersclan/StatsPython/archive/refs/tags/3.1.0.zip; \
+    echo "ab6d0f2dc3c90223524a6d97dd3100796fdf266444b5cd2f066116b977d3551c  3.1.0.zip" | sha256sum -c -; \
+    unzip 3.1.0.zip -d extract; \
+    cp -r extract/*/. /server/bf2/python/bf2/; \
+    rm -fv 3.1.0.zip;
+
 # Install ESAI in all mods
 WORKDIR /root
 COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip
