@@ -13,6 +13,7 @@ $local:VARIANTS_MATRIX = @(
             @{ components = @( 'bf2all64', 'bf2stats-2.5.1' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.0' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.2' ) }
+            @{ components = @( 'bf2all64', 'bf2stats-3.2.0' ) }
             @{ components = @( 'bf2hub' ) }
             @{ components = @( 'bf2stats-2.2.0' ) }
             @{ components = @( 'bf2stats-2.3.8' ) }
@@ -20,6 +21,7 @@ $local:VARIANTS_MATRIX = @(
             @{ components = @( 'bf2stats-2.5.1' ) }
             @{ components = @( 'bf2stats-3.1.0' ) }
             @{ components = @( 'bf2stats-3.1.2' ) }
+            @{ components = @( 'bf2stats-3.2.0' ) }
             @{ components = @( 'fh2-4.6.304' ) }
 
         )
@@ -79,6 +81,7 @@ b0a8b23841c5d3fac51650a6da8ff0e77c1d143a7aaf37c40c498077d71a2a2f  2.4.5.zip
 ab6d0f2dc3c90223524a6d97dd3100796fdf266444b5cd2f066116b977d3551c  3.1.0.zip
 fb739d900ea59e82147a6da9d7e72b329425b315bd8a08749a90fefc15365798  3.1.1.zip
 21958c614ce880f63cd4c5a9db366ccacf68674cd89f50bbf95d9aa2d9bca878  3.1.2.zip
+c43db3c1efbf437838af639b6f6151af5b5d88d2016bf49c765240524d199038  3.2.0.zip
 "@
                                         fh2_sha256sum = @"
 bb933052ad20928b5a4bc6c1eeff647d62b0f3b38de46d063101719a9f0cf488  fh2-server-4.6.304.tar
