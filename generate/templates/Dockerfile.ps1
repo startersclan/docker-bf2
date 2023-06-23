@@ -135,19 +135,6 @@ RUN set -eux; \
 
     if ($c -match 'bf2stats-(3\.\d+\.\d+)') {
         $v = $matches[1]
-        if ($v -eq '3.1.0') {
-@"
-# Install bf2stats $v
-WORKDIR /root
-RUN set -eux; \
-    curl -sSLO https://github.com/BF2Statistics/StatsPython/archive/2197486.zip; \
-    sha256sum 2197486.zip | grep '^881ddc8f77a573be661f68a146883bc5e23b3d1b1a4d4323496d66d405744232 '; \
-    unzip 2197486.zip -d 2197486; \
-    cp -r 2197486/*/. /server/bf2/python/bf2/; \
-    rm -fv 2197486.zip;
-
-"@
-        } else {
 @"
 # Install bf2stats $v
 WORKDIR /root
@@ -160,7 +147,6 @@ RUN set -eux; \
 
 
 "@
-        }
     }
 
     if ($c -match 'fh2-(\d+\.\d+\.\d+)') {
