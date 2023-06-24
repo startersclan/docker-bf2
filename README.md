@@ -21,6 +21,7 @@ All images contain [`Battlefield 2 Server 1.50`](https://www.bf-games.net/downlo
 | `:v1.5.3153.0-bf2all64-bf2stats-2.5.1` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.5.1 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-3.1.0` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-3.1.0 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-3.1.2` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-3.1.2 ) |
+| `:v1.5.3153.0-bf2all64-bf2stats-3.2.0` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-3.2.0 ) |
 | `:v1.5.3153.0-bf2hub` | [View](variants/v1.5.3153.0-bf2hub ) |
 | `:v1.5.3153.0-bf2stats-2.2.0` | [View](variants/v1.5.3153.0-bf2stats-2.2.0 ) |
 | `:v1.5.3153.0-bf2stats-2.3.8` | [View](variants/v1.5.3153.0-bf2stats-2.3.8 ) |
@@ -28,6 +29,7 @@ All images contain [`Battlefield 2 Server 1.50`](https://www.bf-games.net/downlo
 | `:v1.5.3153.0-bf2stats-2.5.1` | [View](variants/v1.5.3153.0-bf2stats-2.5.1 ) |
 | `:v1.5.3153.0-bf2stats-3.1.0` | [View](variants/v1.5.3153.0-bf2stats-3.1.0 ) |
 | `:v1.5.3153.0-bf2stats-3.1.2` | [View](variants/v1.5.3153.0-bf2stats-3.1.2 ) |
+| `:v1.5.3153.0-bf2stats-3.2.0` | [View](variants/v1.5.3153.0-bf2stats-3.2.0 ) |
 | `:v1.5.3153.0-fh2-4.6.304` | [View](variants/v1.5.3153.0-fh2-4.6.304 ) |
 
 - `aix2` - [AIX-2.0](https://www.moddb.com/mods/allied-intent-xtended/downloads/aix-20-server-files) mod.
