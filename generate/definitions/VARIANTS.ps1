@@ -37,6 +37,7 @@ $VARIANTS = @(
                     package_sha256sum = $variant['package_sha256sum']
                     platforms = if ($subVariant['components'] -match 'fh2') { 'linux/amd64' } else { 'linux/386,linux/amd64' }
                     components = $subVariant['components']
+                    job_group_key = $variant['package_version']
                 }
                 # Docker image tag. E.g. '1.5.3153.0', '1.5.3153.0-bf2stats-2.x.x', '1.5.3153.0-bf2all64-3.x.x'
                 tag = @(
