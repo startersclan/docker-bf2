@@ -9,11 +9,12 @@ on:
   pull_request:
     branches:
     - master
+  merge_group:
 jobs:
   test-nogitdiff:
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/powershell:7.2.2-alpine-3.14-20220318
+      image: mcr.microsoft.com/powershell:lts-7.2-alpine-3.17
     steps:
     - run: |
         apk add --no-cache git
@@ -32,10 +33,8 @@ jobs:
       run: |
         git diff --exit-code
 
-  build-v1-5-3153-0:
+  build-1-5-3153-0:
     runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -65,14 +64,22 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
+        key: ${{ runner.os }}-buildx-1.5.3153.0-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
+          ${{ runner.os }}-buildx-1.5.3153.0-
           ${{ runner.os }}-buildx-
+
+    - name: Login to Docker Hub registry
+      # Run on master and tags
+      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
+        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
 
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0
       run: |
         set -e
 
@@ -85,24 +92,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -111,12 +111,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -125,12 +125,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -138,62 +138,16 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0.outputs.REF_SHA_VARIANT }}
           ${{ github.repository }}:latest
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-aix2:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-aix2
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-aix2
       run: |
         set -e
 
@@ -206,24 +160,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-aix2"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-aix2 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -232,12 +179,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-aix2.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-aix2.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-aix2 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -246,12 +193,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-aix2.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-aix2.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-aix2 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -259,61 +206,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-aix2.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-aix2.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-aix2.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2all64:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2all64
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2all64
       run: |
         set -e
 
@@ -326,24 +227,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2all64"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2all64 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -352,12 +246,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2all64 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -366,12 +260,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2all64 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -379,61 +273,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2all64-bf2stats-2-2-0:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2all64-bf2stats-2.2.0
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2all64-bf2stats-2-2-0
       run: |
         set -e
 
@@ -446,24 +294,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2all64-bf2stats-2.2.0"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2all64-bf2stats-2.2.0 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -472,12 +313,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-2-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-2-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2all64-bf2stats-2.2.0 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -486,12 +327,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-2-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-2-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2all64-bf2stats-2.2.0 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -499,61 +340,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-2-0.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-2-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-2-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2all64-bf2stats-2-3-8:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2all64-bf2stats-2.3.8
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2all64-bf2stats-2-3-8
       run: |
         set -e
 
@@ -566,24 +361,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2all64-bf2stats-2.3.8"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2all64-bf2stats-2.3.8 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -592,12 +380,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-3-8.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-3-8.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2all64-bf2stats-2.3.8 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -606,12 +394,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-3-8.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-3-8.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2all64-bf2stats-2.3.8 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -619,61 +407,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-3-8.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-3-8.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-3-8.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2all64-bf2stats-2-4-6:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2all64-bf2stats-2.4.6
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2all64-bf2stats-2-4-6
       run: |
         set -e
 
@@ -686,24 +428,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2all64-bf2stats-2.4.6"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2all64-bf2stats-2.4.6 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -712,12 +447,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-4-6.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-4-6.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2all64-bf2stats-2.4.6 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -726,12 +461,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-4-6.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-4-6.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2all64-bf2stats-2.4.6 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -739,61 +474,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-4-6.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-4-6.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-4-6.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2all64-bf2stats-2-5-1:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2all64-bf2stats-2.5.1
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2all64-bf2stats-2-5-1
       run: |
         set -e
 
@@ -806,24 +495,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2all64-bf2stats-2.5.1"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2all64-bf2stats-2.5.1 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -832,12 +514,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-5-1.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-5-1.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2all64-bf2stats-2.5.1 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -846,12 +528,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-5-1.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-5-1.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2all64-bf2stats-2.5.1 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -859,61 +541,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-5-1.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-5-1.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-5-1.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2all64-bf2stats-3-1-0:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2all64-bf2stats-3.1.0
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2all64-bf2stats-3-1-0
       run: |
         set -e
 
@@ -926,24 +562,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2all64-bf2stats-3.1.0"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2all64-bf2stats-3.1.0 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -952,12 +581,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-1-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-1-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2all64-bf2stats-3.1.0 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -966,12 +595,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-1-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-1-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2all64-bf2stats-3.1.0 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -979,61 +608,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-1-0.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-1-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-1-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2all64-bf2stats-3-1-2:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2all64-bf2stats-3.1.2
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2all64-bf2stats-3-1-2
       run: |
         set -e
 
@@ -1046,24 +629,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2all64-bf2stats-3.1.2"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2all64-bf2stats-3.1.2 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -1072,12 +648,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-1-2.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-1-2.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2all64-bf2stats-3.1.2 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -1086,12 +662,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-1-2.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-1-2.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2all64-bf2stats-3.1.2 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -1099,61 +675,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-1-2.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-1-2.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-1-2.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2all64-bf2stats-3-2-0:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2all64-bf2stats-3.2.0
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2all64-bf2stats-3-2-0
       run: |
         set -e
 
@@ -1166,24 +696,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2all64-bf2stats-3.2.0"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2all64-bf2stats-3.2.0 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -1192,12 +715,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-2-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-2-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2all64-bf2stats-3.2.0 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -1206,12 +729,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-2-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-2-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2all64-bf2stats-3.2.0 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -1219,61 +742,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-2-0.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-2-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-3-2-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2hub:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2hub
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2hub
       run: |
         set -e
 
@@ -1286,24 +763,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2hub"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2hub - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -1312,12 +782,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2hub.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2hub.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2hub - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -1326,12 +796,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2hub.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2hub.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2hub - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -1339,61 +809,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2hub.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2hub.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2hub.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2stats-2-2-0:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2stats-2.2.0
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2stats-2-2-0
       run: |
         set -e
 
@@ -1406,24 +830,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2stats-2.2.0"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2stats-2.2.0 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -1432,12 +849,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-2-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-2-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2stats-2.2.0 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -1446,12 +863,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-2-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-2-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2stats-2.2.0 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -1459,61 +876,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-2-0.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-2-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-2-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2stats-2-3-8:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2stats-2.3.8
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2stats-2-3-8
       run: |
         set -e
 
@@ -1526,24 +897,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2stats-2.3.8"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2stats-2.3.8 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -1552,12 +916,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-3-8.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-3-8.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2stats-2.3.8 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -1566,12 +930,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-3-8.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-3-8.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2stats-2.3.8 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -1579,61 +943,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-3-8.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-3-8.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-3-8.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2stats-2-4-6:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2stats-2.4.6
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2stats-2-4-6
       run: |
         set -e
 
@@ -1646,24 +964,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2stats-2.4.6"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2stats-2.4.6 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -1672,12 +983,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-4-6.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-4-6.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2stats-2.4.6 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -1686,12 +997,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-4-6.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-4-6.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2stats-2.4.6 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -1699,61 +1010,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-4-6.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-4-6.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-4-6.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2stats-2-5-1:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2stats-2.5.1
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2stats-2-5-1
       run: |
         set -e
 
@@ -1766,24 +1031,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2stats-2.5.1"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2stats-2.5.1 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -1792,12 +1050,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-5-1.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-5-1.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2stats-2.5.1 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -1806,12 +1064,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-5-1.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-5-1.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2stats-2.5.1 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -1819,61 +1077,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-5-1.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-5-1.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-5-1.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2stats-3-1-0:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2stats-3.1.0
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2stats-3-1-0
       run: |
         set -e
 
@@ -1886,24 +1098,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2stats-3.1.0"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2stats-3.1.0 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -1912,12 +1117,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-1-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-1-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2stats-3.1.0 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -1926,12 +1131,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-1-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-1-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2stats-3.1.0 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -1939,61 +1144,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-1-0.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-1-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-1-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2stats-3-1-2:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2stats-3.1.2
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2stats-3-1-2
       run: |
         set -e
 
@@ -2006,24 +1165,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2stats-3.1.2"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2stats-3.1.2 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -2032,12 +1184,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-1-2.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-1-2.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2stats-3.1.2 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -2046,12 +1198,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-1-2.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-1-2.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2stats-3.1.2 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -2059,61 +1211,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-1-2.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-1-2.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-1-2.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-bf2stats-3-2-0:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-bf2stats-3.2.0
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-bf2stats-3-2-0
       run: |
         set -e
 
@@ -2126,24 +1232,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-bf2stats-3.2.0"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-bf2stats-3.2.0 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -2152,12 +1251,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-2-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-2-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-bf2stats-3.2.0 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -2166,12 +1265,12 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-2-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-2-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-bf2stats-3.2.0 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -2179,61 +1278,15 @@ jobs:
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-2-0.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-2-0.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-3-2-0.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    # Temp fix
-    # https://github.com/docker/build-push-action/issues/252
-    # https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  build-v1-5-3153-0-fh2-4-6-304:
-    runs-on: ubuntu-latest
-    env:
-      VARIANT: v1.5.3153.0-fh2-4.6.304
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Display system info (linux)
-      run: |
-        set -e
-        hostname
-        whoami
-        cat /etc/*release
-        lscpu
-        free
-        df -h
-        pwd
-        docker info
-        docker version
-
-    # See: https://github.com/docker/build-push-action/blob/v2.6.1/docs/advanced/cache.md#github-cache
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.VARIANT }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ env.VARIANT }}-
-          ${{ runner.os }}-buildx-
-
     # This step generates the docker tags
     - name: Prepare
-      id: prep
+      id: prep-v1-5-3153-0-fh2-4-6-304
       run: |
         set -e
 
@@ -2246,24 +1299,17 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
+        VARIANT="v1.5.3153.0-fh2-4.6.304"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
         # Pass variables to next step
-        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_ENV
-        echo "VARIANT=$VARIANT" >> $GITHUB_ENV
-        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_ENV
-        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_ENV
+        echo "VARIANT_BUILD_DIR=$VARIANT_BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "VARIANT=$VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
+        echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub registry
-      # Run on master and tags
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_REGISTRY_USER }}
-        password: ${{ secrets.DOCKERHUB_REGISTRY_PASSWORD }}
-
-    - name: Build (PRs)
+    - name: v1.5.3153.0-fh2-4.6.304 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
@@ -2272,12 +1318,12 @@ jobs:
         platforms: linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-fh2-4-6-304.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-fh2-4-6-304.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (master)
+    - name: v1.5.3153.0-fh2-4.6.304 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
@@ -2286,12 +1332,12 @@ jobs:
         platforms: linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-fh2-4-6-304.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-fh2-4-6-304.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: Build and push (release)
+    - name: v1.5.3153.0-fh2-4.6.304 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
@@ -2299,9 +1345,9 @@ jobs:
         platforms: linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ env.VARIANT }}
-          ${{ github.repository }}:${{ env.REF_VARIANT }}
-          ${{ github.repository }}:${{ env.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-fh2-4-6-304.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-fh2-4-6-304.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-fh2-4-6-304.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
@@ -2314,7 +1360,8 @@ jobs:
         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   update-draft-release:
-    needs: [build-v1-5-3153-0, build-v1-5-3153-0-aix2, build-v1-5-3153-0-bf2all64, build-v1-5-3153-0-bf2all64-bf2stats-2-2-0, build-v1-5-3153-0-bf2all64-bf2stats-2-3-8, build-v1-5-3153-0-bf2all64-bf2stats-2-4-6, build-v1-5-3153-0-bf2all64-bf2stats-2-5-1, build-v1-5-3153-0-bf2all64-bf2stats-3-1-0, build-v1-5-3153-0-bf2all64-bf2stats-3-1-2, build-v1-5-3153-0-bf2all64-bf2stats-3-2-0, build-v1-5-3153-0-bf2hub, build-v1-5-3153-0-bf2stats-2-2-0, build-v1-5-3153-0-bf2stats-2-3-8, build-v1-5-3153-0-bf2stats-2-4-6, build-v1-5-3153-0-bf2stats-2-5-1, build-v1-5-3153-0-bf2stats-3-1-0, build-v1-5-3153-0-bf2stats-3-1-2, build-v1-5-3153-0-bf2stats-3-2-0, build-v1-5-3153-0-fh2-4-6-304]
+    needs:
+      - build-1-5-3153-0
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
@@ -2327,7 +1374,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-draft-release:
-    needs: [build-v1-5-3153-0, build-v1-5-3153-0-aix2, build-v1-5-3153-0-bf2all64, build-v1-5-3153-0-bf2all64-bf2stats-2-2-0, build-v1-5-3153-0-bf2all64-bf2stats-2-3-8, build-v1-5-3153-0-bf2all64-bf2stats-2-4-6, build-v1-5-3153-0-bf2all64-bf2stats-2-5-1, build-v1-5-3153-0-bf2all64-bf2stats-3-1-0, build-v1-5-3153-0-bf2all64-bf2stats-3-1-2, build-v1-5-3153-0-bf2all64-bf2stats-3-2-0, build-v1-5-3153-0-bf2hub, build-v1-5-3153-0-bf2stats-2-2-0, build-v1-5-3153-0-bf2stats-2-3-8, build-v1-5-3153-0-bf2stats-2-4-6, build-v1-5-3153-0-bf2stats-2-5-1, build-v1-5-3153-0-bf2stats-3-1-0, build-v1-5-3153-0-bf2stats-3-1-2, build-v1-5-3153-0-bf2stats-3-2-0, build-v1-5-3153-0-fh2-4-6-304]
+    needs:
+      - build-1-5-3153-0
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
@@ -2342,7 +1390,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   update-dockerhub-description:
-    needs: [build-v1-5-3153-0, build-v1-5-3153-0-aix2, build-v1-5-3153-0-bf2all64, build-v1-5-3153-0-bf2all64-bf2stats-2-2-0, build-v1-5-3153-0-bf2all64-bf2stats-2-3-8, build-v1-5-3153-0-bf2all64-bf2stats-2-4-6, build-v1-5-3153-0-bf2all64-bf2stats-2-5-1, build-v1-5-3153-0-bf2all64-bf2stats-3-1-0, build-v1-5-3153-0-bf2all64-bf2stats-3-1-2, build-v1-5-3153-0-bf2all64-bf2stats-3-2-0, build-v1-5-3153-0-bf2hub, build-v1-5-3153-0-bf2stats-2-2-0, build-v1-5-3153-0-bf2stats-2-3-8, build-v1-5-3153-0-bf2stats-2-4-6, build-v1-5-3153-0-bf2stats-2-5-1, build-v1-5-3153-0-bf2stats-3-1-0, build-v1-5-3153-0-bf2stats-3-1-2, build-v1-5-3153-0-bf2stats-3-2-0, build-v1-5-3153-0-fh2-4-6-304]
+    needs:
+      - build-1-5-3153-0
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
