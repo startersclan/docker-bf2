@@ -214,6 +214,28 @@ See ``docker-compose`` examples:
 
 ## DNS spoofing
 
+### DNS spoofing: Background
+
+Problem: The Battlefield 2 client and server binaries are hardcoded with gamespy DNS records, e.g. ``bf2web.gamespy.com``. Because gamespy has shut down, the DNS records no longer exist on public DNS servers. In order to keep the game's multiplayer working, DNS must be spoofed to keep it working.
+
+Here's a table of needed DNS entries:
+
+| DNS entry | Description | Needed by Client? | Needed by Server? |
+|:-------|:---------|:---------:|:---------:|
+| battlefield2.available.gamespy.com | To reach master server and CD key server | ✅ | ✅
+| battlefield2.master.gamespy.com | To reach master server and CD key server | ✅ | ✅
+| battlefield2.ms14.gamespy.com | To reach master server and CD key server | ✅ | ✅
+| master.gamespy.com | To reach master server and CD key server | ✅ | ✅
+| motd.gamespy.com | To reach master server and CD key server | ✅ | ✅
+| gpsp.gamespy.com | To reach master server and CD key server | ✅ | ✅
+| gpcm.gamespy.com | To reach master server and CD key server | ✅ | ✅
+| gamespy.com | To reach master server and CD key server | ✅ | ✅
+| bf2web.gamespy.com | For client: For BFHQ to work in-game<br />For server: To get stats from the web stats server (i.e. ASP) | ✅  | ✅
+| gamestats.gamespy.com | Unknown. May be needed by server? | ❓ | ❓
+| eapusher.dice.se | For client: For the EA popup image to work upon logging in.<br />The address is hardcoded as http://eapusher.dice.se/image_english.png | ✅ | ❌
+
+You will need to spoof the DNS accordingly, based on your setup.
+
 ### DNS spoofing: for server to be listed on BF2Hub master server
 
 If you want the BF2 server to be listed a public master server such as [BF2Hub](https://bf2hub.com/servers), for better server discoverability by clients and to make it easier for clients to connect to your server, DNS spoofing is needed for the BF2 server. DNS spoofing can be done using ``--add-host`` on ``docker run``, or ``extra_hosts`` key in ``docker-compose.yml``.
