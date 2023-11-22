@@ -135,6 +135,7 @@ RUN set -eux; \
 
     if ($c -match 'bf2stats-(3\.\d+\.\d+)') {
         $v = $matches[1]
+        if ([version]$v -le [version]'3.2.0') {
 @"
 # Install bf2stats $v
 WORKDIR /root
@@ -147,6 +148,19 @@ RUN set -eux; \
 
 
 "@
+        }else {
+@"
+# Install bf2stats $v
+WORKDIR /root
+RUN set -eux; \
+    curl -sSLO https://github.com/startersclan/asp/archive/refs/tags/$v.zip; \
+    echo "$( $PASS_VARIABLES['bf2stats_3_sha256sum'] -split "`n" | % { $_.Trim() } | Select-String -SimpleMatch "$v.zip" )" | sha256sum -c -; \
+    unzip $v.zip -d extract; \
+    rm -rf /server/bf2/python; \
+    mv extract/asp-$v/src/python /server/bf2/python; \
+    rm -fv $v.zip;
+"@
+        }
     }
 
     if ($c -match 'fh2-(\d+\.\d+\.\d+)') {

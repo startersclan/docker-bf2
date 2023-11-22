@@ -11,17 +11,21 @@ $local:VARIANTS_MATRIX = @(
             @{ components = @( 'bf2all64', 'bf2stats-2.3.8' ) }
             @{ components = @( 'bf2all64', 'bf2stats-2.4.6' ) }
             @{ components = @( 'bf2all64', 'bf2stats-2.5.1' ) }
+            @{ components = @( 'bf2all64', 'bf2stats-2.6.0' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.0' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.2' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.2.0' ) }
+            @{ components = @( 'bf2all64', 'bf2stats-3.3.0' ) }
             @{ components = @( 'bf2hub' ) }
             @{ components = @( 'bf2stats-2.2.0' ) }
             @{ components = @( 'bf2stats-2.3.8' ) }
             @{ components = @( 'bf2stats-2.4.6' ) }
             @{ components = @( 'bf2stats-2.5.1' ) }
+            @{ components = @( 'bf2stats-2.6.0' ) }
             @{ components = @( 'bf2stats-3.1.0' ) }
             @{ components = @( 'bf2stats-3.1.2' ) }
             @{ components = @( 'bf2stats-3.2.0' ) }
+            @{ components = @( 'bf2stats-3.3.0' ) }
             @{ components = @( 'fh2-4.6.304' ) }
 
         )
@@ -77,12 +81,16 @@ b0a8b23841c5d3fac51650a6da8ff0e77c1d143a7aaf37c40c498077d71a2a2f  2.4.5.zip
 59614e3afe781bef7d5e40ea306b3b9b9a700e2e4bf16c548a40916cf42ce882  2.4.6.zip
 8dc705319c03fc9083f41f2b988e8dba1d54f43d3dd518fae1e5cb6c9b38a110  2.5.0.zip
 3d736d1990d452e5da3f24d7d0eb1091a85a286239b5667fab98518cb1c115c9  2.5.1.zip
+6438d1f3a940fbb81c38b5b43aa73f077721a89bd4752da5d1e40bf214e7fc1e  2.6.0.zip
 "@
                                         bf2stats_3_statspython_sha256sum = @"
 ab6d0f2dc3c90223524a6d97dd3100796fdf266444b5cd2f066116b977d3551c  3.1.0.zip
 fb739d900ea59e82147a6da9d7e72b329425b315bd8a08749a90fefc15365798  3.1.1.zip
 21958c614ce880f63cd4c5a9db366ccacf68674cd89f50bbf95d9aa2d9bca878  3.1.2.zip
 c43db3c1efbf437838af639b6f6151af5b5d88d2016bf49c765240524d199038  3.2.0.zip
+"@
+                                        bf2stats_3_sha256sum = @"
+72d37a4ca102166f741cc291308144e3a16505390cd4e72c21e2ecd26f2b8249  3.3.0.zip
 "@
                                         fh2_sha256sum = @"
 bb933052ad20928b5a4bc6c1eeff647d62b0f3b38de46d063101719a9f0cf488  fh2-server-4.6.304.tar
