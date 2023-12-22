@@ -45,12 +45,14 @@ RUN set -eux; \
 # Install bf2stats 2.4.6
 WORKDIR /root
 RUN set -eux; \
-    curl -sSLO https://github.com/startersclan/bf2stats/archive/refs/tags/2.4.6.zip; \
-    echo "59614e3afe781bef7d5e40ea306b3b9b9a700e2e4bf16c548a40916cf42ce882  2.4.6.zip" | sha256sum -c -; \
-    unzip 2.4.6.zip -d extract; \
+    curl -sSLO https://github.com/startersclan/bf2stats/archive/refs/tags/2.4.6.tar.gz; \
+    echo "bf490e3c5d035872f248c15fd32deaf21c84bc254c9e9fd71ec17bb814543e09  2.4.6.tar.gz" | sha256sum -c -; \
+    mkdir -p extract; \
+    tar -C extract -zxvf 2.4.6.tar.gz; \
     rm -rf /server/bf2/python; \
     mv extract/bf2stats-2.4.6/src/python /server/bf2/python; \
-    rm -fv 2.4.6.zip;
+    rm -fv 2.4.6.tar.gz; \
+    rm -rf extract
 
 # Install ESAI in all mods
 WORKDIR /root

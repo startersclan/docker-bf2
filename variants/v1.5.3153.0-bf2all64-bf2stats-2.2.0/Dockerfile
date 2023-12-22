@@ -58,6 +58,7 @@ RUN set -eux; \
     rm -v /aibehaviours-fixlookatwrapper.ai
 
 # Install bf2stats 2.2.0
+# See: https://code.google.com/archive/p/bf2stats/
 WORKDIR /root
 RUN set -eux; \
     # I know, it is mispelled
