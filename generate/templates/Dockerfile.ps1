@@ -103,7 +103,8 @@ RUN set -eux; \
         $v = $matches[1]
         if ($v -eq '2.2.0') {
 @"
-# Install bf2stats $v
+# Install bf2stats 2.2.0
+# See: https://code.google.com/archive/p/bf2stats/
 WORKDIR /root
 RUN set -eux; \
     # I know, it is mispelled
@@ -121,12 +122,14 @@ RUN set -eux; \
 # Install bf2stats $v
 WORKDIR /root
 RUN set -eux; \
-    curl -sSLO https://github.com/startersclan/bf2stats/archive/refs/tags/$v.zip; \
-    echo "$( $PASS_VARIABLES['bf2stats_2_sha256sum'] -split "`n" | % { $_.Trim() } | Select-String -SimpleMatch "$v.zip" )" | sha256sum -c -; \
-    unzip $v.zip -d extract; \
+    curl -sSLO https://github.com/startersclan/bf2stats/archive/refs/tags/$v.tar.gz; \
+    echo "$( $PASS_VARIABLES['bf2stats_2_sha256sum'] -split "`n" | % { $_.Trim() } | Select-String -SimpleMatch "$v.tar.gz" )" | sha256sum -c -; \
+    mkdir -p extract; \
+    tar -C extract -zxvf $v.tar.gz; \
     rm -rf /server/bf2/python; \
     mv extract/bf2stats-$v/src/python /server/bf2/python; \
-    rm -fv $v.zip;
+    rm -fv $v.tar.gz; \
+    rm -rf extract
 
 
 "@
@@ -140,11 +143,13 @@ RUN set -eux; \
 # Install bf2stats $v
 WORKDIR /root
 RUN set -eux; \
-    curl -sSLO https://github.com/startersclan/StatsPython/archive/refs/tags/$v.zip; \
-    echo "$( $PASS_VARIABLES['bf2stats_3_statspython_sha256sum'] -split "`n" | % { $_.Trim() } | Select-String -SimpleMatch "$v.zip" )" | sha256sum -c -; \
-    unzip $v.zip -d extract; \
+    curl -sSLO https://github.com/startersclan/StatsPython/archive/refs/tags/$v.tar.gz; \
+    echo "$( $PASS_VARIABLES['bf2stats_3_statspython_sha256sum'] -split "`n" | % { $_.Trim() } | Select-String -SimpleMatch "$v.tar.gz" )" | sha256sum -c -; \
+    mkdir -p extract; \
+    tar -C extract -zxvf $v.tar.gz; \
     cp -r extract/*/. /server/bf2/python/bf2/; \
-    rm -fv $v.zip;
+    rm -fv $v.tar.gz; \
+    rm -rf extract
 
 
 "@
@@ -153,12 +158,14 @@ RUN set -eux; \
 # Install bf2stats $v
 WORKDIR /root
 RUN set -eux; \
-    curl -sSLO https://github.com/startersclan/asp/archive/refs/tags/$v.zip; \
-    echo "$( $PASS_VARIABLES['bf2stats_3_sha256sum'] -split "`n" | % { $_.Trim() } | Select-String -SimpleMatch "$v.zip" )" | sha256sum -c -; \
-    unzip $v.zip -d extract; \
+    curl -sSLO https://github.com/startersclan/asp/archive/refs/tags/$v.tar.gz; \
+    echo "$( $PASS_VARIABLES['bf2stats_3_sha256sum'] -split "`n" | % { $_.Trim() } | Select-String -SimpleMatch "$v.tar.gz" )" | sha256sum -c -; \
+    mkdir -p extract; \
+    tar -C extract -zxvf $v.tar.gz; \
     rm -rf /server/bf2/python; \
     mv extract/asp-$v/src/python /server/bf2/python; \
-    rm -fv $v.zip;
+    rm -fv $v.tar.gz; \
+    rm -rf extract
 "@
         }
     }

@@ -60,12 +60,14 @@ RUN set -eux; \
 # Install bf2stats 3.3.0
 WORKDIR /root
 RUN set -eux; \
-    curl -sSLO https://github.com/startersclan/asp/archive/refs/tags/3.3.0.zip; \
-    echo "72d37a4ca102166f741cc291308144e3a16505390cd4e72c21e2ecd26f2b8249  3.3.0.zip" | sha256sum -c -; \
-    unzip 3.3.0.zip -d extract; \
+    curl -sSLO https://github.com/startersclan/asp/archive/refs/tags/3.3.0.tar.gz; \
+    echo "1da26288ad11e15b6838b73678ceab54b0f088e758e430dc636ad791d641f930  3.3.0.tar.gz" | sha256sum -c -; \
+    mkdir -p extract; \
+    tar -C extract -zxvf 3.3.0.tar.gz; \
     rm -rf /server/bf2/python; \
     mv extract/asp-3.3.0/src/python /server/bf2/python; \
-    rm -fv 3.3.0.zip;# Install ESAI in all mods
+    rm -fv 3.3.0.tar.gz; \
+    rm -rf extract# Install ESAI in all mods
 WORKDIR /root
 COPY ESAI-Standard-v4.2.zip ESAI-Standard-v4.2.zip
 COPY lowercase-helper /usr/local/bin/lowercase-helper
