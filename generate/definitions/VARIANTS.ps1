@@ -12,7 +12,7 @@ $local:VARIANTS_MATRIX = @(
             @{ components = @( 'bf2all64', 'bf2stats-2.4.6' ) }
             @{ components = @( 'bf2all64', 'bf2stats-2.5.1' ) }
             @{ components = @( 'bf2all64', 'bf2stats-2.6.0' ) }
-            @{ components = @( 'bf2all64', 'bf2stats-2.7.0' ) }
+            @{ components = @( 'bf2all64', 'bf2stats-2.7.1' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.0' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.2' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.2.0' ) }
@@ -23,7 +23,7 @@ $local:VARIANTS_MATRIX = @(
             @{ components = @( 'bf2stats-2.4.6' ) }
             @{ components = @( 'bf2stats-2.5.1' ) }
             @{ components = @( 'bf2stats-2.6.0' ) }
-            @{ components = @( 'bf2stats-2.7.0' ) }
+            @{ components = @( 'bf2stats-2.7.1' ) }
             @{ components = @( 'bf2stats-3.1.0' ) }
             @{ components = @( 'bf2stats-3.1.2' ) }
             @{ components = @( 'bf2stats-3.2.0' ) }
@@ -64,6 +64,8 @@ $VARIANTS = @(
                             passes = @(
                                 @{
                                     variables = @{
+                                        # Since bf2stats 2 python files
+                                        # E.g. https://github.com/startersclan/bf2stats/archive/refs/tags/2.7.1.tar.gz
                                         bf2stats_2_sha256sum = @"
 29a25c6e78062f34b05d7086aad530b598b4c9ed3f32164ffcf3b1c52b33f553  2.3.0.tar.gz
 9a5e0544ba1474feb5ca0194449f6d6dee521abf59cba96dbc94387490d660b0  2.3.1.tar.gz
@@ -85,16 +87,22 @@ de0468b62a510b1b074e6be41b79027edb4f3198940b65d01aa4947cafc27bf8  2.5.0.tar.gz
 e07f46f0078fc0dcdbeb0dd86e1e9add4b502b0d7b263711dcad957ec4a6de61  2.5.1.tar.gz
 7a75b58fec1b1d105c1a495e543eff6f2ee0fd0bf4ab010078539ef95e55f6e7  2.6.0.tar.gz
 daeb57232cd1725bea3cf45c197fba13d99251864347ffff44552aae585b273a  2.7.0.tar.gz
+96a9cd2c1283668e417f45ee14dec6307cbad9f310a81e2e8b5af95a871fef4f  2.7.1.tar.gz
 "@
+                                        # Since bf2stats 3 python files
+                                        # E.g. https://github.com/startersclan/statspython/archive/refs/tags/3.2.0.tar.gz
                                         bf2stats_3_statspython_sha256sum = @"
 de7080d9ecd0af9d547d434c83ec9826d8639a3ab05b10dc07f6ae5bb603149b  3.1.0.tar.gz
 7bfd73109eb5edd686a05f421ec5a3542cf403b228412fc823e702f76c63848e  3.1.1.tar.gz
 3a6478e92f3ce62bfd9f00c8dd1405ce9d97b03f6e1dcdcc83b1628fea3eb8f4  3.1.2.tar.gz
 782dda8f985e35ad40cdc3bd72fb336aa87846a518b4157b6e1647faa3e8ddb4  3.2.0.tar.gz
 "@
+                                        # Since bf2stats 3 python files. Since 3.3.0, python files are in the same repo
+                                        # E.g. https://github.com/startersclan/asp/archive/refs/tags/3.3.0.tar.gz
                                         bf2stats_3_sha256sum = @"
 1da26288ad11e15b6838b73678ceab54b0f088e758e430dc636ad791d641f930  3.3.0.tar.gz
 "@
+                                        # Forgotten Hope 2
                                         fh2_sha256sum = @"
 bb933052ad20928b5a4bc6c1eeff647d62b0f3b38de46d063101719a9f0cf488  fh2-server-4.6.304.tar
 "@
