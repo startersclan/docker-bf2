@@ -616,7 +616,7 @@ jobs:
 
     # This step generates the docker tags
     - name: Prepare
-      id: prep-v1-5-3153-0-bf2all64-bf2stats-2-7-1
+      id: prep-v1-5-3153-0-bf2all64-bf2stats-2-7-2
       run: |
         set -e
 
@@ -629,7 +629,7 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
-        VARIANT="v1.5.3153.0-bf2all64-bf2stats-2.7.1"
+        VARIANT="v1.5.3153.0-bf2all64-bf2stats-2.7.2"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
@@ -639,45 +639,45 @@ jobs:
         echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
         echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: v1.5.3153.0-bf2all64-bf2stats-2.7.1 - Build (PRs)
+    - name: v1.5.3153.0-bf2all64-bf2stats-2.7.2 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
       with:
-        context: variants/v1.5.3153.0-bf2all64-bf2stats-2.7.1
+        context: variants/v1.5.3153.0-bf2all64-bf2stats-2.7.2
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-7-1.outputs.REF_VARIANT }}
-          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-7-1.outputs.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-7-2.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-7-2.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: v1.5.3153.0-bf2all64-bf2stats-2.7.1 - Build and push (master)
+    - name: v1.5.3153.0-bf2all64-bf2stats-2.7.2 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
       with:
-        context: variants/v1.5.3153.0-bf2all64-bf2stats-2.7.1
+        context: variants/v1.5.3153.0-bf2all64-bf2stats-2.7.2
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-7-1.outputs.REF_VARIANT }}
-          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-7-1.outputs.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-7-2.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-7-2.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: v1.5.3153.0-bf2all64-bf2stats-2.7.1 - Build and push (release)
+    - name: v1.5.3153.0-bf2all64-bf2stats-2.7.2 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
-        context: variants/v1.5.3153.0-bf2all64-bf2stats-2.7.1
+        context: variants/v1.5.3153.0-bf2all64-bf2stats-2.7.2
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-7-1.outputs.VARIANT }}
-          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-7-1.outputs.REF_VARIANT }}
-          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-7-1.outputs.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-7-2.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-7-2.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2all64-bf2stats-2-7-2.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
@@ -1353,7 +1353,7 @@ jobs:
 
     # This step generates the docker tags
     - name: Prepare
-      id: prep-v1-5-3153-0-bf2stats-2-7-1
+      id: prep-v1-5-3153-0-bf2stats-2-7-2
       run: |
         set -e
 
@@ -1366,7 +1366,7 @@ jobs:
         # Generate docker image tags
         # E.g. 'v0.0.0-<variant>' and 'v0.0.0-abc0123-<variant>'
         # E.g. 'master-<variant>' and 'master-abc0123-<variant>'
-        VARIANT="v1.5.3153.0-bf2stats-2.7.1"
+        VARIANT="v1.5.3153.0-bf2stats-2.7.2"
         REF_VARIANT="${REF}-${VARIANT}"
         REF_SHA_VARIANT="${REF}-${SHA}-${VARIANT}"
 
@@ -1376,45 +1376,45 @@ jobs:
         echo "REF_VARIANT=$REF_VARIANT" >> $GITHUB_OUTPUT
         echo "REF_SHA_VARIANT=$REF_SHA_VARIANT" >> $GITHUB_OUTPUT
 
-    - name: v1.5.3153.0-bf2stats-2.7.1 - Build (PRs)
+    - name: v1.5.3153.0-bf2stats-2.7.2 - Build (PRs)
       # Run only on pull requests
       if: github.event_name == 'pull_request'
       uses: docker/build-push-action@v3
       with:
-        context: variants/v1.5.3153.0-bf2stats-2.7.1
+        context: variants/v1.5.3153.0-bf2stats-2.7.2
         platforms: linux/386,linux/amd64
         push: false
         tags: |
-          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-7-1.outputs.REF_VARIANT }}
-          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-7-1.outputs.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-7-2.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-7-2.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: v1.5.3153.0-bf2stats-2.7.1 - Build and push (master)
+    - name: v1.5.3153.0-bf2stats-2.7.2 - Build and push (master)
       # Run only on master
       if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v3
       with:
-        context: variants/v1.5.3153.0-bf2stats-2.7.1
+        context: variants/v1.5.3153.0-bf2stats-2.7.2
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-7-1.outputs.REF_VARIANT }}
-          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-7-1.outputs.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-7-2.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-7-2.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-    - name: v1.5.3153.0-bf2stats-2.7.1 - Build and push (release)
+    - name: v1.5.3153.0-bf2stats-2.7.2 - Build and push (release)
       if: startsWith(github.ref, 'refs/tags/')
       uses: docker/build-push-action@v3
       with:
-        context: variants/v1.5.3153.0-bf2stats-2.7.1
+        context: variants/v1.5.3153.0-bf2stats-2.7.2
         platforms: linux/386,linux/amd64
         push: true
         tags: |
-          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-7-1.outputs.VARIANT }}
-          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-7-1.outputs.REF_VARIANT }}
-          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-7-1.outputs.REF_SHA_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-7-2.outputs.VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-7-2.outputs.REF_VARIANT }}
+          ${{ github.repository }}:${{ steps.prep-v1-5-3153-0-bf2stats-2-7-2.outputs.REF_SHA_VARIANT }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 

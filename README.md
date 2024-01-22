@@ -20,7 +20,7 @@ All images contain [`Battlefield 2 Server 1.50`](https://www.bf-games.net/downlo
 | `:v1.5.3153.0-bf2all64-bf2stats-2.4.6` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.4.6 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-2.5.1` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.5.1 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-2.6.0` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.6.0 ) |
-| `:v1.5.3153.0-bf2all64-bf2stats-2.7.1` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.7.1 ) |
+| `:v1.5.3153.0-bf2all64-bf2stats-2.7.2` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-2.7.2 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-3.1.0` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-3.1.0 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-3.1.2` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-3.1.2 ) |
 | `:v1.5.3153.0-bf2all64-bf2stats-3.2.0` | [View](variants/v1.5.3153.0-bf2all64-bf2stats-3.2.0 ) |
@@ -31,7 +31,7 @@ All images contain [`Battlefield 2 Server 1.50`](https://www.bf-games.net/downlo
 | `:v1.5.3153.0-bf2stats-2.4.6` | [View](variants/v1.5.3153.0-bf2stats-2.4.6 ) |
 | `:v1.5.3153.0-bf2stats-2.5.1` | [View](variants/v1.5.3153.0-bf2stats-2.5.1 ) |
 | `:v1.5.3153.0-bf2stats-2.6.0` | [View](variants/v1.5.3153.0-bf2stats-2.6.0 ) |
-| `:v1.5.3153.0-bf2stats-2.7.1` | [View](variants/v1.5.3153.0-bf2stats-2.7.1 ) |
+| `:v1.5.3153.0-bf2stats-2.7.2` | [View](variants/v1.5.3153.0-bf2stats-2.7.2 ) |
 | `:v1.5.3153.0-bf2stats-3.1.0` | [View](variants/v1.5.3153.0-bf2stats-3.1.0 ) |
 | `:v1.5.3153.0-bf2stats-3.1.2` | [View](variants/v1.5.3153.0-bf2stats-3.1.2 ) |
 | `:v1.5.3153.0-bf2stats-3.2.0` | [View](variants/v1.5.3153.0-bf2stats-3.2.0 ) |

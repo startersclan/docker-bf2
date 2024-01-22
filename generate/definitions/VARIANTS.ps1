@@ -12,7 +12,7 @@ $local:VARIANTS_MATRIX = @(
             @{ components = @( 'bf2all64', 'bf2stats-2.4.6' ) }
             @{ components = @( 'bf2all64', 'bf2stats-2.5.1' ) }
             @{ components = @( 'bf2all64', 'bf2stats-2.6.0' ) }
-            @{ components = @( 'bf2all64', 'bf2stats-2.7.1' ) }
+            @{ components = @( 'bf2all64', 'bf2stats-2.7.2' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.0' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.2' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.2.0' ) }
@@ -23,7 +23,7 @@ $local:VARIANTS_MATRIX = @(
             @{ components = @( 'bf2stats-2.4.6' ) }
             @{ components = @( 'bf2stats-2.5.1' ) }
             @{ components = @( 'bf2stats-2.6.0' ) }
-            @{ components = @( 'bf2stats-2.7.1' ) }
+            @{ components = @( 'bf2stats-2.7.2' ) }
             @{ components = @( 'bf2stats-3.1.0' ) }
             @{ components = @( 'bf2stats-3.1.2' ) }
             @{ components = @( 'bf2stats-3.2.0' ) }
@@ -65,7 +65,7 @@ $VARIANTS = @(
                                 @{
                                     variables = @{
                                         # Since bf2stats 2 python files
-                                        # E.g. https://github.com/startersclan/bf2stats/archive/refs/tags/2.7.1.tar.gz
+                                        # E.g. https://github.com/startersclan/bf2stats/archive/refs/tags/2.7.2.tar.gz
                                         bf2stats_2_sha256sum = @"
 29a25c6e78062f34b05d7086aad530b598b4c9ed3f32164ffcf3b1c52b33f553  2.3.0.tar.gz
 9a5e0544ba1474feb5ca0194449f6d6dee521abf59cba96dbc94387490d660b0  2.3.1.tar.gz
@@ -88,6 +88,7 @@ e07f46f0078fc0dcdbeb0dd86e1e9add4b502b0d7b263711dcad957ec4a6de61  2.5.1.tar.gz
 7a75b58fec1b1d105c1a495e543eff6f2ee0fd0bf4ab010078539ef95e55f6e7  2.6.0.tar.gz
 daeb57232cd1725bea3cf45c197fba13d99251864347ffff44552aae585b273a  2.7.0.tar.gz
 96a9cd2c1283668e417f45ee14dec6307cbad9f310a81e2e8b5af95a871fef4f  2.7.1.tar.gz
+bee8933873b42fff26aff34de964d54f4f470e256be43de7ab30ad122788d605  2.7.2.tar.gz
 "@
                                         # Since bf2stats 3 python files
                                         # E.g. https://github.com/startersclan/statspython/archive/refs/tags/3.2.0.tar.gz
