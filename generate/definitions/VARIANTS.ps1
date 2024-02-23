@@ -13,6 +13,7 @@ $local:VARIANTS_MATRIX = @(
             @{ components = @( 'bf2all64', 'bf2stats-2.5.1' ) }
             @{ components = @( 'bf2all64', 'bf2stats-2.6.0' ) }
             @{ components = @( 'bf2all64', 'bf2stats-2.7.2' ) }
+            @{ components = @( 'bf2all64', 'bf2stats-2.8.1' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.0' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.1.2' ) }
             @{ components = @( 'bf2all64', 'bf2stats-3.2.0' ) }
@@ -24,6 +25,7 @@ $local:VARIANTS_MATRIX = @(
             @{ components = @( 'bf2stats-2.5.1' ) }
             @{ components = @( 'bf2stats-2.6.0' ) }
             @{ components = @( 'bf2stats-2.7.2' ) }
+            @{ components = @( 'bf2stats-2.8.1' ) }
             @{ components = @( 'bf2stats-3.1.0' ) }
             @{ components = @( 'bf2stats-3.1.2' ) }
             @{ components = @( 'bf2stats-3.2.0' ) }
@@ -89,6 +91,8 @@ e07f46f0078fc0dcdbeb0dd86e1e9add4b502b0d7b263711dcad957ec4a6de61  2.5.1.tar.gz
 daeb57232cd1725bea3cf45c197fba13d99251864347ffff44552aae585b273a  2.7.0.tar.gz
 96a9cd2c1283668e417f45ee14dec6307cbad9f310a81e2e8b5af95a871fef4f  2.7.1.tar.gz
 bee8933873b42fff26aff34de964d54f4f470e256be43de7ab30ad122788d605  2.7.2.tar.gz
+53927a41279cf904cc8d480fdee6f408a7ab68648a13ee5a313c60b44f58a92c  2.8.0.tar.gz
+79083dfba50a3da954ef44a28c4eb07ba01237f305cd5fc6091ae6b6cd628b70  2.8.1.tar.gz
 "@
                                         # Since bf2stats 3 python files
                                         # E.g. https://github.com/startersclan/statspython/archive/refs/tags/3.2.0.tar.gz
