@@ -1,0 +1,24 @@
+#!/bin/bash
+set -eu
+usage() {
+    echo "healthcheck: Healthcheck a Battlefield 2 server"
+    echo "Usage: healthcheck <HOST> <PORT>"
+    echo "Examples:"
+    echo "  ./healthcheck 127.0.0.1 29900"
+    echo "  ./healthcheck bf2 29900"
+}
+if [ "${1:-}" = '-h' ] || [ "${1:-}" = '--help' ]; then
+    usage
+    exit 0
+fi
+HOST=${1:-localhost} # Hostname
+PORT=${2:-29900} # Gamespy port
+
+echo "Checking $HOST:$PORT"
+RES=$( printf '\xFE\xFD\x00\x10\x20\x30\x40\xFF\xFF\xFF\x01' | nc -w 1 -u "$HOST" "$PORT" )
+if [ -n "$RES" ]; then
+    echo "OK"
+else
+    echo "Not OK"
+    exit 1
+fi

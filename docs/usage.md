@@ -59,13 +59,13 @@ To customize the server, edit `serversettings.con` and `maplist.con` accordingly
 
 ```sh
 # Generate serversettings.con and customize
-docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.9.0 cat /server/bf2/mods/bf2/settings/serversettings.con > serversettings.con
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.9.3 cat /server/bf2/mods/bf2/settings/serversettings.con > serversettings.con
 # Generate maplist.con (coop)
-docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.9.0 bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_coop' > maplist.con
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.9.3 bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_coop' > maplist.con
 # Generate maplist.con (conquest)
-docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.9.0 bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq' > maplist.con
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.9.3 bash -c '(esai-helper -m bf2 get maplist; esai-helper -m xpack get maplist) | grep gpm_cq' > maplist.con
 # Generate BF2StatisticsConfig.py and customize
-docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.9.0 cat /server/bf2/python/bf2/BF2StatisticsConfig.py > BF2StatisticsConfig.py
+docker run --rm startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.9.3 cat /server/bf2/python/bf2/BF2StatisticsConfig.py > BF2StatisticsConfig.py
 # BF2 server with BF2Statistics 2.x.x
 docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     -v "$(pwd)/serversettings.con:/server/bf2/mods/bf2/settings/serversettings.con:ro" \
@@ -74,7 +74,7 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     --add-host bf2web.gamespy.com:192.168.1.100 \
     --add-host gamestats.gamespy.com:192.168.1.100 \
     --add-host eapusher.dice.se:192.168.1.100 \
-    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.9.0
+    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.9.3
 ```
 
 See `docker-compose` examples:
@@ -308,7 +308,7 @@ docker run --rm -it -p 16567:16567/udp -p 29900:29900/udp \
     --add-host bf2web.gamespy.com:192.168.1.100 \
     --add-host gamestats.gamespy.com:192.168.1.100 \
     --add-host eapusher.dice.se:192.168.1.100 \
-    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.9.0
+    startersclan/docker-bf2:v1.5.3153.0-bf2stats-2.9.3
 ```
 
 See `docker-compose` examples:
